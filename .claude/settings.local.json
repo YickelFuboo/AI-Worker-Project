@@ -10,7 +10,9 @@
       "Read(//f/Product_Dev/AI-Worker-Project/**)",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:dev.to)"
+      "WebFetch(domain:dev.to)",
+      "Bash(npm --version)",
+      "Bash(ls:*)"
     ]
   }
 }
