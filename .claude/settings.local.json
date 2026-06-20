@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for f:*)",
+      "Bash(do sed:*)",
+      "Bash(done)",
+      "Bash(python:*)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)",
+      "Read(//f/Product_Dev/AI-Worker-Project/**)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:dev.to)"
+    ]
+  }
+}
