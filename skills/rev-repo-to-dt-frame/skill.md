@@ -13,7 +13,7 @@
 - 存量项目逆向还原时，需明确仓内 DT 基础设施以指导后续 UT 增量生成
 - 多仓服务统一 UT 规范时，需对比各仓 DT 框架差异（不同仓可能用不同测试库/Mock 库）
 - 现有 spec.md 头部仅记录测试框架名称版本，不足以指导 UT 生成，需独立产物承载详细 DT 信息
-- 作为 `rev-code-to-spec-and-design` 的补充，在仓级 `spec.md` / `design.md` 生成后触发
+- 作为 `rev-repo-to-spec-and-design` 的补充，在仓级 `spec.md` / `design.md` 生成后触发
 
 ## 工作方式
 
@@ -72,6 +72,6 @@
 - 输出路径：`repos/{仓名}/.agent/DTFrame.md`
 - 严格按模板格式输出：`templates/dt_frame_template.md`
 - YAML 元数据头部包含 `repo_id`、`language`、`last_modified`、`last_modified_by`（写入执行 skill 名，如 `rev-repo-to-dt-frame` / `fwd-doc-sync`）、`confidence`
-- 正文分节：测试框架 / DT 代码存放位置 / Mock 框架与 Mock 要求 / 测试数据组织 / 执行命令 / 覆盖率统计 / CI 集成 / 已知问题
+- 正文分节：测试框架 / DT 代码存放位置与用例组织约定 / Mock 框架与 Mock 要求（含已有 Mock 清单）/ 测试数据组织 / 测试环境依赖 / 执行命令 / 覆盖率统计 / CI 集成 / 已知问题
 - 每节给出具体的代码证据（文件路径::符号名格式，如 `go.mod::require testify`、`.github/workflows/ci.yml::test job`；不使用行号）
 - 同步更新仓级 spec.md：将 `test_framework` 字段保留为摘要形式（如 "go testing + testify + goconvey + gomock"），正文技术栈表的测试框架行改为"详见 DTFrame.md"
