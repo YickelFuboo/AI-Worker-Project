@@ -1950,7 +1950,7 @@ graph LR
 | 架构设计 Agent | 分析架构影响域，生成接口与元素变更设计 | `requirement.md`、`elements_tree.yaml`、元素规格文件 | `architecture_changes/` 下各元素变更说明，包含接口变更细节 | Skill D：架构影响域分析<br>Skill E：接口契约变更分析 |
 | 实现设计 Agent | 将架构变更细化为模块、数据、文件变更清单与函数签名调整 | 架构变更说明、代码仓 `design.md` | `repo_changes/` 下实现设计文档（含 PlantUML 关键流程） | Skill F：逻辑流设计<br>Skill G：变更范围细化 |
 | 编码实现 Agent | 生成代码并执行合规检视，产出单元测试需求 | 实现设计文档、源码、编码规范 | 代码 diff、合规检视报告、单元测试需求说明 | Skill H：代码生成<br>Skill I：代码合规检视 |
-| 开发自研 Agent (UT) | 生成单元测试代码，自动编译执行并分析覆盖率，阻断低质量代码 | 代码 diff、实现设计文档、测试框架信息 | 单元测试代码、UT 执行报告（包含覆盖率） | Skill J：单元测试生成<br>Skill K：单元测试执行与覆盖率分析 |
+| 开发自验 Agent (UT) | 生成单元测试代码，自动编译执行并分析覆盖率，阻断低质量代码 | 代码 diff、实现设计文档、测试框架信息 | 单元测试代码、UT 执行报告（包含覆盖率） | Skill J：单元测试生成<br>Skill K：单元测试执行与覆盖率分析 |
 | 编译构建 Agent | 多仓编译并生成版本包，处理编译失败 | 分支/MR、`environment.md`、`elements_tree.yaml` | 版本包、编译日志 | Skill L：多仓依赖解析<br>Skill M：版本打包 |
 | 测试设计 Agent | 根据场景和测试点生成或修改测试用例 | `requirement.md`、`test_points.md`、场景交互流程 | `TC_xxx_xxx.md` 测试用例文件 | Skill N：测试用例生成 |
 | 测试开发 Agent | 将测试用例转换为可执行自动化测试脚本 | 测试用例 Markdown、脚本模板、部署拓扑 | `test_xxx.py` 等测试脚本 | Skill O：测试脚本转换 |
