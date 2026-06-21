@@ -1,0 +1,100 @@
+element_name: amf
+element_id: amf
+repo_path: repos/amf
+last_modified: "2026-06-21T11:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 amf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/amf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # Namf_Communication 服务组
+  - if_id: IF-001
+    if_name: UEContextTransfer
+    protocol: SBI (Namf_Communication, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: UE 上下文转移（跨 AMF 切换时被目标 AMF 调用）
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.1
+
+  - if_id: IF-002
+    if_name: CreateUEContext
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: 创建 UE 上下文（目标 AMF 侧）
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.2
+
+  - if_id: IF-003
+    if_name: ReleaseUEContext
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: 释放 UE 上下文
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.3
+
+  - if_id: IF-004
+    if_name: RegistrationStatusUpdate
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: 更新注册状态（向旧 AMF 同步）
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.4
+
+  - if_id: IF-005
+    if_name: N1N2MessageTransfer
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: N1/N2 消息转移（其他 NF 调用 AMF 转发至 UE/RAN）
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.8
+
+  - if_id: IF-006
+    if_name: AMFStatusChangeSubscribe
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: 订阅 AMF 状态变更
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.15
+
+  - if_id: IF-007
+    if_name: AMFStatusChangeSubscribeModify
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: 修改 AMF 状态变更订阅
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.16
+
+  - if_id: IF-008
+    if_name: AMFStatusChangeUnSubscribe
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: 取消 AMF 状态变更订阅
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.17
+
+  # Namf_Communication EBI Assignment 服务组
+  - if_id: IF-009
+    if_name: EBIAssignment
+    protocol: SBI (Namf_Communication)
+    direction: provided
+    summary: EPS Bearer ID 分配
+    contract_ref: repos/amf/.agent/interfaces.md §2.1.7
+
+  # HTTP-Callback 服务组（供 PCF/SMF/UDM 回调）
+  - if_id: IF-010
+    if_name: AmPolicyControlUpdateNotify
+    protocol: HTTP-Callback (Namf_Communication callback)
+    direction: provided
+    summary: AM 策略更新通知回调（PCF 调用）
+    contract_ref: repos/amf/.agent/interfaces.md §2.8.1
+
+  - if_id: IF-011
+    if_name: N1MessageNotify
+    protocol: HTTP-Callback (Namf_Communication callback)
+    direction: provided
+    summary: N1 消息通知回调（SMF 调用）
+    contract_ref: repos/amf/.agent/interfaces.md §2.8.4
+
+  - if_id: IF-012
+    if_name: SmContextStatusNotify
+    protocol: HTTP-Callback (Namf_Communication callback)
+    direction: provided
+    summary: SM 上下文状态通知回调（SMF 调用）
+    contract_ref: repos/amf/.agent/interfaces.md §2.8.3
+
+# 完整 36 接口索引（含 8 个服务组）见 repos/amf/.agent/spec.md §3 与 .agent/interfaces.md §2
+full_contract_index: repos/amf/.agent/interfaces.md

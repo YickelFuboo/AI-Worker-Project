@@ -1,0 +1,110 @@
+element_name: amf
+element_id: amf
+repo_path: repos/amf
+last_modified: "2026-06-21T11:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 amf 元素依赖的外部接口清单。
+# 证据来源：repos/amf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+# 其他 NF 元素尚未生成 interfaces.yaml，本批次标注"待对方元素生成后双向校验"。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement / Nnrf_NFDiscovery, HTTP/2 + JSON + mTLS)
+    operations:
+      - POST /nnrf-nfm/v1/nf-instances  # NF 实例注册
+      - GET /nnrf-disc/v1/nf-instances   # NF 发现
+    purpose: AMF 启动时注册 NF 实例；调用其他 NF 前发现实例
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: ausf
+    protocol: SBI (Nausf_UEAuthentication)
+    operations:
+      - POST /nausf-auth/v1/ue-authentications
+    purpose: UE 注册时 5G-AKA/EAP 鉴权
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-003
+    provider_element: udm
+    protocol: SBI (Nudm_SDM / Nudm_UECM)
+    operations:
+      - GET/POST/Nudm-SDM/*
+      - Nudm-UECM/*
+    purpose: 订阅数据获取 + 变更订阅
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-004
+    provider_element: smf
+    protocol: SBI (Nsmf_PDUSession)
+    operations:
+      - POST/PUT /nsmf-pdusession/v1/sm-contexts
+    purpose: PDU 会话建立/修改/释放协调
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-005
+    provider_element: pcf
+    protocol: SBI (Npcf_AMPolicy)
+    operations:
+      - POST/PATCH/DELETE /npcf-am-policy-control/v1/policies
+    purpose: AM 策略关联建立/更新/删除
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-006
+    provider_element: nssf
+    protocol: SBI (Nnssf_NSSelection)
+    operations:
+      - GET /nnssf-nsselection/v1/network-slice-information
+    purpose: 网络切片选择
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-007
+    provider_element: amf  # 目标 AMF（跨 AMF 切换）
+    protocol: SBI (Namf_Communication)
+    operations:
+      - POST /namf-comm/v1/ue-contexts/:id/transfer
+    purpose: 跨 AMF 切换时 UE 上下文转移（本元素既是提供方也是消费方）
+    evidence: repos/amf/.agent/spec.md §4.2
+    cross_check: self  # 自反依赖，对应本元素 IF-001 UEContextTransfer
+
+  - if_ext_id: IF-EXT-008
+    provider_element: RAN  # gNB，非本系统元素
+    protocol: NGAP over SCTP (3GPP TS 38.413)
+    operations:
+      - NGAP 消息双向收发
+    purpose: N2 接口信令承载
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: external  # 非系统内元素，不参与双向校验
+
+  - if_ext_id: IF-EXT-009
+    provider_element: UE  # 非本系统元素
+    protocol: NAS over N1 (3GPP TS 24.501)
+    operations:
+      - NAS 消息双向收发（经 RAN 透传）
+    purpose: N1 接口信令承载
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: external
+
+  - if_ext_id: IF-EXT-010
+    provider_element: prometheus  # 监控系统，非本系统元素
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 metrics server 端口）
+    evidence: repos/amf/.agent/spec.md §4.1
+    cross_check: external
+
+# 依赖统计
+summary:
+  total: 10
+  system_internal: 7  # nrf/ausf/udm/smf/pcf/nssf/amf(self)
+  external: 3         # RAN/UE/prometheus
+  pending_cross_check: 6  # 待 nrf/ausf/udm/smf/pcf/nssf 元素 interfaces.yaml 生成

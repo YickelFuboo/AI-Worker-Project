@@ -72,6 +72,7 @@
 - 输出路径：`repos/{仓名}/.agent/DTFrame.md`
 - 严格按模板格式输出：`templates/dt_frame_template.md`
 - YAML 元数据头部包含 `repo_id`、`language`、`last_modified`、`last_modified_by`（写入执行 skill 名，如 `rev-repo-to-dt-frame` / `fwd-doc-sync`）、`confidence`
+- `last_modified` 格式为 ISO 8601 带时区（如 `2026-06-21T14:30:00+08:00`），用于增量模式下 `git log --before="<last_modified>"` 精确定位锚点提交；仅日期精度会导致同日内多次提交无法区分
 - 正文分节：测试框架 / DT 代码存放位置与用例组织约定 / Mock 框架与 Mock 要求（含已有 Mock 清单）/ 测试数据组织 / 测试环境依赖 / 执行命令 / 覆盖率统计 / CI 集成 / 已知问题
 - 每节给出具体的代码证据（文件路径::符号名格式，如 `go.mod::require testify`、`.github/workflows/ci.yml::test job`；不使用行号）
 - 同步更新仓级 spec.md：将 `test_framework` 字段保留为摘要形式（如 "go testing + testify + goconvey + gomock"），正文技术栈表的测试框架行改为"详见 DTFrame.md"

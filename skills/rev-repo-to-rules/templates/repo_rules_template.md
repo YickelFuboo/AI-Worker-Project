@@ -1,6 +1,6 @@
 ---
 repo_id: {repo_id}
-last_modified: "{YYYY-MM-DD}"
+last_modified: "{YYYY-MM-DDTHH:MM:SS±HH:MM}"
 last_modified_by: {skill_name}
 confidence: {high|medium|low}
 ---

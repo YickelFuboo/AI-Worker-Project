@@ -3,7 +3,7 @@ repo_id: {repo_id}
 language: {language}
 build_system: {build_system}
 template_version: "1.0"
-last_modified: {last_modified}
+last_modified: "{YYYY-MM-DDTHH:MM:SS±HH:MM}"
 last_modified_by: {skill_name}
 confidence: high | medium | low
 ---
@@ -123,4 +123,4 @@ confidence: high | medium | low
 
 | 模块 | 一句话职责 | 详细设计位置 |
 |------|-----------|--------------|
-| {模块1} | {职责摘要} | design.md §6.{N} 或 `modules/{模块1}/design.md`（>800 文件阈值） |
+| {模块1} | {职责摘要} | design.md §8.{N} 或 `modules/{模块1}/design.md`（>800 文件阈值） |

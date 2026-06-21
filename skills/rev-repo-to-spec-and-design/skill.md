@@ -82,6 +82,7 @@
   - 嵌套目录同样产出（如 `modules/internal/ngap/dispatcher/spec.md`），无层数限制
   - 模块级不单独产 interfaces.md，对外接口统一归仓级 interfaces.md
 - 仓级 design.md 模块清单列出所有产了模块级 md 的目录路径与嵌套层级
+- `last_modified` 格式为 ISO 8601 带时区（如 `2026-06-21T14:30:00+08:00`），用于增量模式下 `git log --before="<last_modified>"` 精确定位锚点提交；仅日期精度会导致同日内多次提交无法区分
 - 包含 PlantUML 状态图（如有状态机）和序列图（关键流程含异常分支）
 - 不再单设"逆向来源"章节；置信度写入 YAML 头部，不确定项与人工复核点写入本次生成/更新的差异摘要（一次性产物，不持久化到 md 正文）
 - 三文件接口签名一致性：spec.md §3 索引 ↔ interfaces.md 详情 ↔ design.md §6 模块间接口

@@ -1,0 +1,30 @@
+# 架构元素树（跨仓元素索引）
+#
+# 本文件是工作空间级跨仓元素图谱，由 rev-arch-element-extract skill 维护。
+# 每个元素对应一个 repo（一 repo 一顶层元素）。
+# 详细元素规格见 elements/{element_name}/spec.md。
+
+tree_meta:
+  last_modified: "2026-06-21T11:00:00+08:00"
+  last_modified_by: rev-arch-element-extract
+  element_count: 1
+  note: "本文件初始创建，目前仅 amf 元素已抽取。其余 13 个 free5gc NF 仓待 rev-arch-element-extract 逐个执行。"
+
+elements:
+  - element_id: amf
+    element_name: amf
+    element_type: service
+    repo_path: repos/amf
+    spec_path: architectures/logic_view/elements/amf/spec.md
+    last_modified: "2026-06-21T11:00:00+08:00"
+    confidence: high
+    aliases: []  # repo 改名时保留旧元素名，新名追加到此
+    depends_on:
+      - nrf
+      - ausf
+      - udm
+      - smf
+      - pcf
+      - nssf
+      - amf  # 自反：跨 AMF 切换时目标 AMF 调用本元素 UEContextTransfer
+    # 被依赖方待其他元素生成后补充 depended_by 字段

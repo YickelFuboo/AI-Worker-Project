@@ -1,7 +1,7 @@
 ---
 repo_id: {repo_id}
 template_version: "1.0"
-last_modified: {last_modified}
+last_modified: "{YYYY-MM-DDTHH:MM:SS±HH:MM}"
 last_modified_by: {skill_name}
 confidence: high | medium | low
 ---
