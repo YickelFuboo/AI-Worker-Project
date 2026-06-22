@@ -1,0 +1,98 @@
+element_name: n3iwf
+element_id: n3iwf
+repo_path: repos/n3iwf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 n3iwf 元素依赖的外部接口清单。
+# 证据来源：repos/n3iwf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+#
+# 关键差异声明：n3iwf 不依赖任何 SBI 类 NF（NRF/AUSF/UDM/PCF/NSSF/UDR/SMF/CHF 等）。
+# 所有控制面跨 NF 交互均通过 AMF（N2/NGAP）中转。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+
+external_dependencies:
+  # 系统内 NF 依赖（仅 AMF 与 UPF，均为协议级，非 SBI）
+  - if_ext_id: IF-EXT-001
+    provider_element: amf
+    protocol: NGAP/SCTP (TS 38.413, 3GPP R17)
+    operations:
+      - NGSetupRequest / NGSetupResponse / NGSetupFailure
+      - InitialUEMessage（携带 EAP-5G/AN-Param）
+      - UplinkNASTransport / DownlinkNASTransport
+      - InitialContextSetupRequest / Response
+      - UEContextModificationRequest / Response
+      - UEContextReleaseCommand / Complete / Request
+      - PDUSessionResourceSetup/Modify/Release Request/Response/Command
+      - AMFConfigurationUpdate
+      - OverloadStart / OverloadStop
+      - NGReset / NGResetAcknowledge
+      - ErrorIndication
+    purpose: 控制面对端，承载 EAP-5G 注册、NAS 中继、PDU 会话编排、UE 上下文管理；n3iwf 作为 NG-RAN 节点与 AMF 完成所有 N2 程序
+    evidence: repos/n3iwf/.agent/spec.md §4.1 / §4.2
+    cross_check: pending  # 待 amf 元素 interfaces.yaml 补充 N2/NGAP 入口（当前 amf interfaces.yaml 仅含 SBI 接口）
+
+  - if_ext_id: IF-EXT-002
+    provider_element: upf
+    protocol: GTP-U v1/UDP (TS 29.281, port 2152)
+    operations:
+      - G-PDU 双向（含 PDU Session Container 扩展头携带 QFI）
+    purpose: 用户面 N3 隧道对端，承载 PDU 会话用户面数据
+    evidence: repos/n3iwf/.agent/spec.md §4.1 / §4.2
+    cross_check: pending  # 待 upf 元素 interfaces.yaml 双向校验
+
+  # 外部系统依赖（非本系统 NF）
+  - if_ext_id: IF-EXT-003
+    provider_element: UE  # WiFi 接入设备，非本系统元素
+    protocol: IKEv2 + IPsec ESP + EAP-5G + NAS over IPsec/TCP + GRE over IPsec
+    operations:
+      - IKE_SA_INIT / IKE_AUTH / CREATE_CHILD_SA / INFORMATIONAL（RFC 7296）
+      - EAP-5G payload exchange（TS 33.501 Annex T）
+      - NWuCP TCP NAS 双向
+      - GRE 用户面双向（含 QFI）
+    purpose: UE 侧协议对端，承载安全通道建立、注册鉴权、NAS 信令、用户面数据
+    evidence: repos/n3iwf/.agent/spec.md §4.1
+    cross_check: external  # UE 非系统内元素，不参与双向校验
+
+  - if_ext_id: IF-EXT-004
+    provider_element: linux_kernel_xfrm  # 运行环境
+    protocol: netlink
+    operations:
+      - XFRM 状态/策略安装
+      - XFRM 接口创建/删除（默认 + per-PDU）
+    purpose: IPsec SA 安装与加解密内核态卸载；XFRM 接口生命周期管理
+    evidence: repos/n3iwf/.agent/spec.md §4.1
+    cross_check: external  # 运行环境依赖，不参与双向校验
+
+  - if_ext_id: IF-EXT-005
+    provider_element: prometheus  # 监控系统
+    protocol: HTTP(S) scrape
+    operations:
+      - GET /metrics
+    purpose: NGAP 指标暴露，可选 mTLS
+    evidence: repos/n3iwf/.agent/spec.md §4.1
+    cross_check: external
+
+# 显式声明：不依赖以下 SBI 类 NF（与 amf/smf 形成对比）
+no_dependency_on:
+  - nrf       # 不参与 NF 注册/发现（无 SBI）
+  - ausf      # 鉴权经 AMF 中转，无直接调用
+  - udm       # 订阅数据经 AMF 中转
+  - pcf       # 策略经 AMF 中转
+  - nssf      # 切片选择经 AMF 中转
+  - udr       # 无直接依赖
+  - smf       # PDU 会话经 AMF 中转，n3iwf 不直接调用 SMF SBI
+  - chf       # 计费经 SMF/AMF 中转
+  rationale: |
+    n3iwf 在架构上是协议网关（IKEv2/NGAP/GTP-U），不暴露 SBI、不消费 SBI。
+    所有 5GC 控制面跨 NF 协作均经 AMF（N2/NGAP）中转。
+    详见 repos/n3iwf/.agent/spec.md §4.2 末尾注释：
+    "n3iwf 与 NRF/AUSF/UDM/SMF/PCF/NSSF 等控制面 NF 没有直接交互"
+
+# 依赖统计
+summary:
+  total: 5
+  system_internal: 2   # amf, upf（均为协议级依赖，非 SBI）
+  external: 3          # UE, linux_kernel_xfrm, prometheus
+  sbi_dependencies: 0  # 无 SBI 依赖
+  pending_cross_check: 2  # 待 amf/upf 元素 interfaces.yaml 补充协议级接口入口

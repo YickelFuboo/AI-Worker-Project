@@ -1,0 +1,87 @@
+element_name: tngf
+element_id: tngf
+repo_path: repos/tngf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 tngf 元素依赖的外部接口清单。
+# 证据来源：repos/tngf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# tngf 非 SBI 元素：所有依赖为非 HTTP 协议（NGAP/GTP-U/RADIUS/IKE/netlink/scrape）。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: amf
+    protocol: NGAP over SCTP (3GPP TS 38.413, PPID=60)
+    operations:
+      - NGSetupRequest (out)
+      - UplinkNASTransport (out)
+      - PDUSessionResource* Response (out)
+      - InitialContextSetupResponse / UEContextReleaseComplete (out)
+      - DownlinkNASTransport / InitialContextSetupRequest / PDUSessionResource* Request / UEContextReleaseCommand / AMFConfigurationUpdate / OverloadStart|Stop / AMFStatusIndication (in)
+    purpose: 与 AMF 控制面（N2）交互，承载 UE 注册/鉴权/上下文/会话/移动性所有 NAS 与 NGAP 信令；TNGF 在 AMF 视角充当 RAN 节点
+    evidence: repos/tngf/.agent/spec.md §4.1, §4.2
+    cross_check: ok  # amf 元素 interfaces.yaml 已存在（提供的为 SBI，N2 由 AMF 内部 NGAP server 承载，非 SBI 列表中），架构层等价：双向校验需在 amf interfaces.yaml 补 N2 endpoint 后完成
+
+  - if_ext_id: IF-EXT-002
+    provider_element: upf
+    protocol: GTP-U over UDP (3GPP TS 29.281, port 2152)
+    operations:
+      - GTP-U T-PDU 双向收发（按 TEID/PDU Session）
+    purpose: 与 UPF 用户面隧道（N3），承载 UE 上下行用户面 PDU
+    evidence: repos/tngf/.agent/spec.md §4.1, §4.2
+    cross_check: pending  # 待 upf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-003
+    provider_element: TWAN_AP  # 受信 WLAN 接入点，非本系统 NF 元素
+    protocol: RADIUS over UDP (RFC 2865/3579)
+    operations:
+      - RADIUS Access-Request → tngf
+      - RADIUS Access-Challenge/Accept/Reject ← tngf
+    purpose: 接入侧 RADIUS 转发者，承载 UE EAP-5G 主鉴权
+    evidence: repos/tngf/.agent/spec.md §4.1
+    cross_check: external  # 非系统内 NF 元素，不参与跨仓双向校验
+
+  - if_ext_id: IF-EXT-004
+    provider_element: UE  # 终端，非本系统元素
+    protocol: IKEv2 (RFC 7296) + IPsec ESP (RFC 4303) + NAS over TCP + GRE/IPv4
+    operations:
+      - IKE_SA_INIT / IKE_AUTH / CREATE_CHILD_SA / INFORMATIONAL（UE↔TNGF）
+      - IPsec ESP 控制/用户面加密承载
+      - NWt-cp NAS over TCP（内层）
+      - NWt-up IPv4 + GRE（用户面）
+    purpose: UE 与 TNGF 间安全通道与 NAS/用户面承载对端
+    evidence: repos/tngf/.agent/spec.md §4.1
+    cross_check: external
+
+  - if_ext_id: IF-EXT-005
+    provider_element: linux_kernel_xfrm  # 内核 netlink，非 NF 元素
+    protocol: netlink (vishvananda/netlink)
+    operations:
+      - XFRM 虚拟接口创建/删除（LinkAdd/LinkDel）
+      - XFRM state/policy 安装
+    purpose: 创建/清理 IPsec 虚拟接口（默认名 ipsec, id=7，UP 通过偏移），是数据面承载基础
+    evidence: repos/tngf/.agent/spec.md §4.1（`pkg/ike/xfrm/`、`pkg/service/init.go::InitDefaultXfrmInterface/RemoveIPsecInterfaces`）
+    cross_check: external  # 运行时基础设施，非系统 NF
+
+  - if_ext_id: IF-EXT-006
+    provider_element: prometheus  # 监控系统，非本系统元素
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 metrics server 端口，默认 9091，可独立 mTLS）
+    evidence: repos/tngf/.agent/spec.md §6.3、§4.1
+    cross_check: external
+
+# 依赖统计
+summary:
+  total: 6
+  system_internal: 2          # amf / upf
+  external: 4                 # TWAN_AP / UE / linux_kernel_xfrm / prometheus
+  pending_cross_check: 2      # amf（N2 端点需在 amf interfaces.yaml 补充）, upf（待生成）
+  sbi_dependencies: 0         # tngf 非 SBI 元素，无 SBI 出向依赖
+  non_sbi_note: |
+    tngf 所有跨 NF 依赖均为非 SBI 协议：
+    - amf：通过 NGAP/SCTP（N2）而非 Namf SBI
+    - upf：通过 GTP-U/UDP（N3）而非任何 SBI
+    因此 tngf 不依赖 nrf 做 SBI 服务发现，AMF 地址由本仓 YAML 配置直接给出（`Configuration.AMFSCTPAddresses`）。

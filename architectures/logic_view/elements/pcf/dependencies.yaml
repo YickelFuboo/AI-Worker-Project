@@ -1,0 +1,122 @@
+element_name: pcf
+element_id: pcf
+repo_path: repos/pcf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 pcf 元素依赖的外部接口清单。
+# 证据来源：repos/pcf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+# 其他 NF 元素尚未生成 interfaces.yaml 时标注 "pending"，待生成后双向校验。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement / Nnrf_NFDiscovery, HTTP/2 + JSON + mTLS)
+    operations:
+      - POST /nnrf-nfm/v1/nf-instances        # NF 实例注册
+      - DELETE /nnrf-nfm/v1/nf-instances/:id  # NF 注销
+      - GET /nnrf-disc/v1/nf-instances        # 发现 UDR/BSF/AMF
+    purpose: 启动时注册 NF 实例；调用其他 NF 前发现实例；终止时注销
+    evidence: repos/pcf/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-002
+    provider_element: udr
+    protocol: SBI (Nudr_DataRepository)
+    operations:
+      - GET/POST /nudr-dr/v2/policy-data/*    # SM/AM Policy Data
+      - GET/POST /nudr-dr/v2/policy-data/bdt-data
+      - 订阅/取消订阅 influence-data
+    purpose: 拉取策略订阅数据（SM/AM/BDT/Influence），驱动策略决策
+    evidence: repos/pcf/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-003
+    provider_element: bsf
+    protocol: SBI (Nbsf_Management)
+    operations:
+      - POST /nbsf-management/v1/pcfBindings
+      - PATCH /nbsf-management/v1/pcfBindings/:bindingId
+      - DELETE /nbsf-management/v1/pcfBindings/:bindingId
+    purpose: 多 PCF 部署下注册/更新/删除 PCF Binding（可选）
+    evidence: repos/pcf/.agent/spec.md §4.1
+    cross_check: pending
+    optional: true   # 仅多 PCF 场景启用
+
+  - if_ext_id: IF-EXT-004
+    provider_element: amf
+    protocol: SBI (Namf_Communication)
+    operations:
+      - POST /namf-comm/v1/subscriptions      # AMF 状态订阅
+      - 反向回调路径由 AMF 路由暴露：AmPolicy Update/Terminate Notify
+    purpose: 订阅 AMF 状态变更；向 AMF 投递 AM Policy 更新/终止通知
+    evidence: repos/pcf/.agent/spec.md §4.1, §4.2
+    cross_check: ok   # 对端 amf 元素 IF-010 AmPolicyControlUpdateNotify 已提供
+
+  - if_ext_id: IF-EXT-005
+    provider_element: smf
+    protocol: SBI 反向回调 (HTTP/2 + JSON + mTLS)
+    operations:
+      - POST {SmfNotifUri}  # SM Policy Update/Terminate Notify
+    purpose: 向 SMF 投递 SM Policy 更新/终止通知
+    evidence: repos/pcf/.agent/spec.md §4.1, §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-006
+    provider_element: chf
+    protocol: SBI (Nchf_*, 间接)
+    operations:
+      - 通过 PCC 规则编排 Charging Trigger 与 RatingGroup
+    purpose: 计费策略关联与 Charging Trigger 协同（按 PCC 规则编排，非直接 SBI 出站）
+    evidence: repos/pcf/.agent/spec.md §2.1 SM 策略控制
+    cross_check: pending
+    indirect: true
+
+  - if_ext_id: IF-EXT-007
+    provider_element: af   # 含 NEF 透传
+    protocol: SBI 反向回调
+    operations:
+      - POST {AfNotifUri}                     # App Session 事件通知
+      - POST {AfTerminationUri}               # App Session 终止通知
+    purpose: 向 AF/NEF 投递应用会话事件与终止通知
+    evidence: repos/pcf/.agent/spec.md §4.1, §4.2
+    cross_check: external  # AF/NEF 仓边界外，按外部系统处理
+
+  - if_ext_id: IF-EXT-008
+    provider_element: nef
+    protocol: SBI 反向回调
+    operations:
+      - 同 af 透传路径
+    purpose: NEF 作为 AF 北向网关时的回调投递目标
+    evidence: repos/pcf/.agent/spec.md §4.1
+    cross_check: external
+
+  - if_ext_id: IF-EXT-009
+    provider_element: MongoDB
+    protocol: mongo-driver (TCP + BSON)
+    operations:
+      - InitPcfContext mongoapi.SetMongoDB
+      - CRUD policy-data 集合
+    purpose: 策略数据持久化（重启容忍）
+    evidence: repos/pcf/.agent/spec.md §4.1, §2.2.2
+    cross_check: external
+
+  - if_ext_id: IF-EXT-010
+    provider_element: prometheus
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 metrics server 端口）
+    evidence: repos/pcf/.agent/spec.md §4.1
+    cross_check: external
+
+# 依赖统计
+summary:
+  total: 10
+  system_internal: 6      # nrf/udr/bsf/amf/smf/chf
+  external: 4             # af-nef/MongoDB/prometheus（af 与 nef 同源透传，归一外部）
+  pending_cross_check: 4  # nrf/udr/bsf/smf 元素 interfaces.yaml 待生成
+  cross_check_ok: 1       # amf
+  indirect: 1             # chf（经 PCC 规则间接编排）
+  optional: 1             # bsf

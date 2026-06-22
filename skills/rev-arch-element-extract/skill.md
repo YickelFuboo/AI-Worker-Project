@@ -28,7 +28,9 @@
 #### 首次生成模式
 
 1. **元素名与 repo 关联确认**：从 `elements_tree.yaml` 读取本仓的 `element_name` 与 `repo_path` 映射；若 `elements_tree.yaml` 中无本仓条目，先在 `elements_tree.yaml` 新增一行（元素名默认取 repo 名，`element_type` 由 repo 角色判定，见步骤 4）。
-2. **输入源加载（优先 .agent/*.md）**：
+2. **输入源加载（事实源：`.agent/*.md`；参考源：历史架构方案）**：
+
+   **事实源（决定本元素 spec/interfaces/dependencies 的最终内容）**：
    - 优先读取 `repos/{repo}/.agent/spec.md`（业务功能 / SBI 接口索引 / 外部依赖 / 模块清单 → 元素职责、业务能力、提供的接口）
    - 优先读取 `repos/{repo}/.agent/interfaces.md`（接口契约详情 → §5 提供的接口引用）
    - 优先读取 `repos/{repo}/.agent/design.md`（设计目标 / 模块划分 / 数据对象 / 部署 / 质量属性 → §4 质量属性、§7 数据对象、§8 部署）
@@ -36,6 +38,23 @@
    - 优先读取 `repos/{repo}/.agent/DTFrame.md`（测试基础设施 → §4 质量属性的可测试性子项）
    - 若 `.agent/*.md` 部分缺失：对缺失部分降级扫源码 + 构建配置（go.mod / Makefile / CI）补齐，并在 spec.md §1 标注"本节由源码扫描补齐，置信度降级"
    - 若 `.agent/*.md` 全部缺失：执行全量源码扫描（参考 `rev-repo-to-spec-and-design` 的扫描策略），产出的同时**建议**触发 rev-repo-* 系列 skill 先补 `.agent/*.md`，本 skill 不直接生成 `.agent/*.md`
+
+   **意图源（针对设计意图、原架构假设、原 DFX 目标值；与事实源并存表达）**：
+   - 若 `knowledge/历史方案/架构方案/` 目录非空，扫描该目录下所有 `.md` / `.pdf` / `.txt` 文件（doc/docx/pptx 需投递时先用 pandoc 转 md；本 skill 不做格式转换）
+   - 筛选与本元素相关的方案（按 frontmatter 中的 `related_elements` 或 `related_repos` 字段；无 frontmatter 时按文档内容是否出现本元素名）
+   - 过滤 status=已废弃；status=已演进 沿 `superseded_by` 链找到现行方案再使用
+   - **强抽取四类意图信息（不只校准，是主动归纳进产物）**：
+     1. 元素定位与战略角色（§1 元素定位 / §2 职责描述）—— 当年为什么定义这个元素、它在系统中的战略意图
+     2. 业务能力的设计意图（§3 业务能力的"原设计目的"列）—— 每个能力当年要解决的具体业务问题
+     3. 质量属性的原目标值与策略原因（§4 质量属性的"原目标值 + 策略原因"列）—— 历史方案给的性能/可靠性/可用性数字与背后理由
+     4. 部署形态与容量规格的原意图（§8 部署与运行）—— 当年规划的部署形态、容量上限、扩缩容策略
+   - **事实/意图分流规则**：
+     - 事实域（接口签名、依赖、协议、当前部署形态、当前 DFX 实现）以代码 + `.agent/*.md` 为准
+     - 意图域（战略角色、设计目的、原 DFX 目标、原部署规划）以历史方案为准
+     - 同章节内两者并存表达，明示「现状」与「原设计意图」标签
+     - 事实层冲突（历史方案 vs 代码）→ 事实写代码版本，差异摘要标注「历史方案描述为 A，现行实现为 B，建议人工裁决」
+   - **抽取留痕**：每条意图条目末尾标「参考自 {solution_name} §X」，便于读者回溯原文
+   - **历史方案缺失**：意图域章节标注「无历史方案输入，本节仅基于现行代码归纳」，confidence 降级，但不阻断产出
 3. **元素类型判定**：根据 repo 在系统中的角色判定 `element_type`：
    - `service`：对外提供 SBI/REST/RPC 接口的独立部署 NF（如 amf/smf/upf）
    - `component`：被其他元素以库形式依赖的组件（如 util/openapi 共享库）
@@ -75,6 +94,7 @@
 - **增量模式以 .agent/*.md 的 last_modified 为主要锚点**：元素文档跟随 .agent/*.md 漂移，不直接跟源码 commit；源码 commit 仅在 .agent/*.md 未及时刷新时作辅助探测
 - **置信度评估**：基于 .agent/*.md 高置信度章节归纳的为高；降级扫码补齐的章节为中；.agent/*.md 全缺全量扫码的为低
 - **不生成 .agent/*.md**：本 skill 只消费 .agent/*.md，不生产；若仓内 .agent/*.md 缺失，建议触发 rev-repo-* skill 补齐后再跑本 skill
+- **历史架构方案是意图源、与事实源并存**：`knowledge/历史方案/架构方案/` 下文档用于强抽取设计意图、原 DFX 目标值、原部署规划、战略角色定位；与事实源（代码/`.agent/*.md`）并存表达，事实层冲突以事实源为准，意图层以历史方案为准；意图条目末尾必须留来源「参考自 {solution_name} §X」；doc/docx/pptx 等格式需投递时先用 pandoc 转 md，本 skill 不内嵌格式转换
 
 ### 输出要求
 

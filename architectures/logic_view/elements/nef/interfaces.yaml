@@ -1,0 +1,67 @@
+element_name: nef
+element_id: nef
+repo_path: repos/nef
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 nef 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/nef/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # AF 侧 REST API（3gpp-traffic-influence, TS 29.522）
+  - if_id: IF-001
+    if_name: TrafficInfluenceSubscription
+    protocol: AF REST (3gpp-traffic-influence, HTTP/2 + JSON, TS 29.522)
+    direction: provided
+    summary: AF 流量影响订阅的 CRUD 入口（GET/POST/PUT/PATCH/DELETE on /3gpp-traffic-influence/v1/:afID/subscriptions[/:subID]）
+    contract_ref: repos/nef/.agent/interfaces.md §2.1-§2.6
+
+  # AF 侧 REST API（3gpp-pfd-management, TS 29.122）
+  - if_id: IF-002
+    if_name: PFDManagementTransactions
+    protocol: AF REST (3gpp-pfd-management, TS 29.122)
+    direction: provided
+    summary: SCS/AS PFD 事务 CRUD（GET/POST/DELETE on /3gpp-pfd-management/v1/:scsAsID/transactions[/:transID]）
+    contract_ref: repos/nef/.agent/interfaces.md §2.7-§2.12
+
+  - if_id: IF-003
+    if_name: PFDManagementApplications
+    protocol: AF REST (3gpp-pfd-management)
+    direction: provided
+    summary: SCS/AS PFD 应用粒度 CRUD（GET/PUT/PATCH/DELETE on .../transactions/:transID/applications/:appID）
+    contract_ref: repos/nef/.agent/interfaces.md §2.13-§2.16
+
+  # SBI 侧（Nnef_PFDmanagement）
+  - if_id: IF-004
+    if_name: PFDFApplicationsQuery
+    protocol: SBI REST (Nnef_PFDmanagement, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: SMF 按 appID 查询 PFD（GET /nnef-pfdmanagement/v1/applications[?application-ids=...|/:appID]）
+    contract_ref: repos/nef/.agent/interfaces.md §2.17-§2.18
+
+  - if_id: IF-005
+    if_name: PFDFSubscriptions
+    protocol: SBI REST (Nnef_PFDmanagement)
+    direction: provided
+    summary: SMF 订阅 PFD 变更（POST /nnef-pfdmanagement/v1/subscriptions，DELETE /.../:subID）
+    contract_ref: repos/nef/.agent/interfaces.md §2.19-§2.20
+
+  # SBI 侧 Callback（Nnef_EventExposure）
+  - if_id: IF-006
+    if_name: SmfNotificationCallback
+    protocol: SBI REST (nnef-callback, HTTP/2 + JSON)
+    direction: provided
+    summary: SMF 事件通知入口，按 NotifId 路由并转发至 AF NotificationDestination
+    contract_ref: repos/nef/.agent/interfaces.md §2.21
+
+  # OAM
+  - if_id: IF-007
+    if_name: OamIndex
+    protocol: OAM REST (nnef-oam)
+    direction: provided
+    summary: OAM 索引占位（当前返回空 JSON）
+    contract_ref: repos/nef/.agent/interfaces.md §2.22
+
+# 完整 22 接口契约见 repos/nef/.agent/interfaces.md §2
+full_contract_index: repos/nef/.agent/interfaces.md

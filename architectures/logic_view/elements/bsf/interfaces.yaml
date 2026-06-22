@@ -1,0 +1,137 @@
+element_name: bsf
+element_id: bsf
+repo_path: repos/bsf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 bsf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/bsf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # Nbsf_Management 服务组 - PCF 会话级绑定
+  - if_id: IF-001
+    if_name: CreatePCFBinding
+    protocol: SBI (Nbsf_Management, HTTP/1.1 + JSON, 可选 TLS)
+    direction: provided
+    summary: 创建 PCF 会话级绑定（PCF 在 PDU 会话建立时登记）
+    contract_ref: repos/bsf/.agent/interfaces.md §2.2
+
+  - if_id: IF-002
+    if_name: GetPCFBindings
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 按多维条件查询 PCF 绑定（SMF/NEF/AF 反查 PCF 入口）
+    contract_ref: repos/bsf/.agent/interfaces.md §2.3
+
+  - if_id: IF-003
+    if_name: GetIndPCFBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 按 bindingId 查询单条 PCF 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.4
+
+  - if_id: IF-004
+    if_name: UpdateIndPCFBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 部分更新 PCF 会话级绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.5
+
+  - if_id: IF-005
+    if_name: DeleteIndPCFBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 删除 PCF 会话级绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.6
+
+  # Nbsf_Management 服务组 - PCF UE 级绑定
+  - if_id: IF-006
+    if_name: CreatePCFforUEBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 创建 UE 级 PCF 绑定（按 SUPI/GPSI）
+    contract_ref: repos/bsf/.agent/interfaces.md §2.7
+
+  - if_id: IF-007
+    if_name: GetPCFForUeBindings
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 按 SUPI/GPSI 查询 UE 级 PCF 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.8
+
+  - if_id: IF-008
+    if_name: UpdateIndPCFforUEBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 部分更新 UE 级 PCF 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.9
+
+  - if_id: IF-009
+    if_name: DeleteIndPCFforUEBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 删除 UE 级 PCF 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.10
+
+  # Nbsf_Management 服务组 - PCF MBS 绑定
+  - if_id: IF-010
+    if_name: CreatePCFMbsBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 创建 MBS 会话 PCF 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.11
+
+  - if_id: IF-011
+    if_name: GetPCFMbsBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 按 MBS Session ID 查询 PCF MBS 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.12
+
+  - if_id: IF-012
+    if_name: ModifyIndPCFMbsBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 部分更新 MBS 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.13
+
+  - if_id: IF-013
+    if_name: DeleteIndPCFMbsBinding
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 删除 MBS 绑定
+    contract_ref: repos/bsf/.agent/interfaces.md §2.14
+
+  # Nbsf_Management 服务组 - 订阅
+  - if_id: IF-014
+    if_name: CreateIndividualSubcription
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 创建绑定事件订阅
+    contract_ref: repos/bsf/.agent/interfaces.md §2.15
+
+  - if_id: IF-015
+    if_name: ReplaceIndividualSubcription
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 整体替换订阅（不存在返回 404）
+    contract_ref: repos/bsf/.agent/interfaces.md §2.16
+
+  - if_id: IF-016
+    if_name: DeleteIndividualSubcription
+    protocol: SBI (Nbsf_Management)
+    direction: provided
+    summary: 删除订阅
+    contract_ref: repos/bsf/.agent/interfaces.md §2.17
+
+  # 健康检查
+  - if_id: IF-017
+    if_name: Index
+    protocol: HTTP
+    direction: provided
+    summary: 根路径健康检查
+    contract_ref: repos/bsf/.agent/interfaces.md §2.1
+
+# 完整 17 接口契约（含字段校验/错误码/调用链映射）见 repos/bsf/.agent/interfaces.md
+full_contract_index: repos/bsf/.agent/interfaces.md

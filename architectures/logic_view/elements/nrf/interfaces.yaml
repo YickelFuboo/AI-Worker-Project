@@ -1,0 +1,102 @@
+element_name: nrf
+element_id: nrf
+repo_path: repos/nrf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 nrf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/nrf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # Nnrf_NFManagement 服务组（SBI REST，HTTP/2 + JSON + mTLS）
+  - if_id: IF-001
+    if_name: RegisterNFInstance
+    protocol: SBI (Nnrf_NFManagement, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: 注册或更新 NF 实例 Profile（PUT 幂等）；NF 启动时调用，无需 OAuth token
+    contract_ref: repos/nrf/.agent/interfaces.md §2.1
+
+  - if_id: IF-002
+    if_name: DeregisterNFInstance
+    protocol: SBI (Nnrf_NFManagement)
+    direction: provided
+    summary: 反注册 NF 实例，触发 DEREGISTERED 通知广播
+    contract_ref: repos/nrf/.agent/interfaces.md §2.2
+
+  - if_id: IF-003
+    if_name: UpdateNFInstance
+    protocol: SBI (Nnrf_NFManagement)
+    direction: provided
+    summary: JSON Patch 更新 NF Profile（禁止改 nfInstanceId）
+    contract_ref: repos/nrf/.agent/interfaces.md §2.3
+
+  - if_id: IF-004
+    if_name: GetNFInstance
+    protocol: SBI (Nnrf_NFManagement)
+    direction: provided
+    summary: 按 nfInstanceId 查询单个 NF Profile
+    contract_ref: repos/nrf/.agent/interfaces.md §2.4
+
+  - if_id: IF-005
+    if_name: GetNFInstances
+    protocol: SBI (Nnrf_NFManagement)
+    direction: provided
+    summary: 按 NF 类型枚举 NF URI 集合（UriList）
+    contract_ref: repos/nrf/.agent/interfaces.md §2.5
+
+  - if_id: IF-006
+    if_name: CreateSubscription
+    protocol: SBI (Nnrf_NFManagement)
+    direction: provided
+    summary: 订阅 NF 状态变更事件，声明回调 URI
+    contract_ref: repos/nrf/.agent/interfaces.md §2.6
+
+  - if_id: IF-007
+    if_name: UpdateSubscription
+    protocol: SBI (Nnrf_NFManagement)
+    direction: provided
+    summary: 修改订阅条件
+    contract_ref: repos/nrf/.agent/interfaces.md §2.7
+
+  - if_id: IF-008
+    if_name: RemoveSubscription
+    protocol: SBI (Nnrf_NFManagement)
+    direction: provided
+    summary: 取消 NF 状态变更订阅
+    contract_ref: repos/nrf/.agent/interfaces.md §2.8
+
+  # Nnrf_NFDiscovery 服务组
+  - if_id: IF-009
+    if_name: SearchNFInstances
+    protocol: SBI (Nnrf_NFDiscovery, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: 多维过滤查询 NF 实例（target/requester NF 类型、服务名、切片、PLMN、位置等 40+ 参数）；所有跨 NF 调用前置
+    contract_ref: repos/nrf/.agent/interfaces.md §2.9
+
+  # Nnrf_AccessToken 服务组（OAuth2）
+  - if_id: IF-010
+    if_name: AccessTokenRequest
+    protocol: SBI (Nnrf_AccessToken / OAuth2, HTTP/2 + form-urlencoded + mTLS)
+    direction: provided
+    summary: OAuth2 client_credentials 模式签发 RS512 JWT（exp=1000s, token_type=Bearer），承载 NF 间授权
+    contract_ref: repos/nrf/.agent/interfaces.md §2.10
+
+  # Bootstrapping（占位）
+  - if_id: IF-011
+    if_name: BootstrappingInfoRequest
+    protocol: SBI (HTTP/2 + JSON)
+    direction: provided
+    summary: 启动信息查询入口（当前为 501 占位）
+    contract_ref: repos/nrf/.agent/interfaces.md §2.11
+
+  # 出站通知接口
+  - if_id: IF-012
+    if_name: NFStatusNotify
+    protocol: SBI (Nnrf_NFManagement Notify, HTTP/2 + JSON + mTLS, 出站)
+    direction: provided-outbound
+    summary: NF 注册/反注册/Profile 变更事件主动推送到订阅方声明的回调 URI；nrf 主动出站，携带自签 NRF token
+    contract_ref: repos/nrf/.agent/interfaces.md §2.13
+
+# 完整 13 接口索引与契约详情见 repos/nrf/.agent/spec.md §3 与 .agent/interfaces.md §2
+full_contract_index: repos/nrf/.agent/interfaces.md

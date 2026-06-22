@@ -1,0 +1,81 @@
+element_name: ausf
+element_id: ausf
+repo_path: repos/ausf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 ausf 元素依赖的外部接口清单。
+# 证据来源：repos/ausf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement, HTTP/2 + JSON + mTLS)
+    operations:
+      - POST /nnrf-nfm/v1/nf-instances/{nfInstanceID}   # NF 实例注册
+      - DELETE /nnrf-nfm/v1/nf-instances/{nfInstanceID} # NF 实例注销
+    purpose: AUSF 启动时注册 NF 实例（2s 退避无限重试至成功）；终止时优雅注销
+    evidence: repos/ausf/.agent/spec.md §4.1 + §4.2
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFDiscovery)
+    operations:
+      - GET /nnrf-disc/v1/nf-instances?target-nf-type=UDM&service-names=nudm-ueau
+    purpose: 处理每次 UE 鉴权请求时发现 UDM 实例 URL
+    evidence: repos/ausf/.agent/spec.md §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-003
+    provider_element: udm
+    protocol: SBI (Nudm_UEAuthentication)
+    operations:
+      - POST /nudm-ueau/v1/{supiOrSuci}/security-information/generate-auth-data
+    purpose: 获取鉴权向量（5G-AKA / EAP-AKA'）；AUTS 重同步场景重发请求
+    evidence: repos/ausf/.agent/spec.md §4.2
+    cross_check: pending  # 待 udm 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-004
+    provider_element: udm
+    protocol: SBI (Nudm_UEAuthentication)
+    operations:
+      - POST /nudm-ueau/v1/{supi}/auth-events
+    purpose: 鉴权成功/失败结果上报（AuthEvent，含时间戳、AuthType、Success、ServingNetworkName、AusfInstanceId）
+    evidence: repos/ausf/.agent/spec.md §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-005
+    provider_element: amf
+    protocol: SBI (Nausf_UEAuthentication, 入站方向)
+    operations:
+      - 被 AMF 调用 IF-001/IF-002/IF-003（UE 鉴权发起/5G-AKA 确认/EAP 会话推进）
+    purpose: 入站鉴权请求方；架构上 AMF 为上游消费者
+    evidence: repos/ausf/.agent/spec.md §4.1 + §4.2
+    cross_check: provider_self  # 本元素对 AMF 提供接口，对应 ausf 自身 IF-001/IF-002/IF-003
+
+  - if_ext_id: IF-EXT-006
+    provider_element: prometheus
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 Metrics server 端口，默认 9091）
+    evidence: repos/ausf/.agent/spec.md §4.1
+    cross_check: external  # 非系统内元素，不参与双向校验
+
+  - if_ext_id: IF-EXT-007
+    provider_element: OpenTelemetry
+    protocol: OTel
+    operations:
+      - 分布式追踪 span 注入（间接依赖）
+    purpose: 分布式追踪（go.opentelemetry.io/otel v1.24.0 indirect）
+    evidence: repos/ausf/.agent/spec.md §5
+    cross_check: external
+
+# 依赖统计
+summary:
+  total: 7
+  system_internal: 5   # nrf x2 / udm x2 / amf（入站）
+  external: 2          # prometheus / OpenTelemetry
+  pending_cross_check: 4   # 待 nrf / udm 元素 interfaces.yaml 生成

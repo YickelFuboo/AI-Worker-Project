@@ -1,0 +1,118 @@
+element_name: smf
+element_id: smf
+repo_path: repos/smf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 smf 元素依赖的外部接口清单。
+# 证据来源：repos/smf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+# 注意：smf ↔ upf 为 PFCP over UDP（N4），属于协议接口（非 SBI），单独列在 protocol_dependencies。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement / Nnrf_NFDiscovery, HTTP/2 + JSON + mTLS)
+    operations:
+      - POST /nnrf-nfm/v1/nf-instances           # NF 实例注册
+      - DELETE /nnrf-nfm/v1/nf-instances/{nfId}  # 注销
+      - GET /nnrf-disc/v1/nf-instances           # NF 发现（AMF/PCF/CHF/UDM/BSF）
+    purpose: 启动注册 NF 实例；调用其他 NF 前发现实例；OAuth2 token 颁发
+    evidence: repos/smf/.agent/spec.md §4.1
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: amf
+    protocol: SBI (Namf_Communication)
+    operations:
+      - POST /namf-comm/v1/.../n1-n2-messages
+      - POST /namf-comm/v1/callback/.../smContextStatus/{supi}/{pduSessionId}
+    purpose: 下行 NAS/N2 SM 信息投递；SM 上下文释放状态通知
+    evidence: repos/smf/.agent/spec.md §4.2
+    cross_check: bidirectional  # amf 元素 dependencies.yaml IF-EXT-004 反向指向 smf 提供的 Nsmf_PDUSession
+
+  - if_ext_id: IF-EXT-003
+    provider_element: pcf
+    protocol: SBI (Npcf_SMPolicyControl)
+    operations:
+      - POST /npcf-smpolicycontrol/v1/sm-policies     # 含 UE Location（PR #200）
+      - DELETE /npcf-smpolicycontrol/v1/sm-policies/{polId}
+    purpose: SM Policy Association 建立/更新/终止；获取 PCC 与 Session 规则
+    evidence: repos/smf/.agent/spec.md §4.1 / §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-004
+    provider_element: chf
+    protocol: SBI (Nchf_ConvergedCharging)
+    operations:
+      - POST /nchf-convergedcharging/v3/chargingdata   # Initial / Update / Release
+    purpose: 在线/离线计费的额度请求与用量上报
+    evidence: repos/smf/.agent/spec.md §4.1 / §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-005
+    provider_element: udm
+    protocol: SBI (Nudm_SDM / Nudm_UECM)
+    operations:
+      - GET /nudm-sdm/v1/{supi}/sm-data
+      - PUT /nudm-uecm/v1/{supi}/registrations/smf-registrations/*
+    purpose: 订阅数据获取；SMF 注册（UECM）
+    evidence: repos/smf/.agent/spec.md §4.1 / §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-006
+    provider_element: bsf
+    protocol: SBI (Nbsf_Management)
+    operations:
+      - POST /nbsf-management/v1/pcfBindings    # 注册 PCF 绑定
+      - DELETE /nbsf-management/v1/pcfBindings  # 释放 PCF 绑定
+    purpose: PCF 选择前查询 UE 既有绑定（BSF 感知 PCF 选择，PR #176）；会话释放时解绑
+    evidence: repos/smf/.agent/spec.md §4.1 / §4.2
+    cross_check: pending  # bsf 元素 interfaces.yaml 待生成
+
+  - if_ext_id: IF-EXT-007
+    provider_element: smf  # 其他 SMF 实例（H-SMF / V-SMF）
+    protocol: SBI (Nsmf_PDUSession)
+    operations:
+      - POST /nsmf-pdusession/v1/pdu-sessions
+      - POST /nsmf-pdusession/v1/pdu-sessions/{ref}/modify
+      - POST /nsmf-pdusession/v1/pdu-sessions/{ref}/release
+    purpose: H-SMF/V-SMF 跨 SMF 会话族（当前实现占位 501，依赖关系保留）
+    evidence: repos/smf/.agent/spec.md §4.1
+    cross_check: self  # 自反依赖，对应本元素 IF-006（占位）
+
+  - if_ext_id: IF-EXT-008
+    provider_element: prometheus  # 监控系统，非本系统元素
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 metrics server 端口，可选独立 TLS）
+    evidence: repos/smf/.agent/spec.md §4.1
+    cross_check: external
+
+# 协议层依赖（非 SBI，但属于关键架构依赖）
+protocol_dependencies:
+  - if_ext_id: IF-EXT-P01
+    provider_element: upf
+    protocol: PFCP over UDP (N4, 3GPP TS 29.244)
+    udp_port: 8805
+    operations:
+      - PFCP Association Setup / Release
+      - PFCP Heartbeat（双向，PfcpHeartbeatInterval 可禁用）
+      - PFCP Session Establishment / Modification / Deletion
+      - PFCP Session Report（UPF 上行，已释放会话兜底返回 SessionContextNotFound）
+    purpose: 用户面会话控制：下发 PDR/FAR/QER/URR，是用户面规则的唯一来源；同时接收 UPF 用量与事件上报
+    direction: outbound (smf 主控，upf 应答；upf 发起 Heartbeat/Report)
+    evidence: repos/smf/.agent/spec.md §4.1 / §4.2，repos/smf/.agent/design.md §8.12 / §11.2
+    note: PFCP 非 SBI/REST 接口，是 smf 架构上的核心出站协议依赖
+    cross_check: pending  # upf 元素 interfaces.yaml 待生成（需在 upf 侧以 protocol_interfaces 形式登记 PFCP 入站）
+
+# 依赖统计
+summary:
+  total_sbi: 8           # nrf/amf/pcf/chf/udm/bsf/smf(self)/prometheus
+  total_protocol: 1      # upf (PFCP/N4)
+  system_internal: 7     # nrf/amf/pcf/chf/udm/bsf/upf
+  self_reference: 1      # smf 自反（H-SMF/V-SMF 占位）
+  external_system: 1     # prometheus
+  pending_cross_check: 6 # nrf/pcf/chf/udm/bsf/upf
+  bidirectional_verified: 1  # amf（已通过 amf/dependencies.yaml IF-EXT-004 反向校验）

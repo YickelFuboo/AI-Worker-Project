@@ -1,0 +1,88 @@
+element_name: n3iwf
+element_id: n3iwf
+repo_path: repos/n3iwf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 n3iwf 元素对外提供的接口索引（摘要层）。
+# 完整契约（协议字段/操作列表/报文格式/错误码）见 repos/n3iwf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+#
+# 关键差异声明：n3iwf 不提供 SBI HTTP 服务接口（与 amf/smf/ausf 等 SBI 类 NF 不同）。
+# 对外接口全部为协议级：IKEv2/IPsec（UE 侧）+ NGAP（AMF 侧）+ GTP-U（UPF 侧）+ NAS over IPsec TCP + GRE。
+
+provided_interfaces:
+  # UE 侧：IKEv2/IPsec 控制面
+  - if_id: IF-001
+    if_name: IKEv2 (UE-N3IWF)
+    protocol: IKEv2/UDP (port 500, 4500 NAT-T)
+    direction: provided
+    summary: UE 与 N3IWF 建立 IKE SA 与 IPsec Child SA（IKE_SA_INIT / IKE_AUTH / CREATE_CHILD_SA / INFORMATIONAL）
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.1
+
+  - if_id: IF-002
+    if_name: EAP-5G over IKE_AUTH
+    protocol: EAP-5G payload in IKEv2 (TS 33.501 Annex T)
+    direction: provided
+    summary: 在 IKE_AUTH 多轮交换中承载 5GS NAS，完成非 3GPP 接入下的 UE 注册与鉴权
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.2
+
+  - if_id: IF-003
+    if_name: NAS over IPsec (NWuCP)
+    protocol: TCP inside IPsec ESP tunnel (port = nasTcpPort)
+    direction: provided
+    summary: UE 注册成功后承载后续 NAS 信令（4 字节长度前缀 + NAS PDU）
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.3
+
+  # AMF 侧：NGAP 控制面（N2，n3iwf 充当 NG-RAN 节点）
+  - if_id: IF-004
+    if_name: NGAP (N3IWF-to-AMF)
+    protocol: NGAP/SCTP (port 38412, TS 38.413)
+    direction: provided  # n3iwf 主动发起的 NGAP 程序
+    summary: 作为 NG-RAN 节点向 AMF 发起 NGSetupRequest / InitialUEMessage / UplinkNASTransport / PDUSessionResourceSetupResponse / UEContextReleaseRequest 等
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.4
+
+  - if_id: IF-005
+    if_name: NGAP (AMF-to-N3IWF)
+    protocol: NGAP/SCTP (port 38412)
+    direction: consumed-as-server  # n3iwf 接收 AMF 主导的程序
+    summary: 接收 AMF 主导的 N2 程式码（InitialContextSetupRequest / DownlinkNASTransport / PDUSessionResource Setup/Modify/Release / UEContextRelease Command / AMFConfigurationUpdate / OverloadStart/Stop / NGReset 等）
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.5
+
+  # UE 侧：用户面 GRE
+  - if_id: IF-006
+    if_name: GRE (UE-N3IWF user plane)
+    protocol: GRE (IP proto 47) over IPsec ESP
+    direction: provided
+    summary: UE 用户面 IP 报文以 GRE 封装承载于 IPsec 隧道；GRE Key 携带 5G QFI
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.6
+
+  # UPF 侧：用户面 GTP-U（N3）
+  - if_id: IF-007
+    if_name: GTP-U (N3IWF-UPF, N3)
+    protocol: GTP-U v1/UDP (port 2152, TS 29.281)
+    direction: provided  # n3iwf 在 N3 上既收也发
+    summary: N3 接口承载 PDU 会话用户面，G-PDU + PDU Session Container 扩展头携带 QFI
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.7
+
+  # 运维侧
+  - if_id: IF-008
+    if_name: Metrics HTTP
+    protocol: HTTP/HTTPS (default 9091, optional mTLS)
+    direction: provided
+    summary: Prometheus 拉取 NGAP 指标，namespace=free5gc
+    contract_ref: repos/n3iwf/.agent/interfaces.md §2.8
+
+# 接口形态说明
+interface_nature:
+  sbi_provided: false   # n3iwf 不提供 SBI HTTP 服务
+  protocols:
+    - IKEv2/IPsec (UE-side, control)
+    - EAP-5G (embedded in IKE_AUTH)
+    - NAS over IPsec/TCP (UE-side, control)
+    - NGAP/SCTP (AMF-side, N2)
+    - GRE over IPsec (UE-side, user plane)
+    - GTP-U/UDP (UPF-side, N3)
+    - HTTP(S) Metrics (ops only)
+
+full_contract_index: repos/n3iwf/.agent/interfaces.md

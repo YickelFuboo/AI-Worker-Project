@@ -3,12 +3,18 @@
 # 本文件是工作空间级跨仓元素图谱，由 rev-arch-element-extract skill 维护。
 # 每个元素对应一个 repo（一 repo 一顶层元素）。
 # 详细元素规格见 elements/{element_name}/spec.md。
+#
+# depends_on / depended_by 仅记录"本系统内 NF 元素"之间的边；
+# 外部基础设施（MongoDB / Prometheus / OpenTelemetry / Linux kernel xfrm / gtp5g）、
+# 接入设备（UE / RAN / WiFi AP / TWAN AP）、外部域（AF / SCS-AS / billing_domain DN）
+# 等不属于 NF 元素的依赖，仅出现在各 element 目录下 dependencies.yaml 的 external_dependencies 节，
+# 不纳入本树。
 
 tree_meta:
-  last_modified: "2026-06-21T11:00:00+08:00"
+  last_modified: "2026-06-22T12:00:00+08:00"
   last_modified_by: rev-arch-element-extract
-  element_count: 1
-  note: "本文件初始创建，目前仅 amf 元素已抽取。其余 13 个 free5gc NF 仓待 rev-arch-element-extract 逐个执行。"
+  element_count: 14
+  note: "14 个 free5gc NF 元素已全部抽取。depended_by 由 depends_on 反向构建，已双向校验。"
 
 elements:
   - element_id: amf
@@ -18,7 +24,7 @@ elements:
     spec_path: architectures/logic_view/elements/amf/spec.md
     last_modified: "2026-06-21T11:00:00+08:00"
     confidence: high
-    aliases: []  # repo 改名时保留旧元素名，新名追加到此
+    aliases: []
     depends_on:
       - nrf
       - ausf
@@ -27,4 +33,228 @@ elements:
       - pcf
       - nssf
       - amf  # 自反：跨 AMF 切换时目标 AMF 调用本元素 UEContextTransfer
-    # 被依赖方待其他元素生成后补充 depended_by 字段
+    depended_by:
+      - ausf  # ausf 鉴权结果回调 / Nausf_SoR
+      - chf   # chf 计费状态通知
+      - n3iwf # 非 3GPP 接入经由 N2 接入 amf
+      - nssf  # nssf 切片选择结果通知
+      - pcf   # pcf AM/UE Policy 下发
+      - smf   # smf 会话事件回调到 amf
+      - tngf  # 受信非 3GPP 接入经由 N2 接入 amf
+
+  - element_id: ausf
+    element_name: ausf
+    element_type: service
+    repo_path: repos/ausf
+    spec_path: architectures/logic_view/elements/ausf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现 UDM
+      - udm  # 鉴权向量获取与鉴权事件上报
+      - amf  # 鉴权过程中向 amf 回调 SoR/UPU
+    depended_by:
+      - amf  # amf 在 5G-AKA / EAP-AKA' 鉴权时调用 ausf
+
+  - element_id: bsf
+    element_name: bsf
+    element_type: service
+    repo_path: repos/bsf
+    spec_path: architectures/logic_view/elements/bsf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+    depended_by:
+      - pcf  # pcf 注册 / 查询 PDU 会话绑定信息
+      - smf  # smf 会话建立时注册绑定信息
+
+  - element_id: chf
+    element_name: chf
+    element_type: service
+    repo_path: repos/chf
+    spec_path: architectures/logic_view/elements/chf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+      - amf  # 配额耗尽 / 计费状态通知 amf
+      - smf  # 配额耗尽 / 计费状态通知 smf
+    depended_by:
+      - pcf  # pcf 触发 SpendingLimit 订阅
+      - smf  # smf PDU 会话计费触发与配额请求
+
+  - element_id: n3iwf
+    element_name: n3iwf
+    element_type: service
+    repo_path: repos/n3iwf
+    spec_path: architectures/logic_view/elements/n3iwf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - amf  # N2/NGAP 控制面（非 SBI）
+      - upf  # N3/GTP-U 用户面（非 SBI）
+    depended_by: []  # n3iwf 不被本系统内其他 NF 反向依赖（终端侧网元）
+
+  - element_id: nef
+    element_name: nef
+    element_type: service
+    repo_path: repos/nef
+    spec_path: architectures/logic_view/elements/nef/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+      - pcf  # AF 策略请求转发 / 流量路由策略
+      - smf  # 会话相关能力暴露
+      - udr  # AF 数据存取
+    depended_by:
+      - pcf  # pcf AF 透传场景调用 nef
+
+  - element_id: nrf
+    element_name: nrf
+    element_type: service
+    repo_path: repos/nrf
+    spec_path: architectures/logic_view/elements/nrf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on: []  # nrf 是根服务，不静态依赖其他 NF；动态订阅方在运行时声明
+    depended_by:
+      - amf
+      - ausf
+      - bsf
+      - chf
+      - nef
+      - nssf
+      - pcf
+      - smf
+      - udm
+      - udr
+    # 备注：nrf 是 5GC 所有 NF 的发现锚点，自反式订阅由 dynamic-subscriber-NF 表达
+
+  - element_id: nssf
+    element_name: nssf
+    element_type: service
+    repo_path: repos/nssf
+    spec_path: architectures/logic_view/elements/nssf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+      - amf  # 切片可用性变更通知 amf
+    depended_by:
+      - amf  # amf 注册时选择 NSSF / 接入鉴权时切片选择
+
+  - element_id: pcf
+    element_name: pcf
+    element_type: service
+    repo_path: repos/pcf
+    spec_path: architectures/logic_view/elements/pcf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+      - amf  # AM/UE Policy 下发
+      - bsf  # 注册/查询 PDU 会话绑定信息
+      - chf  # SpendingLimit 订阅
+      - nef  # AF 透传通道
+      - smf  # Npcf_SMPolicyControl 下发会话策略
+      - udr  # AM/SM/UE Policy 数据存取
+    depended_by:
+      - amf  # amf 申请 AM/UE Policy
+      - nef  # nef 转发 AF 策略请求
+      - smf  # smf 申请 SM Policy
+
+  - element_id: smf
+    element_name: smf
+    element_type: service
+    repo_path: repos/smf
+    spec_path: architectures/logic_view/elements/smf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+      - amf  # 会话事件回调
+      - bsf  # 注册绑定信息
+      - chf  # 计费触发与配额请求
+      - pcf  # SM Policy 申请
+      - udm  # 会话订阅数据获取
+      - upf  # PFCP N4（非 SBI）下发用户面规则
+      - smf  # 自反：H-SMF / V-SMF 漫游互通
+    depended_by:
+      - amf  # amf 在 PDU 会话流程中调用 smf
+      - chf  # chf 配额耗尽回调 smf
+      - nef  # nef 暴露会话能力
+      - pcf  # pcf 主动会话策略变更通知
+      - upf  # upf PFCP 关联报告路径上报（实质方向 upf→smf）
+
+  - element_id: tngf
+    element_name: tngf
+    element_type: service
+    repo_path: repos/tngf
+    spec_path: architectures/logic_view/elements/tngf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - amf  # N2/NGAP 控制面（非 SBI）
+      - upf  # N3/GTP-U 用户面（非 SBI）
+    depended_by: []  # tngf 是受信非 3GPP 接入网元，不被其他 NF 反向依赖
+
+  - element_id: udm
+    element_name: udm
+    element_type: service
+    repo_path: repos/udm
+    spec_path: architectures/logic_view/elements/udm/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+      - udr  # 订阅数据存取
+      - udm  # 自反：多 UDM 集群内互通
+    depended_by:
+      - amf   # amf 获取移动性订阅数据 / SDM 订阅
+      - ausf  # ausf 鉴权向量与鉴权事件
+      - smf   # smf 会话订阅数据
+
+  - element_id: udr
+    element_name: udr
+    element_type: service
+    repo_path: repos/udr
+    spec_path: architectures/logic_view/elements/udr/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases: []
+    depends_on:
+      - nrf  # NF 注册与发现
+    depended_by:
+      - nef  # nef AF 数据存取
+      - pcf  # pcf Policy 数据存取
+      - udm  # udm 订阅数据存取
+
+  - element_id: upf
+    element_name: upf
+    element_type: service
+    repo_path: repos/upf
+    spec_path: architectures/logic_view/elements/upf/spec.md
+    last_modified: "2026-06-22T12:00:00+08:00"
+    confidence: high
+    aliases:
+      - go-upf  # 代码仓名为 go-upf，元素名规整为 upf
+    depends_on:
+      - smf  # PFCP N4 控制（实质方向 smf→upf，本字段表达 upf 在控制面需 smf）
+      - upf  # 自反：N9（UPF 间 GTP-U）漫游链路
+    depended_by:
+      - n3iwf  # n3iwf 通过 N3/GTP-U 转发非 3GPP 接入用户面
+      - smf    # smf 直接控制 upf 下发 PDR/FAR/QER/URR
+      - tngf   # tngf 通过 N3/GTP-U 转发受信非 3GPP 接入用户面

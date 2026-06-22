@@ -1,0 +1,53 @@
+element_name: nrf
+element_id: nrf
+repo_path: repos/nrf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 nrf 元素依赖的外部接口清单。
+# 证据来源：repos/nrf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 架构特性：nrf 作为 5GC 服务治理中枢与 OAuth2 授权服务器，**不依赖任何其他 5GC NF 元素**——
+#   是"被所有 NF 依赖"的元素，自身仅依赖持久层与监控基础设施（外部系统）。
+# 跨仓依赖双向校验：本文件声明的依赖均为系统外部基础设施，无需 NF 元素 interfaces.yaml 校验。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: MongoDB
+    protocol: MongoDB Wire Protocol (mongo-driver)
+    operations:
+      - NfProfile 集合 CRUD       # NF Profile 仓库读写
+      - Subscriptions 集合 CRUD   # NF 状态订阅条目读写
+      - urilist 集合 CRUD         # 按 NF 类型聚合的 URI 二级索引读写
+    purpose: NF Profile / Subscriptions / urilist 持久化，是服务目录与订阅的存储底座；nrf 启动时连接，进程级唯一依赖
+    evidence: repos/nrf/.agent/spec.md §4.1
+    cross_check: external  # 外部基础设施系统，不参与 NF 元素双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: dynamic-subscriber-NF  # 订阅方 NF（动态，运行时由订阅方声明）
+    protocol: SBI (Nnrf_NFManagement Notify callback, HTTP/2 + JSON + mTLS)
+    operations:
+      - POST {NotificationUri}  # NFStatusNotify 出站推送
+    purpose: NF 注册/反注册/Profile 变更事件回调推送；回调 URI 由订阅方在 CreateSubscription 时声明，nrf 主动出站
+    evidence: repos/nrf/.agent/spec.md §3（NRF 出站接口）、interfaces.md §2.13
+    cross_check: dynamic  # 订阅方在运行时声明，依赖目标不固定到具体 NF 元素
+
+  - if_ext_id: IF-EXT-003
+    provider_element: prometheus
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics  # 指标暴露（独立 metrics server 端口，可选 TLS）
+    purpose: 指标暴露给监控系统采集
+    evidence: repos/nrf/.agent/spec.md §4.1
+    cross_check: external  # 非本系统 NF 元素
+
+# 依赖统计
+summary:
+  total: 3
+  system_internal_nf: 0   # nrf 不依赖任何其他 5GC NF 元素（关键架构特性：被依赖的中枢）
+  external: 3             # MongoDB / 订阅方动态回调 / prometheus
+  pending_cross_check: 0
+  note: |
+    nrf 是 5GC 服务注册中心与 OAuth2 授权服务器，
+    被所有其他 NF（amf/smf/udm/ausf/pcf/nssf/udr/nef/upf 等）依赖（入站），
+    自身无 NF 前置依赖（出站方向仅有动态订阅回调与持久层/监控）。
+    nrf 不可用将导致全网服务发现与令牌签发停摆，是系统关键路径。

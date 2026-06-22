@@ -1,0 +1,88 @@
+element_name: chf
+element_id: chf
+repo_path: repos/chf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 chf 元素依赖的外部接口清单。
+# 证据来源：repos/chf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+# 其他 NF 元素尚未生成 interfaces.yaml 时，标注"待对方元素生成后双向校验"。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement / Nnrf_NFDiscovery, HTTP/2 + JSON + TLS)
+    operations:
+      - PUT /nnrf-nfm/v1/nf-instances/{nfInstanceId}    # NF 实例注册
+      - DELETE /nnrf-nfm/v1/nf-instances/{nfInstanceId} # NF 实例反注册
+      - GET /nnrf-disc/v1/nf-instances                  # 下游 NF 发现
+    purpose: chf 启动时注册 NF 实例；关停时反注册；按需发现 SMF 等下游 NF
+    evidence: repos/chf/.agent/spec.md §4.1, §4.2
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: smf
+    protocol: SBI (Nsmf 回调 / Nchf_ConvergedCharging_Notify, HTTP/2 + JSON + TLS)
+    operations:
+      - POST {notifyUri}  # ChargingNotifyRequest，NotificationType=REAUTHORIZATION
+    purpose: RechargePut 触发后向 SMF 回调，通知 UE 配额恢复进入重授权流程
+    evidence: repos/chf/.agent/spec.md §4.2
+    cross_check: pending  # 待 smf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-003
+    provider_element: mongodb
+    protocol: MongoDB wire protocol
+    operations:
+      - find/update on policyData.ues.chargingData (quota)
+      - find on tariff collection
+    purpose: 持久化 (UE, RatingGroup) 配额与资费，使配额状态跨进程重启不丢失
+    evidence: repos/chf/.agent/spec.md §4.1
+    cross_check: external  # 非系统内 NF 元素，外部数据系统
+
+  - if_ext_id: IF-EXT-004
+    provider_element: billing_domain  # 外部计费域 OCS/BSS
+    protocol: FTP (可选 TLS)
+    operations:
+      - LIST / STOR / NOOP / QUIT  # 计费域作为 FTP 客户端从 chf 内嵌 CGF FTP 取 CDR
+    purpose: CDR 文件从 chf 转交到计费域用于后续计费/出账
+    evidence: repos/chf/.agent/spec.md §4.1, §4.2
+    cross_check: external  # 非本系统元素
+
+  # 反向依赖：以下元素作为 SBI 入站消费方调用 chf；chf 不主动调用它们的接口，但需在架构层声明协作关系
+  - if_ext_id: IF-EXT-005
+    provider_element: smf  # SMF 是 chf 的主消费方（PDU 会话计费触发）
+    protocol: SBI (Nchf_ConvergedCharging, 反向：smf → chf)
+    operations:
+      - POST /nchf-convergedcharging/v3/chargingdata          # SMF → chf 触发计费
+      - POST /nchf-convergedcharging/v3/chargingdata/{ref}/update
+      - POST /nchf-convergedcharging/v3/chargingdata/{ref}/release
+    purpose: 接收 SMF PDU 会话维度的计费触发（语义反向依赖：chf 被动消费）
+    evidence: repos/chf/.agent/spec.md §4.2
+    cross_check: inbound  # 反向依赖，由消费方元素声明出站
+
+  - if_ext_id: IF-EXT-006
+    provider_element: amf  # AMF 作为消费方触发注册计费
+    protocol: SBI (Nchf_ConvergedCharging, 反向：amf → chf)
+    operations:
+      - POST /nchf-convergedcharging/v3/chargingdata  # 注册计费事件
+    purpose: 接收 AMF 注册计费触发（语义反向依赖：chf 被动消费）
+    evidence: repos/chf/.agent/spec.md §4.2
+    cross_check: inbound  # 反向依赖
+
+  - if_ext_id: IF-EXT-007
+    provider_element: prometheus  # 监控系统，非本系统元素
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 metrics server 端口）
+    evidence: repos/chf/.agent/spec.md §2.1（Prometheus 指标导出）
+    cross_check: external
+
+# 依赖统计
+summary:
+  total: 7
+  system_internal_outbound: 2     # nrf / smf（Recharge 回调）
+  system_internal_inbound: 2      # smf / amf（被消费）
+  external: 3                     # mongodb / billing_domain / prometheus
+  pending_cross_check: 2          # 待 nrf / smf 元素 interfaces.yaml 生成

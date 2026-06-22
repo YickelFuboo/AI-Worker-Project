@@ -1,0 +1,82 @@
+element_name: nef
+element_id: nef
+repo_path: repos/nef
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 nef 元素依赖的外部接口清单。
+# 证据来源：repos/nef/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement / Nnrf_NFDiscovery, HTTP/2 + JSON + mTLS)
+    operations:
+      - POST /nnrf-nfm/v1/nf-instances   # NF 实例注册
+      - DELETE /nnrf-nfm/v1/nf-instances/:nfInstanceId  # NF 实例注销
+      - GET /nnrf-disc/v1/nf-instances    # NF 发现 (PCF/UDR)
+    purpose: 启动期注册 NF 实例并定时重试；终止时注销；首次调用 PCF/UDR 前发现实例；出站 OAuth2 token 获取
+    evidence: repos/nef/.agent/spec.md §4.1 / §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-002
+    provider_element: pcf
+    protocol: SBI (Npcf_PolicyAuthorization)
+    operations:
+      - POST /npcf-policyauthorization/v1/app-sessions
+      - GET /npcf-policyauthorization/v1/app-sessions/:appSessionId
+      - PATCH /npcf-policyauthorization/v1/app-sessions/:appSessionId
+      - DELETE /npcf-policyauthorization/v1/app-sessions/:appSessionId
+    purpose: 单 UE 流量影响订阅落地到应用会话（gpsi/ipv4/ipv6/macAddr 任一非空时触发）
+    evidence: repos/nef/.agent/spec.md §4.1 / §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-003
+    provider_element: udr
+    protocol: SBI (Nudr_DataRepository)
+    operations:
+      - PUT/PATCH/DELETE /nudr-dr/v2/application-data/influenceData/:influenceId
+      - GET /nudr-dr/v2/application-data/pfds?appId=...
+      - GET/PUT/DELETE /nudr-dr/v2/application-data/pfds/:appId
+    purpose: 组/AnyUE 流量影响数据存取；PFD 数据存取（externalGroupId/anyUeInd 命中或 PFD 写路径触发）
+    evidence: repos/nef/.agent/spec.md §4.1 / §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-004
+    provider_element: smf
+    protocol: SBI (PFD 订阅消费者 + 事件通知发送方)
+    operations:
+      - GET /nnef-pfdmanagement/v1/applications      # SMF 作为消费者调本元素
+      - POST /nnef-pfdmanagement/v1/subscriptions    # SMF 作为消费者调本元素
+      - POST /nnef-callback/v1/notification/smf      # SMF 作为发送方调本元素
+      - POST {pfdSub.NotifyUri}                       # 本元素异步扇出 PFD 变更至 SMF
+    purpose: 与 SMF 双向交互——SMF 消费本元素 PFD 服务；本元素异步通知 PFD 变更给 SMF；本元素接收并转发 SMF 事件通知
+    evidence: repos/nef/.agent/spec.md §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-005
+    provider_element: AF  # AF / SCS-AS，通常为外部第三方
+    protocol: AF REST (3gpp-traffic-influence / 3gpp-pfd-management, TS 29.522 / 29.122) + 反向 callback
+    operations:
+      - POST {tiSub.NotificationDestination}   # SMF 事件回流后本元素转发 AF
+      - AF/SCS-AS 主动调用本元素 AF API（被动方向）
+    purpose: 能力开放消费者；事件回流的最终接收方
+    evidence: repos/nef/.agent/spec.md §4.1 / §4.2
+    cross_check: external  # AF 为外部第三方，非本系统元素，不参与双向校验
+
+  - if_ext_id: IF-EXT-006
+    provider_element: prometheus
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 metrics server 端口，可选启用）
+    evidence: repos/nef/.agent/spec.md §4.1
+    cross_check: external
+
+# 依赖统计
+summary:
+  total: 6
+  system_internal: 4   # nrf / pcf / udr / smf
+  external: 2          # AF / prometheus
+  pending_cross_check: 4  # 待 nrf/pcf/udr/smf 元素 interfaces.yaml 生成后双向校验

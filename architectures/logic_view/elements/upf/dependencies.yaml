@@ -1,0 +1,97 @@
+element_name: upf
+element_id: upf
+repo_path: repos/go-upf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 upf 元素依赖的外部接口清单。
+# 证据来源：repos/go-upf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+#
+# 重要：upf 是用户面 NF，依赖形态与控制面 NF 不同：
+#   - 上游唯一 NF 依赖是 smf（PFCP 对端），无其他 SBI 调用
+#   - 下游强依赖内核 gtp5g 模块（非系统 NF，是 Linux 内核模块）
+#   - 数据面外部对端为 RAN/DN（非系统 NF）
+# 跨仓依赖双向校验：本文件声明的依赖 smf → smf 元素 interfaces.yaml 应有对应 PFCP 接口（待 smf 元素生成后校验）。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: smf
+    protocol: PFCP over UDP (N4, 3GPP TS 29.244)
+    operations:
+      # smf 提供给 upf 的 PFCP 接口（upf 作为 PFCP Request 发起方调用）
+      - PFCP SessionReportRequest  # upf→smf：下行数据触发 DLDR 上报
+      - PFCP SessionReportRequest  # upf→smf：用量上报 USAR（含 PERIO 周期触发）
+      - PFCP HeartbeatRequest      # upf→smf：心跳保活（可选方向，主要由 smf 主动发起）
+    purpose: |
+      smf 是 upf 的唯一 NF 上游：
+      1. smf 作为 PFCP 主动方下发 PDR/FAR/QER/URR/BAR 规则（AssociationSetup/SessionEst/Mod/Del/Heartbeat）；
+      2. upf 作为 PFCP 主动方上报 DLDR（下行不可达触发 Paging）与 USAR（用量测量）。
+      双向 PFCP 信令是 upf 唯一的 NF 间通信。
+    evidence: repos/go-upf/.agent/spec.md §4.1, §4.2
+    cross_check: pending  # 待 smf 元素 interfaces.yaml 生成后双向校验
+    note: |
+      与控制面 NF（如 amf）依赖 nrf/ausf/udm/smf 多个 NF 不同，upf 不调用 SBI，
+      没有 NRF 注册与发现需求（PFCP NodeID 由 smf 侧静态配置），
+      因此本元素 NF 间依赖极简，仅 smf 一项。
+
+  - if_ext_id: IF-EXT-002
+    provider_element: gtp5g_kernel_module
+    protocol: Generic Netlink (Linux netlink)
+    operations:
+      - 创建 gtp5g 网络设备（OpenGtp5gLink）
+      - 添加路由到 gtp5g 链路（按 DnnList.Cidr）
+      - 下发 PDR/FAR/QER/URR/BAR 规则（netlink Attrs）
+      - 主动查询 URR 计量（QueryURR）
+      - 接收 BUFF/NOCP 上行通知（buffnetlink）
+    version_constraint: "[0.9.5, 0.11.0)"
+    purpose: |
+      用户面数据转发引擎。upf 用户态进程仅做 PFCP 信令翻译；
+      实际报文转发（N3 解封 → 路由 → N6 / N9 再封 → 发 RAN）全部在内核态由 gtp5g 完成。
+      启动时强制校验内核模块版本，不在兼容区间则拒绝运行。
+    evidence: repos/go-upf/.agent/spec.md §4.1, design.md §12.1
+    cross_check: external  # 非系统内 NF，是 Linux 内核模块，不参与 NF 间双向校验
+
+  - if_ext_id: IF-EXT-003
+    provider_element: RAN  # gNB，非本系统元素
+    protocol: GTP-U over UDP (N3, 3GPP TS 29.281)
+    operations:
+      - GTP-U T-PDU 双向（上行 gNB→UPF 解封；下行 UPF→gNB 封装）
+    purpose: N3 接口用户面隧道对端（通过内核 gtp5g 交互，本元素用户态不直接处理）
+    evidence: repos/go-upf/.agent/spec.md §4.1
+    cross_check: external  # 非系统内元素
+
+  - if_ext_id: IF-EXT-004
+    provider_element: DN  # Data Network，非本系统元素
+    protocol: Raw IP (N6)
+    operations:
+      - 上行：UPF→DN（内核路由直出，无 GTP 封装）
+      - 下行：DN→UPF（内核接收，匹配 PDR 触发 FAR/BUFF/NOCP）
+    purpose: N6 接口数据网络出口
+    evidence: repos/go-upf/.agent/spec.md §4.1
+    cross_check: external
+
+  - if_ext_id: IF-EXT-005
+    provider_element: upf  # 其他 UPF 实例，自反依赖
+    protocol: GTP-U over UDP (N9)
+    operations:
+      - GTP-U T-PDU 双向（多 UPF 串联场景）
+    purpose: N9 接口 UPF↔UPF 用户面隧道（可选，仅在多 UPF 拓扑下使用）
+    evidence: repos/go-upf/.agent/spec.md §4.1（IfInfo.Type=N9）
+    cross_check: self  # 自反依赖
+
+# 依赖统计
+summary:
+  total: 5
+  system_nf_internal: 1     # smf（唯一 NF 间依赖）
+  system_self_reference: 1  # upf 自身（N9）
+  external_kernel: 1        # gtp5g 内核模块
+  external_systems: 2       # RAN / DN
+  pending_cross_check: 1    # 待 smf 元素 interfaces.yaml 生成
+
+# 与控制面 NF 依赖形态对比
+contrast_with_control_plane_nf:
+  amf_dependencies: 7 个系统内 NF（nrf/ausf/udm/smf/pcf/nssf/amf）+ 3 个外部系统
+  upf_dependencies: 1 个系统内 NF（smf）+ 1 个内核模块 + 3 个数据面对端
+  key_difference: |
+    upf 不接入 NRF 服务发现（PFCP NodeID 由 smf 静态配置），
+    不调用 SBI，不依赖 UDM/PCF/AUSF；用户面 NF 的依赖图本质上是 1:1（与 smf）+ 内核模块 + 数据面对端。

@@ -1,0 +1,140 @@
+element_name: udr
+element_id: udr
+repo_path: repos/udr
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 udr 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/udr/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # Nudr_DataRepository 服务组 - Subscription Data
+  - if_id: IF-001
+    if_name: Nudr_DR Subscription Data
+    protocol: SBI (Nudr_DataRepository, HTTP/2 + JSON + TLS)
+    direction: provided
+    summary: UE 订阅档案 CRUD（AM/SM/SMS Management/Trace/Operator Specific/Identity 等子集合）
+    contract_ref: repos/udr/.agent/interfaces.md §2.1
+
+  - if_id: IF-002
+    if_name: Nudr_DR AMF Context
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: AMF 3GPP / Non-3GPP 接入登记上下文 PUT/PATCH/GET
+    contract_ref: repos/udr/.agent/interfaces.md §2.2 §2.3
+
+  - if_id: IF-003
+    if_name: Nudr_DR SMF Registration
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: SMF 登记上下文集合与单文档 CRUD
+    contract_ref: repos/udr/.agent/interfaces.md §2.1
+
+  - if_id: IF-004
+    if_name: Nudr_DR SMSF Registration
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 3GPP/Non-3GPP SMSF 登记上下文 CRUD
+    contract_ref: repos/udr/.agent/interfaces.md §2.1
+
+  - if_id: IF-005
+    if_name: Nudr_DR Authentication Data
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 鉴权数据查询/更新、Authentication Status、Auth SoR
+    contract_ref: repos/udr/.agent/interfaces.md §2.1
+
+  # Policy Data 服务组
+  - if_id: IF-006
+    if_name: Nudr_DR Policy Data
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 策略数据 CRUD（UE/AM/SM/BDT/Sponsor Connectivity/Plmn UE Policy 等）
+    contract_ref: repos/udr/.agent/interfaces.md §2.2 §2.6
+
+  # Application Data 服务组
+  - if_id: IF-007
+    if_name: Nudr_DR Application Data
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 应用数据 CRUD（PFD/Influence Data/BDT/Service Parameter/IPTV）
+    contract_ref: repos/udr/.agent/interfaces.md §2.3 §2.4
+
+  # Exposure Data 服务组
+  - if_id: IF-008
+    if_name: Nudr_DR Exposure Data
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: EE 订阅集合与单文档、AMF Subscription Info、组订阅
+    contract_ref: repos/udr/.agent/interfaces.md §2.4 §2.7
+
+  - if_id: IF-009
+    if_name: Nudr_DR SDM Subscription
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: Subscriber Data Management 订阅集合与文档
+    contract_ref: repos/udr/.agent/interfaces.md §2.1
+
+  # Subs-to-Notify
+  - if_id: IF-010
+    if_name: Nudr_DR Subs-to-Notify
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 数据变更订阅注册（POST/PUT/DELETE）
+    contract_ref: repos/udr/.agent/interfaces.md §2.5
+
+  # Shared Data
+  - if_id: IF-011
+    if_name: Nudr_DR Shared Data
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 共享数据检索（GET）
+    contract_ref: repos/udr/.agent/interfaces.md §2.10
+
+  - if_id: IF-012
+    if_name: Nudr_DR Parameter Provision
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 参数提供文档 CRUD（Provisioned Parameter Data）
+    contract_ref: repos/udr/.agent/interfaces.md §2.1
+
+  - if_id: IF-013
+    if_name: Nudr_DR Identity/ODB Query
+    protocol: SBI (Nudr_DataRepository)
+    direction: provided
+    summary: 按 SUPI/GPSI 查询身份与 ODB 数据
+    contract_ref: repos/udr/.agent/interfaces.md §2.1
+
+  # 主动外呼回调
+  - if_id: IF-014
+    if_name: Data Change Notification
+    protocol: HTTP-Callback (UDR -> 订阅方 notification URI)
+    direction: outbound
+    summary: 数据变更时异步向订阅方推送 Data Change / Policy Data Change / Influence Data Change 通知
+    contract_ref: repos/udr/.agent/interfaces.md §2.5
+
+  # 架构占位接口（未实现，返回 501）
+  - if_id: IF-015
+    if_name: Nudr_GroupId-Map
+    protocol: SBI (Nudr_GroupId-Map)
+    direction: provided
+    summary: NF Group ID 映射查询（架构占位，未实现）
+    contract_ref: repos/udr/.agent/interfaces.md §2.8
+
+  - if_id: IF-016
+    if_name: Nhss_IMS_SDM
+    protocol: SBI (Nhss_IMS_SDM)
+    direction: provided
+    summary: HSS IMS SDM 数据查询/订阅（架构占位，未实现）
+    contract_ref: repos/udr/.agent/interfaces.md §2.9
+
+  # Metrics
+  - if_id: IF-017
+    if_name: Metrics Scrape
+    protocol: HTTP scrape (Prometheus)
+    direction: provided
+    summary: 指标暴露（独立 metrics server 端口，默认 9091）
+    contract_ref: repos/udr/.agent/spec.md §2.1
+
+full_contract_index: repos/udr/.agent/interfaces.md

@@ -1,0 +1,89 @@
+element_name: chf
+element_id: chf
+repo_path: repos/chf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 chf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/chf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # Nchf_ConvergedCharging 服务组（融合计费，核心）
+  - if_id: IF-001
+    if_name: ChargingDataCreate
+    protocol: SBI (Nchf_ConvergedCharging, HTTP/2 + JSON + TLS)
+    direction: provided
+    summary: 消费 NF 首次发起计费会话，开 CDR 与首次配额预留
+    contract_ref: repos/chf/.agent/interfaces.md §2.1
+
+  - if_id: IF-002
+    if_name: ChargingDataUpdate
+    protocol: SBI (Nchf_ConvergedCharging)
+    direction: provided
+    summary: 周期/事件用量上报与再授权，可触发 partial CDR 切分
+    contract_ref: repos/chf/.agent/interfaces.md §2.2
+
+  - if_id: IF-003
+    if_name: ChargingDataRelease
+    protocol: SBI (Nchf_ConvergedCharging)
+    direction: provided
+    summary: 会话结束，关 CDR 落盘
+    contract_ref: repos/chf/.agent/interfaces.md §2.3
+
+  - if_id: IF-004
+    if_name: RechargeGet
+    protocol: SBI (Nchf_ConvergedCharging 内部)
+    direction: provided
+    summary: 充值通道健康探测占位
+    contract_ref: repos/chf/.agent/interfaces.md §2.4
+
+  - if_id: IF-005
+    if_name: RechargePut
+    protocol: SBI (Nchf_ConvergedCharging 内部)
+    direction: provided
+    summary: 触发 (UE, RatingGroup) 配额从 DEBIT 恢复 RESERVE，并回调 SMF 重授权
+    contract_ref: repos/chf/.agent/interfaces.md §2.5
+
+  # Nchf_OfflineOnlyCharging 服务组（骨架，501 Not Implemented）
+  - if_id: IF-006
+    if_name: OfflineOnlyCharging
+    protocol: SBI (Nchf_OfflineOnlyCharging)
+    direction: provided
+    summary: 离线计费协议占位（Create/Update/Release 均返回 501）
+    contract_ref: repos/chf/.agent/interfaces.md §2.6
+
+  # Nchf_SpendingLimitControl 服务组（骨架，501 Not Implemented）
+  - if_id: IF-007
+    if_name: SpendingLimitControl
+    protocol: SBI (Nchf_SpendingLimitControl)
+    direction: provided
+    summary: 限额控制协议占位（订阅 Create/Update/Delete 均返回 501）
+    contract_ref: repos/chf/.agent/interfaces.md §2.7
+
+  # 内嵌 Diameter Rf：Rating Function Server
+  - if_id: IF-008
+    if_name: RatingFunction
+    protocol: Diameter Rf over TCP/TLS (Application=Re_interface)
+    direction: provided
+    summary: 内嵌资费计算服务端，处理 Service Usage Request（SUR/SUA），从 MongoDB 取 tariff
+    contract_ref: repos/chf/.agent/interfaces.md §2.8
+
+  # 内嵌 Diameter Ro：Account Balance Management Function Server
+  - if_id: IF-009
+    if_name: ABMFCreditControl
+    protocol: Diameter Ro over TCP/TLS (RFC 4006, Application=Re_interface)
+    direction: provided
+    summary: 内嵌账户余额管理服务端，处理 Credit Control Request（CCR/CCA），对 MongoDB quota 扣减/退还
+    contract_ref: repos/chf/.agent/interfaces.md §2.9
+
+  # 内嵌 CGF FTP
+  - if_id: IF-010
+    if_name: CGF-FTP
+    protocol: FTP over TCP (可选 TLS)
+    direction: provided
+    summary: 内嵌 Charging Gateway Function FTP 服务，接收/转交本地 CDR 文件给计费域
+    contract_ref: repos/chf/.agent/interfaces.md §2.10
+
+# 完整接口索引（含 3 个 SBI 服务组 + 2 个 Diameter 接口 + FTP）见 repos/chf/.agent/spec.md §3 与 .agent/interfaces.md §2
+full_contract_index: repos/chf/.agent/interfaces.md

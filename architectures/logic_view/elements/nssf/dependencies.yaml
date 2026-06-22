@@ -1,0 +1,47 @@
+element_name: nssf
+element_id: nssf
+repo_path: repos/nssf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 nssf 元素依赖的外部接口清单。
+# 证据来源：repos/nssf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement, HTTP/2 + JSON + TLS)
+    operations:
+      - POST /nnrf-nfm/v1/nf-instances/{nfInstanceId}   # NF 实例注册（启动期阻塞重试至成功或 ctx.Done）
+      - DELETE /nnrf-nfm/v1/nf-instances/{nfInstanceId} # NF 实例注销（停机/panic 路径）
+    purpose: NSSF 启动时向 NRF 注册 NfProfile（NfType=NSSF），关闭/panic 时优雅注销；OAuth2 启用与否由注册响应 CustomInfo.oauth2 动态决定
+    evidence: repos/nssf/.agent/spec.md §4.1 / §4.2
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: amf
+    protocol: 反向调用关系（AMF → NSSF）
+    operations:
+      - 无（AMF 是本元素 SBI 接口的消费者，本元素不主动调用 AMF）
+    purpose: 架构语义依赖声明——AMF 调用本元素的 Nnssf_NSSelection 与 Nnssf_NSSAIAvailability；用于跨仓双向校验本元素对应 amf 元素 dependencies.yaml 中 IF-EXT-006 nssf 条目
+    evidence: repos/nssf/.agent/spec.md §4.2 / repos/amf/dependencies.yaml IF-EXT-006
+    cross_check: confirmed  # amf 元素 dependencies.yaml IF-EXT-006 已声明对 nssf 的依赖
+    relation: inbound_consumer
+
+  - if_ext_id: IF-EXT-003
+    provider_element: prometheus
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 指标暴露（独立 metrics server 端口，默认 9091 https，可配置启用）
+    evidence: repos/nssf/.agent/spec.md §2.2.5 / design.md §11.5
+    cross_check: external  # 非系统内元素，不参与双向校验
+
+# 依赖统计
+summary:
+  total: 3
+  system_internal_outbound: 1   # nrf（本元素主动调用）
+  system_internal_inbound: 1    # amf（消费者，反向语义依赖）
+  external: 1                   # prometheus
+  pending_cross_check: 1        # 待 nrf 元素 interfaces.yaml 生成

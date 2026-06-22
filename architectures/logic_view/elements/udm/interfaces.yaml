@@ -1,0 +1,239 @@
+element_name: udm
+element_id: udm
+repo_path: repos/udm
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 udm 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/udm/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+# 仅列举本元素已落地实现的接口；NotImplemented (501) 占位路由不进入架构层接口清单。
+
+provided_interfaces:
+  # Nudm_UEAuthentication 服务组
+  - if_id: IF-001
+    if_name: GenerateAuthData
+    protocol: SBI (Nudm_UEAuthentication, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: 为 AUSF 生成 5G-AKA 鉴权向量（含 AUTS 重同步分支）
+    contract_ref: repos/udm/.agent/interfaces.md §2.1.1
+
+  - if_id: IF-002
+    if_name: ConfirmAuth
+    protocol: SBI (Nudm_UEAuthentication)
+    direction: provided
+    summary: AUSF 鉴权完成事件落库
+    contract_ref: repos/udm/.agent/interfaces.md §2.1.2
+
+  # Nudm_SDM 服务组（v2）
+  - if_id: IF-003
+    if_name: GetAmData
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 查询 AM 订阅数据（AMF 注册流程）
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.1
+
+  - if_id: IF-004
+    if_name: GetSmData
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 查询 SM 订阅数据（SMF PDU 会话建立）
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.2
+
+  - if_id: IF-005
+    if_name: GetNssai
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 查询订阅 NSSAI
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.3
+
+  - if_id: IF-006
+    if_name: GetSmfSelectData
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 查询 SMF 选择辅助数据
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.4
+
+  - if_id: IF-007
+    if_name: GetTraceData
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 查询 Trace 配置
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.7
+
+  - if_id: IF-008
+    if_name: GetUeContextInSmfData
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 查询 SMF 中 UE 上下文视图
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.6
+
+  - if_id: IF-009
+    if_name: GetSupi
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 多数据集合并查询（取 SUPI/GPSI 等）
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.5
+
+  - if_id: IF-010
+    if_name: GetSharedData
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 查询共享订阅数据
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.12
+
+  - if_id: IF-011
+    if_name: SubscribeSdm
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 订阅 UE 订阅数据变更
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.8
+
+  - if_id: IF-012
+    if_name: UnsubscribeSdm
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 取消订阅数据变更
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.9
+
+  - if_id: IF-013
+    if_name: ModifySdmSubscription
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 修改订阅数据变更
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.10
+
+  - if_id: IF-014
+    if_name: SubscribeSharedData
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: 订阅共享数据变更
+    contract_ref: repos/udm/.agent/interfaces.md §2.2
+
+  - if_id: IF-015
+    if_name: GetIdTranslationResult
+    protocol: SBI (Nudm_SDM v2)
+    direction: provided
+    summary: GPSI→SUPI 反解析
+    contract_ref: repos/udm/.agent/interfaces.md §2.2.15
+
+  # Nudm_UECM 服务组
+  - if_id: IF-016
+    if_name: RegistrationAmf3gppAccess
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: AMF 3GPP 接入注册写入
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.1
+
+  - if_id: IF-017
+    if_name: GetAmf3gppAccess
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: 查询 AMF 3GPP 注册
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.2
+
+  - if_id: IF-018
+    if_name: UpdateAmf3gppAccess
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: 更新 AMF 3GPP 注册
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.5
+
+  - if_id: IF-019
+    if_name: RegistrationAmfNon3gppAccess
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: AMF Non-3GPP 接入注册
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.4
+
+  - if_id: IF-020
+    if_name: GetAmfNon3gppAccess
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: 查询 AMF Non-3GPP 注册
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.3
+
+  - if_id: IF-021
+    if_name: UpdateAmfNon3gppAccess
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: 更新 AMF Non-3GPP 注册
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.5
+
+  - if_id: IF-022
+    if_name: RegistrationSmfRegistrations
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: SMF PDU 会话级注册写入
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.7
+
+  - if_id: IF-023
+    if_name: DeregistrationSmfRegistrations
+    protocol: SBI (Nudm_UECM)
+    direction: provided
+    summary: SMF PDU 会话级反注册
+    contract_ref: repos/udm/.agent/interfaces.md §2.3.7
+
+  # Nudm_EE 服务组
+  - if_id: IF-024
+    if_name: CreateEeSubscription
+    protocol: SBI (Nudm_EE)
+    direction: provided
+    summary: 创建 UE 事件暴露订阅
+    contract_ref: repos/udm/.agent/interfaces.md §2.4.1
+
+  - if_id: IF-025
+    if_name: UpdateEeSubscription
+    protocol: SBI (Nudm_EE)
+    direction: provided
+    summary: 更新事件暴露订阅
+    contract_ref: repos/udm/.agent/interfaces.md §2.4.2
+
+  - if_id: IF-026
+    if_name: DeleteEeSubscription
+    protocol: SBI (Nudm_EE)
+    direction: provided
+    summary: 删除事件暴露订阅
+    contract_ref: repos/udm/.agent/interfaces.md §2.4.3
+
+  # Nudm_PP 服务组
+  - if_id: IF-027
+    if_name: UpdatePpData
+    protocol: SBI (Nudm_PP)
+    direction: provided
+    summary: NEF 参数注入 PP-Data
+    contract_ref: repos/udm/.agent/interfaces.md §2.5.1
+
+  - if_id: IF-028
+    if_name: Create5GMBSGroup
+    protocol: SBI (Nudm_PP)
+    direction: provided
+    summary: 5G MBS 组参数创建
+    contract_ref: repos/udm/.agent/interfaces.md §2.5.2
+
+  - if_id: IF-029
+    if_name: Create5GVNGroup
+    protocol: SBI (Nudm_PP)
+    direction: provided
+    summary: 5G VN 组参数创建
+    contract_ref: repos/udm/.agent/interfaces.md §2.5.3
+
+  - if_id: IF-030
+    if_name: CreatePPDataEntry
+    protocol: SBI (Nudm_PP)
+    direction: provided
+    summary: AF 实例级 PP 参数条目写入
+    contract_ref: repos/udm/.agent/interfaces.md §2.5.4
+
+  # Nudm Callback 服务组
+  - if_id: IF-031
+    if_name: DataChangeNotificationToNF
+    protocol: HTTP-Callback (Nudm Callback)
+    direction: provided
+    summary: 接收 UDR 数据变更并转发给已订阅 NF
+    contract_ref: repos/udm/.agent/interfaces.md §2.6.1
+
+# NotImplemented 占位说明：仓内保留 nudm-mt / nudm-niddau / nudm-rsds / nudm-ssau / nudm-ueid
+# 五组 URI 前缀路由，handler 当前返回 501，不在 ServiceNameList 中声明，因此不计入架构层接口清单。
+# 详见 repos/udm/.agent/spec.md §3 与 .agent/interfaces.md §2.7–§2.11。
+full_contract_index: repos/udm/.agent/interfaces.md

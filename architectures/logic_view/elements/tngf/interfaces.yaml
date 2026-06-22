@@ -1,0 +1,79 @@
+element_name: tngf
+element_id: tngf
+repo_path: repos/tngf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 tngf 元素对外提供的接口索引（摘要层）。
+# tngf 非 SBI 网元：对外接口为 RADIUS / IKEv2 / IPsec / NAS-TCP / GRE / NGAP / GTP-U / Metrics。
+# 完整契约（协议字段/消息过程/错误码）见 repos/tngf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # ---- 接入侧（UE/TWAN）----
+  - if_id: IF-001
+    if_name: RADIUS 接入鉴权端点
+    protocol: RADIUS over UDP (RFC 2865/3579)
+    direction: provided
+    summary: 接收 TWAN/AP 转发的 Access-Request，承载 EAP-5G 主鉴权；含 Message-Authenticator 强制校验
+    contract_ref: repos/tngf/.agent/interfaces.md §2.1, §2.2
+
+  - if_id: IF-002
+    if_name: IKEv2 协商端点
+    protocol: IKEv2 over UDP/500, UDP/4500 (RFC 7296)
+    direction: provided
+    summary: 与 UE 协商 IKE_SA / Child SA / INFORMATIONAL，建立 IPsec 通道
+    contract_ref: repos/tngf/.agent/interfaces.md §2.3
+
+  - if_id: IF-003
+    if_name: IPsec ESP 数据通道
+    protocol: IPsec ESP (RFC 4303) via XFRM netlink
+    direction: provided
+    summary: UE↔TNGF 控制/用户面加密通道，默认接口名 ipsec，id=7，UP 通过偏移分配额外 SA
+    contract_ref: repos/tngf/.agent/interfaces.md §2.4
+
+  - if_id: IF-004
+    if_name: NAS over TCP (NWt-cp)
+    protocol: TCP (经 IPsec 内层)
+    direction: provided
+    summary: UE 与 TNGF 间内层 NAS 信令承载，TNGF 收到后转 NGAP UplinkNASTransport
+    contract_ref: repos/tngf/.agent/interfaces.md §2.5
+
+  - if_id: IF-005
+    if_name: NWt 用户面 GRE 端点
+    protocol: GRE + IPv4 over IPsec
+    direction: provided
+    summary: UE 上行用户面通过 GRE（含 QFI）封装经 IPsec 进入 TNGF，再转 GTP-U
+    contract_ref: repos/tngf/.agent/interfaces.md §2.6
+
+  # ---- 核心网侧 ----
+  - if_id: IF-006
+    if_name: NGAP / N2
+    protocol: NGAP over SCTP (3GPP TS 38.413, PPID=60)
+    direction: provided  # tngf 作为 N2 端点（AMF 视角的 RAN 节点），双向收发
+    summary: 与 AMF 控制面：NGSetup、InitialContextSetup、PDUSessionResource*、DL/UL NAS、UEContextRelease、AMFConfigurationUpdate、Overload Start/Stop 等
+    contract_ref: repos/tngf/.agent/interfaces.md §2.7
+
+  - if_id: IF-007
+    if_name: GTP-U / N3
+    protocol: GTP-U over UDP (3GPP TS 29.281, port 2152)
+    direction: provided  # tngf 作为 N3 隧道端点
+    summary: 与 UPF 用户面隧道；TEID 由 tngf 在 [1, MaxUint32] 范围分配
+    contract_ref: repos/tngf/.agent/interfaces.md §2.8
+
+  # ---- 运维侧 ----
+  - if_id: IF-008
+    if_name: Prometheus Metrics
+    protocol: HTTP(S) GET
+    direction: provided
+    summary: 向 Prometheus 暴露 NGAP 与进程指标，默认绑定 :9091，命名空间 free5gc，可独立 mTLS
+    contract_ref: repos/tngf/.agent/interfaces.md §2.9
+
+# tngf 非 SBI 元素提示
+sbi_compliant: false
+sbi_note: |
+  tngf 不提供任何 SBI/REST HTTP 服务接口。架构上它在接入侧是协议网关（RADIUS/IKE/IPsec/NWt），
+  在核心网侧通过 NGAP/N2 与 AMF 交互、GTP-U/N3 与 UPF 交互。Prometheus /metrics 仅为运维拉取端点，
+  不属于服务化接口。
+
+full_contract_index: repos/tngf/.agent/interfaces.md

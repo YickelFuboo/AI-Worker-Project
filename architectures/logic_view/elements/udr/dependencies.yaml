@@ -1,0 +1,91 @@
+element_name: udr
+element_id: udr
+repo_path: repos/udr
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 udr 元素依赖的外部接口清单。
+# 证据来源：repos/udr/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement, HTTP/2 + JSON + TLS)
+    operations:
+      - POST /nnrf-nfm/v1/nf-instances/{nfId}   # NF 实例注册（启动期）
+      - DELETE /nnrf-nfm/v1/nf-instances/{nfId} # NF 实例注销（终止期）
+    purpose: UDR 启动时注册 NF 实例，终止时反注册；接收 NRF 下发的 OAuth2 启用标志
+    evidence: repos/udr/.agent/spec.md §4.1, §4.2
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFDiscovery)
+    operations:
+      - GET /nnrf-disc/v1/nf-instances
+    purpose: 备用 NF 发现入口（当前 UDR 出站调用稀少，主要为对称能力保留）
+    evidence: repos/udr/.agent/spec.md §4.2
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-003
+    provider_element: nrf
+    protocol: HTTP (OAuth2 token issuer)
+    operations:
+      - 入站 token 校验（按 ServiceName）
+      - 出站 token 获取（UDR -> NRF 自身调用前置）
+    purpose: 入站请求 OAuth2 token 校验 + 出站调用 token 注入；NRF 作为 token issuer
+    evidence: repos/udr/.agent/spec.md §4.1
+    cross_check: pending
+
+  - if_ext_id: IF-EXT-004
+    provider_element: MongoDB  # 外部基础设施，非本系统 NF 元素
+    protocol: TCP (mongo wire protocol, 7.0)
+    operations:
+      - mongoapi.RestfulAPIGetOne / GetMany
+      - mongoapi.RestfulAPIJSONPatch
+      - mongoapi.RestfulAPIDeleteOne / DeleteMany
+      - mongoapi.RestfulAPIPutOne
+    purpose: 所有 SubscriptionData/PolicyData/ApplicationData/ExposureData/Authentication 数据集的持久化后端
+    evidence: repos/udr/.agent/spec.md §4.1
+    cross_check: external  # 外部基础设施，不参与系统内元素双向校验
+
+  - if_ext_id: IF-EXT-005
+    provider_element: prometheus  # 监控系统，非本系统 NF 元素
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics（被 prometheus 主动抓取）
+    purpose: 指标暴露（独立 metrics server 端口，默认 9091；configuration.metrics.enable 控制）
+    evidence: repos/udr/.agent/spec.md §2.2.5, §4.1
+    cross_check: external
+
+# 反向依赖（数据消费方）：本节仅作上下文说明，udr 为被依赖方，不在本仓声明出站依赖
+# 这些 NF 是 udr 的"上游消费者"，它们的依赖应在各自 dependencies.yaml 中声明
+consumers_of_udr:
+  - consumer_element: udm
+    consumed_interfaces: [IF-001, IF-002, IF-003, IF-004, IF-005, IF-009, IF-013]
+    purpose: UDM 处理 SDM/UECM/AUTH 查询时落地到 UDR
+    evidence: repos/udr/.agent/spec.md §4.2
+
+  - consumer_element: pcf
+    consumed_interfaces: [IF-006, IF-010]
+    purpose: PCF 进行 UE/AM/SM/BDT 策略决策时读写策略数据
+    evidence: repos/udr/.agent/spec.md §4.2
+
+  - consumer_element: nef
+    consumed_interfaces: [IF-007, IF-010, IF-014]
+    purpose: NEF 处理应用数据（PFD/Influence）暴露时读写
+    evidence: repos/udr/.agent/spec.md §4.2
+
+  - consumer_element: chf
+    consumed_interfaces: [IF-001, IF-013]
+    purpose: 计费侧数据获取
+    evidence: repos/udr/.agent/spec.md §4.2
+
+# 依赖统计
+summary:
+  total: 5
+  system_internal: 3  # nrf (NF Management / NF Discovery / OAuth2 token issuer，同一元素三种用途)
+  external: 2         # MongoDB / prometheus
+  pending_cross_check: 3  # 待 nrf 元素 interfaces.yaml 生成
+  consumers_count: 4  # udm / pcf / nef / chf 反向引用 udr

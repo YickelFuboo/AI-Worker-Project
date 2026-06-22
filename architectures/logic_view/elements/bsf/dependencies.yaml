@@ -1,0 +1,71 @@
+element_name: bsf
+element_id: bsf
+repo_path: repos/bsf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 bsf 元素依赖的外部接口清单。
+# 证据来源：repos/bsf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
+# 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
+
+external_dependencies:
+  - if_ext_id: IF-EXT-001
+    provider_element: nrf
+    protocol: SBI (Nnrf_NFManagement, HTTP/2 + JSON)
+    operations:
+      - PUT /nnrf-nfm/v1/nf-instances/{nfInstanceId}   # NF 实例注册（启动时，2s 间隔无限重试）
+      - DELETE /nnrf-nfm/v1/nf-instances/{nfInstanceId}  # NF 实例反注册（终止时）
+    purpose: BSF 启动时向 NRF 注册自身实例（声明 Nbsf-management 服务，API v1，版本 1.5.0），终止时反注册；使 PCF/SMF/NEF/AF 可发现本元素
+    evidence: repos/bsf/.agent/spec.md §4.1
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+
+  - if_ext_id: IF-EXT-002
+    provider_element: MongoDB  # 外部基础设施
+    protocol: mongo wire protocol
+    operations:
+      - Connect / Disconnect
+      - CRUD on collections (pcfBindings 等)
+      - 启动时全量回载内存缓存
+    purpose: 绑定数据持久化（PCF/UE/MBS 三类绑定）；可选，缺失时降级为纯内存运行
+    evidence: repos/bsf/.agent/spec.md §4.1
+    cross_check: external  # 外部基础设施，非系统内 NF 元素
+
+  - if_ext_id: IF-EXT-003
+    provider_element: prometheus  # 外部监控系统
+    protocol: HTTP scrape
+    operations:
+      - GET /metrics
+    purpose: 业务指标暴露（绑定计数 Gauge、绑定事件 Counter、绑定时延 Histogram、PCF Discovery Counter）；独立端口（默认 9091，默认 mTLS）
+    evidence: repos/bsf/.agent/spec.md §4.1
+    cross_check: external
+
+# 注意：以下为 bsf 的**消费方**（被调用方向），不是 bsf 出站依赖，记录于此供跨仓影响分析参考。
+# bsf 本身不主动调用 PCF/SMF/NEF/AF，而是被它们调用 Nbsf_Management 接口。
+consumers_for_reference:
+  - consumer_element: pcf
+    interfaces_consumed:
+      - IF-001 CreatePCFBinding   # PDU 会话建立时
+      - IF-004 UpdateIndPCFBinding  # 会话修改时
+      - IF-005 DeleteIndPCFBinding  # 会话释放时
+      - IF-006 CreatePCFforUEBinding
+      - IF-010 CreatePCFMbsBinding
+    evidence: repos/bsf/.agent/spec.md §4.2
+
+  - consumer_element: smf
+    interfaces_consumed:
+      - IF-002 GetPCFBindings  # 策略请求前发现 PCF
+    evidence: repos/bsf/.agent/spec.md §4.2
+
+  - consumer_element: nef
+    interfaces_consumed:
+      - IF-002 GetPCFBindings
+      - IF-014 CreateIndividualSubcription  # AF 跟踪 PCF 切换
+    evidence: repos/bsf/.agent/spec.md §4.2
+
+# 依赖统计
+summary:
+  total: 3
+  system_internal: 1   # nrf
+  external: 2          # MongoDB / prometheus
+  pending_cross_check: 1  # 待 nrf 元素 interfaces.yaml 生成
+  consumers_count: 3   # 仅供参考：被 pcf/smf/nef 消费

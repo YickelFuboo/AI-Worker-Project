@@ -1,0 +1,85 @@
+element_name: pcf
+element_id: pcf
+repo_path: repos/pcf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 pcf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/pcf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应；服务组归属对应 3GPP TS。
+
+provided_interfaces:
+  # Npcf_SMPolicyControl 服务组（TS 29.512）
+  - if_id: IF-001
+    if_name: Npcf_SMPolicyControl
+    protocol: SBI (Npcf_SMPolicyControl, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: SM 策略关联生命周期（POST/GET/UPDATE/DELETE sm-policies）
+    contract_ref: repos/pcf/.agent/interfaces.md §2.1
+
+  # Npcf_AMPolicyControl 服务组（TS 29.507）
+  - if_id: IF-002
+    if_name: Npcf_AMPolicyControl
+    protocol: SBI (Npcf_AMPolicyControl)
+    direction: provided
+    summary: AM 策略关联创建/查询/删除与事件触发器上报
+    contract_ref: repos/pcf/.agent/interfaces.md §2.2
+
+  # Npcf_UEPolicyControl 服务组
+  - if_id: IF-003
+    if_name: Npcf_UEPolicyControl
+    protocol: SBI (Npcf_UEPolicyControl)
+    direction: provided
+    summary: UE 路由选择策略关联（演化 stub，沿用 AmPolicy handler 派发）
+    contract_ref: repos/pcf/.agent/interfaces.md §2.3
+
+  # Npcf_BDTPolicyControl 服务组（TS 29.554）
+  - if_id: IF-004
+    if_name: Npcf_BDTPolicyControl
+    protocol: SBI (Npcf_BDTPolicyControl)
+    direction: provided
+    summary: BDT 策略创建/查询/更新（PATCH）
+    contract_ref: repos/pcf/.agent/interfaces.md §2.3
+
+  # Npcf_PolicyAuthorization 服务组（TS 29.514）
+  - if_id: IF-005
+    if_name: Npcf_PolicyAuthorization
+    protocol: SBI (Npcf_PolicyAuthorization)
+    direction: provided
+    summary: AF/NEF 应用会话上下文与事件订阅；P-CSCF Restoration
+    contract_ref: repos/pcf/.agent/interfaces.md §2.4
+
+  # Npcf_Callback (UDR) 服务组
+  - if_id: IF-006
+    if_name: Npcf_Callback_UDR
+    protocol: SBI Callback (HTTP/2 + JSON)
+    direction: provided
+    summary: 接收 UDR 策略数据/影响数据变更通知
+    contract_ref: repos/pcf/.agent/interfaces.md §2.6
+
+  # Npcf_Callback (AMF) 服务组
+  - if_id: IF-007
+    if_name: Npcf_Callback_AMF
+    protocol: SBI Callback
+    direction: provided
+    summary: 接收 AMF 状态变更通知（amfstatus）
+    contract_ref: repos/pcf/.agent/interfaces.md §2.6
+
+  # Npcf_EventExposure 服务组（路由组占位）
+  - if_id: IF-008
+    if_name: Npcf_EventExposure
+    protocol: SBI (Npcf_EventExposure)
+    direction: provided
+    summary: 事件暴露（服务路由组占位，后续完善）
+    contract_ref: repos/pcf/.agent/interfaces.md §2
+
+  # Npcf_OAM 运维接口
+  - if_id: IF-009
+    if_name: Npcf_OAM
+    protocol: HTTP (无鉴权)
+    direction: provided
+    summary: 运维查询 AM Policy（按 supi）
+    contract_ref: repos/pcf/.agent/interfaces.md §2.7
+
+# 完整接口契约（含 26+ 路由）见 repos/pcf/.agent/spec.md §3 与 .agent/interfaces.md §2
+full_contract_index: repos/pcf/.agent/interfaces.md

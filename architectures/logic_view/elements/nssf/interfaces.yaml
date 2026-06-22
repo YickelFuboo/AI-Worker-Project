@@ -1,0 +1,66 @@
+element_name: nssf
+element_id: nssf
+repo_path: repos/nssf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 nssf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/nssf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # Nnssf_NSSelection 服务组（资源 URI 前缀：/nnssf-nsselection/v2）
+  - if_id: IF-001
+    if_name: NSSelectionGet
+    protocol: SBI (Nnssf_NSSelection, HTTP/2 + JSON + TLS)
+    direction: provided
+    summary: UE 注册 / PDU 会话流程切片选择查询（输出 Allowed/Configured NSSAI、候选 AMF/AMF Set/NRF AMF Set 或 NsiInformation）
+    contract_ref: repos/nssf/.agent/interfaces.md §2.1
+    authorized_consumers: [AMF, NSSF]
+
+  # Nnssf_NSSAIAvailability 服务组（资源 URI 前缀：/nnssf-nssaiavailability/v1）
+  - if_id: IF-002
+    if_name: NSSAIAvailabilityPut
+    protocol: SBI (Nnssf_NSSAIAvailability)
+    direction: provided
+    summary: AMF 全量上报本 NF 在指定 TA 支持的 S-NSSAI 列表（替换式）
+    contract_ref: repos/nssf/.agent/interfaces.md §2.2
+
+  - if_id: IF-003
+    if_name: NSSAIAvailabilityPatch
+    protocol: SBI (Nnssf_NSSAIAvailability)
+    direction: provided
+    summary: AMF 增量更新 SupportedNssaiAvailabilityData（RFC6902 JSON Patch）
+    contract_ref: repos/nssf/.agent/interfaces.md §2.3
+
+  - if_id: IF-004
+    if_name: NSSAIAvailabilityDelete
+    protocol: SBI (Nnssf_NSSAIAvailability)
+    direction: provided
+    summary: 删除指定 nfId 的 NSSAI 可用性数据
+    contract_ref: repos/nssf/.agent/interfaces.md §2.4
+
+  - if_id: IF-005
+    if_name: NSSAIAvailabilitySubscribe
+    protocol: SBI (Nnssf_NSSAIAvailability)
+    direction: provided
+    summary: 创建切片可用性变更订阅（按 TaiList，返回 SubscriptionId 与初始 AuthorizedNssaiAvailabilityData）
+    contract_ref: repos/nssf/.agent/interfaces.md §2.5
+
+  - if_id: IF-006
+    if_name: NSSAIAvailabilityUnsubscribe
+    protocol: SBI (Nnssf_NSSAIAvailability)
+    direction: provided
+    summary: 按 SubscriptionId 删除订阅
+    contract_ref: repos/nssf/.agent/interfaces.md §2.6
+
+  - if_id: IF-007
+    if_name: HealthCheck
+    protocol: SBI REST (GET)
+    direction: provided
+    summary: 服务前缀根路径健康检查，返回 200 {"status":"Service Available"}
+    contract_ref: repos/nssf/.agent/interfaces.md §2.9
+
+# 未实现接口（占位，返回 501）：NSSAIAvailabilitySubscriptionPatch / NSSAIAvailabilityOptions
+# 详见 repos/nssf/.agent/interfaces.md §2.7 与 §2.8
+full_contract_index: repos/nssf/.agent/interfaces.md

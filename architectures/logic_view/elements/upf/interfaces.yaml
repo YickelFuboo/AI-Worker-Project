@@ -1,0 +1,117 @@
+element_name: upf
+element_id: upf
+repo_path: repos/go-upf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 upf 元素对外提供的接口索引（摘要层）。
+# 完整契约（PFCP MessageType / IE 字段 / Cause 错误码 / 事务序号管理）见 repos/go-upf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+#
+# 重要：upf 是用户面 NF，对外接口为 PFCP（N4 信令面）与 GTP-U（N3/N9 用户面），
+# 不提供 SBI HTTP/REST 接口，与 amf/smf 等控制面 NF 接口形态完全不同。
+
+provided_interfaces:
+  # PFCP N4 心跳服务组
+  - if_id: IF-001
+    if_name: HeartbeatRequest/Response
+    protocol: PFCP (N4, UDP/8805, 3GPP TS 29.244)
+    message_type: 1 / 2
+    direction: provided (被动响应 SMF 请求)
+    summary: N4 链路保活，返回 RecoveryTimeStamp
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.1
+
+  # PFCP N4 关联管理服务组
+  - if_id: IF-002
+    if_name: AssociationSetupRequest/Response
+    protocol: PFCP (N4)
+    message_type: 5 / 6
+    direction: provided
+    summary: SMF↔UPF 关联建立，重复请求按 TS 29.244 删除旧关联及全部会话后重建
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.2
+
+  - if_id: IF-003
+    if_name: AssociationUpdateRequest/Response
+    protocol: PFCP (N4)
+    message_type: 7 / 8
+    direction: provided
+    summary: 关联更新（本元素未实现，仅打印 not supported）
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.3
+    status: not_implemented
+
+  - if_id: IF-004
+    if_name: AssociationReleaseRequest/Response
+    protocol: PFCP (N4)
+    message_type: 9 / 10
+    direction: provided
+    summary: 关联释放（本元素未实现）
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.4
+    status: not_implemented
+
+  # PFCP N4 会话管理服务组
+  - if_id: IF-005
+    if_name: SessionEstablishmentRequest/Response
+    protocol: PFCP (N4)
+    message_type: 50 / 51
+    direction: provided
+    summary: 会话建立，下发 PDR/FAR/QER/URR/BAR 规则；三阶段 Validate→Execute(fail-fast)→Apply
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.5
+
+  - if_id: IF-006
+    if_name: SessionModificationRequest/Response
+    protocol: PFCP (N4)
+    message_type: 52 / 53
+    direction: provided
+    summary: 会话修改（Create/Update/Remove/Query 混合），含互斥校验；执行阶段 best-effort
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.6
+
+  - if_id: IF-007
+    if_name: SessionDeletionRequest/Response
+    protocol: PFCP (N4)
+    message_type: 54 / 55
+    direction: provided
+    summary: 会话删除，回收资源并上报终态 USAReport（USAR_TRIG_TERMR）
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.7
+
+  # PFCP N4 上行上报服务组（UPF 主动）
+  - if_id: IF-008
+    if_name: SessionReportRequest/Response
+    protocol: PFCP (N4)
+    message_type: 56 / 57
+    direction: provided-outbound (UPF→SMF Request；SMF→UPF Response)
+    summary: 主动上报下行数据触发（DLDR，含 PDRID）与用量测量（USAR，含 URRID/URSEQN/Trigger/Volume/Duration）
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.8
+
+  # GTP-U 用户面接口（实际转发由内核 gtp5g 实现）
+  - if_id: IF-009
+    if_name: GTP-U Data (N3)
+    protocol: GTP-U (UDP/2152, 3GPP TS 29.281)
+    direction: provided (数据面，内核态处理)
+    summary: gNB↔UPF 用户面隧道，内核 gtp5g 解封 GTP-U → 路由出 N6（或 N9 再封）
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.9
+    implementation: kernel (gtp5g module)
+
+  - if_id: IF-010
+    if_name: GTP-U Data (N9)
+    protocol: GTP-U (UDP/2152)
+    direction: provided
+    summary: UPF↔UPF 用户面隧道（多 UPF 串联可选），内核 gtp5g 实现
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.9
+    implementation: kernel (gtp5g module)
+
+  - if_id: IF-011
+    if_name: N6 IP Output
+    protocol: Raw IP (无 GTP 封装)
+    direction: provided
+    summary: UPF↔DN 出口，经内核路由直出（启动时按 DnnList.Cidr 添加路由到 gtp5g 链路）
+    contract_ref: repos/go-upf/.agent/interfaces.md §2.9
+    implementation: kernel (Linux routing)
+
+# 关键架构特征
+characteristics:
+  no_sbi: true              # 不提供 SBI HTTP/REST 接口
+  passive_pfcp: true        # PFCP 被动方，由 SMF 发起关联
+  data_plane_in_kernel: true # 用户面数据转发委托内核 gtp5g 模块
+  pfcp_unencrypted: true    # PFCP over UDP 明文，无 TLS/IPSec，依赖网络隔离
+
+full_contract_index: repos/go-upf/.agent/interfaces.md

@@ -1,0 +1,73 @@
+element_name: ausf
+element_id: ausf
+repo_path: repos/ausf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 ausf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/ausf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+
+provided_interfaces:
+  # Nausf_UEAuthentication 服务组（已实现主流程）
+  - if_id: IF-001
+    if_name: UeAuthenticationsPost
+    protocol: SBI (Nausf_UEAuthentication, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: UE 鉴权发起（AMF 调用，按 AuthType 返回 5G-AKA AV 或 EAP-Request/AKA'-Challenge）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.1
+
+  - if_id: IF-002
+    if_name: UeAuthentications5gAkaConfirmation
+    protocol: SBI (Nausf_UEAuthentication)
+    direction: provided
+    summary: 5G-AKA 鉴权确认（AMF 上送 RES*，AUSF 比对 XRES* 并上报 UDM）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.2
+
+  - if_id: IF-003
+    if_name: EapAuthMethod
+    protocol: SBI (Nausf_UEAuthentication)
+    direction: provided
+    summary: EAP-AKA' 鉴权会话推进（AMF 提交 EAP-Response，AUSF 校验 MAC/RES 与子类型）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.3
+
+  # Nausf_UEAuthentication 服务组（路由占位，handler 返回 501 NotImplemented）
+  - if_id: IF-004
+    if_name: UeAuthenticationsDeregister
+    protocol: SBI (Nausf_UEAuthentication)
+    direction: provided
+    summary: 鉴权去注册（路由占位，501）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.9
+
+  - if_id: IF-005
+    if_name: ProseAuthentications
+    protocol: SBI (Nausf_UEAuthentication)
+    direction: provided
+    summary: ProSe 鉴权（路由占位，501）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.6
+
+  - if_id: IF-006
+    if_name: RgAuthentications
+    protocol: SBI (Nausf_UEAuthentication)
+    direction: provided
+    summary: RG（Residential Gateway）鉴权（路由占位，501）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.7
+
+  # Nausf_SoRProtection 服务组（路由占位）
+  - if_id: IF-007
+    if_name: SupiUeSorPost
+    protocol: SBI (Nausf_SoRProtection)
+    direction: provided
+    summary: SoR 保护数据生成（路由占位，501）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.11
+
+  # Nausf_UPUProtection 服务组（路由占位）
+  - if_id: IF-008
+    if_name: SupiUeUpuPost
+    protocol: SBI (Nausf_UPUProtection)
+    direction: provided
+    summary: UPU 保护数据生成（路由占位，501）
+    contract_ref: repos/ausf/.agent/interfaces.md §2.12
+
+# 完整接口索引（含 13 个路由分组）见 repos/ausf/.agent/spec.md §3 与 .agent/interfaces.md §2
+full_contract_index: repos/ausf/.agent/interfaces.md

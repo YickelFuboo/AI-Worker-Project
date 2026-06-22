@@ -1,0 +1,136 @@
+element_name: smf
+element_id: smf
+repo_path: repos/smf
+last_modified: "2026-06-22T12:00:00+08:00"
+last_modified_by: rev-arch-element-extract
+
+# 本文件是 smf 元素对外提供的接口索引（摘要层）。
+# 完整契约（method/path/请求响应模型/错误码）见 repos/smf/.agent/interfaces.md。
+# 接口 ID 与 spec.md §5 一一对应。
+# 注意：smf 与 upf 之间为 PFCP over UDP（N4），属于协议接口，体现在出站，不在本文件（provided）登记。
+
+provided_interfaces:
+  # Nsmf_PDUSession 服务组（/nsmf-pdusession/v1）
+  - if_id: IF-001
+    if_name: CreateSMContext
+    protocol: SBI (Nsmf_PDUSession, HTTP/2 + JSON + mTLS)
+    direction: provided
+    summary: 创建 PDU SM Context（AMF 触发 PDU 会话建立）
+    contract_ref: repos/smf/.agent/interfaces.md §2.1
+
+  - if_id: IF-002
+    if_name: UpdateSMContext
+    protocol: SBI (Nsmf_PDUSession)
+    direction: provided
+    summary: 更新 PDU SM Context（修改/激活/去激活/切换）
+    contract_ref: repos/smf/.agent/interfaces.md §2.2
+
+  - if_id: IF-003
+    if_name: ReleaseSMContext
+    protocol: SBI (Nsmf_PDUSession)
+    direction: provided
+    summary: 释放 PDU SM Context
+    contract_ref: repos/smf/.agent/interfaces.md §2.3
+
+  - if_id: IF-004
+    if_name: RetrieveSMContext
+    protocol: SBI (Nsmf_PDUSession)
+    direction: provided
+    summary: 检索 PDU SM Context（占位，未实现 501）
+    contract_ref: repos/smf/.agent/interfaces.md §2.4
+
+  - if_id: IF-005
+    if_name: SendMoData
+    protocol: SBI (Nsmf_PDUSession)
+    direction: provided
+    summary: MO 数据发送（占位，未实现 501）
+    contract_ref: repos/smf/.agent/interfaces.md §2.1.5
+
+  - if_id: IF-006
+    if_name: PDUSession-H-SMF-Family
+    protocol: SBI (Nsmf_PDUSession)
+    direction: provided
+    summary: H-SMF / V-SMF 跨 SMF 会话族（PostPduSessions/Update/Release/Retrieve/TransferMoData，均占位 501）
+    contract_ref: repos/smf/.agent/interfaces.md §2.5
+
+  # Nsmf_EventExposure 服务组（/nsmf-event-exposure/v1）
+  - if_id: IF-007
+    if_name: EventExposure-Subscriptions
+    protocol: SBI (Nsmf_EventExposure)
+    direction: provided
+    summary: 事件订阅创建/查询/替换/删除（占位族，501 NotImplemented）
+    contract_ref: repos/smf/.agent/interfaces.md §2.9
+
+  # Nsmf_Callback 服务组（/nsmf-callback/v1）
+  - if_id: IF-008
+    if_name: SmPolicyUpdateNotify
+    protocol: HTTP-Callback (Nsmf_Callback, 独立 OAuth 资源域 npcf-smpolicycontrol)
+    direction: provided
+    summary: PCF 推送 SM 策略更新通知
+    contract_ref: repos/smf/.agent/interfaces.md §2.6
+
+  - if_id: IF-009
+    if_name: SmPolicyControlTerminate
+    protocol: HTTP-Callback (Nsmf_Callback)
+    direction: provided
+    summary: PCF 推送 SM 策略终止通知（占位，未实现 501）
+    contract_ref: repos/smf/.agent/interfaces.md §2.7
+
+  - if_id: IF-010
+    if_name: ChargingNotification
+    protocol: HTTP-Callback (Nsmf_Callback, 独立 callback 鉴权域)
+    direction: provided
+    summary: CHF 推送计费触发通知（notifyUri 格式 notify_<smContextRef>）
+    contract_ref: repos/smf/.agent/interfaces.md §2.8
+
+  # Nsmf_OAM 服务组（/nsmf-oam/v1）
+  - if_id: IF-011
+    if_name: GetUEPDUSessionInfo
+    protocol: REST (Nsmf_OAM)
+    direction: provided
+    summary: 运维查询单会话 PDU Session 状态
+    contract_ref: repos/smf/.agent/interfaces.md §2.10
+
+  - if_id: IF-012
+    if_name: GetSMFUserPlaneInfo
+    protocol: REST (Nsmf_OAM)
+    direction: provided
+    summary: 运维查询 SMF 用户面拓扑
+    contract_ref: repos/smf/.agent/interfaces.md §2.11
+
+  # Nsmf_UPI 服务组（free5gc 私有，/nsmf-upi/v1）
+  - if_id: IF-013
+    if_name: UPI-GetUpNodesLinks
+    protocol: REST (Nsmf_UPI 私有)
+    direction: provided
+    summary: 查询 UP Node/Link 配置（用户面拓扑动态可见）
+    contract_ref: repos/smf/.agent/interfaces.md §2.12
+
+  - if_id: IF-014
+    if_name: UPI-PostUpNodesLinks
+    protocol: REST (Nsmf_UPI 私有)
+    direction: provided
+    summary: 替换 UP Node/Link 配置并触发 PFCP 关联
+    contract_ref: repos/smf/.agent/interfaces.md §2.13
+
+  - if_id: IF-015
+    if_name: UPI-DeleteUpNodeLink
+    protocol: REST (Nsmf_UPI 私有)
+    direction: provided
+    summary: 删除 UP Node 链路（仅在 ULCL 禁用时允许）
+    contract_ref: repos/smf/.agent/interfaces.md §2.14
+
+# 协议层接口（非 SBI，不在 provided REST 列表中）
+protocol_interfaces:
+  - protocol: PFCP over UDP (N4, 3GPP TS 29.244)
+    direction: outbound  # smf 作为 CP，向 upf 发起会话控制；upf 发起 Heartbeat/Report
+    peer_element: upf
+    udp_port: 8805
+    note: PFCP 是 smf ↔ upf 协议接口，非服务化 REST，详见 repos/smf/.agent/design.md §8.12 与 spec.md §3 末尾说明
+  - protocol: GSM NAS (N1 SM 子层, 3GPP TS 24.501)
+    direction: bidirectional
+    peer_element: UE (经 amf 透传)
+    note: SMF 解析/构造 PDU Session Establishment/Modification/Release 等 NAS 消息，经 amf 透传
+
+# 完整接口契约索引见 repos/smf/.agent/interfaces.md（含 SBI 14 条 + UPI 3 条，共 §2.1 ~ §2.14）
+full_contract_index: repos/smf/.agent/interfaces.md
