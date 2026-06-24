@@ -3,7 +3,7 @@
 ## 功能描述
 
 为代码仓逆向生成规格与设计文档，支持任意规模的仓与嵌套模块结构：
-- **仓级必产**：`repos/{repo}/.agent/` 下的 spec.md / design.md / interfaces.md（rules.md 与 DTFrame.md 由各自独立 skill 生成）
+- **仓级必产**：`repos/{repo}/.agent/` 下的 spec.md / design.md / interfaces.md（rules/ 目录与 DTFrame.md 由各自独立 skill 生成）
 - **模块级按需递归产出**：遍历仓内目录树，对**每个源码文件数 > 800 的目录**，在 `repos/{repo}/.agent/modules/{目录相对路径}/` 下产 spec.md + design.md；若该目录的子目录也 >800，子目录同样产出，形成多层嵌套，无层数限制
 
 提取类/函数结构、数据结构、状态机和关键流程，生成对应级别的 spec.md 和 design.md（含 PlantUML 图）。
@@ -57,7 +57,7 @@
 - **产出规则**：仓级必产；递归遍历目录树，对每个源码文件数 > 800 的目录产模块级 spec.md + design.md，多层嵌套无层数限制
 - **阈值跨越**：目录因新增文件从 ≤800 跨越到 >800 时触发首次生成；因删除降到 ≤800 时保留文档但标注"已降级"
 - PlantUML 图必须准确反映代码中的实际状态转换和调用关系；跨模块流程图必须包含异常分支（失败点、错误表现、处理策略）
-- **职责边界**：spec 只写"有什么能力+目标指标"；design 只写"通过什么设计手段达成"；编码约束与经验归 rules.md；测试基础设施归 DTFrame.md。三处不得跨界重复
+- **职责边界**：spec 只写"有什么能力+目标指标"；design 只写"通过什么设计手段达成"；编码约束与经验归 `rules/` 目录（详见 `rev-repo-to-rules` skill）；测试基础设施归 DTFrame.md。三处不得跨界重复
 - spec.md 与 DTFrame.md 的测试框架信息分工：spec.md 不写测试框架细节（统一引用 DTFrame.md）
 - 仓级 spec.md 模块清单为索引式（模块路径+一句话职责+模块级文档位置），详细职责归模块级或仓级 design.md
 - spec.md 必须包含对外接口契约索引（§3）与跨仓协作关系（§4.2），供 fwd-cross-repo-impact 使用；接口契约详情归 interfaces.md

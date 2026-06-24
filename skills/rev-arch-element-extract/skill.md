@@ -34,7 +34,7 @@
    - 优先读取 `repos/{repo}/.agent/spec.md`（业务功能 / SBI 接口索引 / 外部依赖 / 模块清单 → 元素职责、业务能力、提供的接口）
    - 优先读取 `repos/{repo}/.agent/interfaces.md`（接口契约详情 → §5 提供的接口引用）
    - 优先读取 `repos/{repo}/.agent/design.md`（设计目标 / 模块划分 / 数据对象 / 部署 / 质量属性 → §4 质量属性、§7 数据对象、§8 部署）
-   - 优先读取 `repos/{repo}/.agent/rules.md`（编码约束 / 可观测性 / 已知技术债 → §4 质量属性的可观测性子项、§8 部署运行约定）
+   - 优先读取 `repos/{repo}/.agent/rules/_index.md` 与 `rules/约束/可观测性.md`（可观测性约定 → §4 质量属性的可观测性子项）、`rules/约束/编码风格.md`（部署运行约定相关）
    - 优先读取 `repos/{repo}/.agent/DTFrame.md`（测试基础设施 → §4 质量属性的可测试性子项）
    - 若 `.agent/*.md` 部分缺失：对缺失部分降级扫源码 + 构建配置（go.mod / Makefile / CI）补齐，并在 spec.md §1 标注"本节由源码扫描补齐，置信度降级"
    - 若 `.agent/*.md` 全部缺失：执行全量源码扫描（参考 `rev-repo-to-spec-and-design` 的扫描策略），产出的同时**建议**触发 rev-repo-* 系列 skill 先补 `.agent/*.md`，本 skill 不直接生成 `.agent/*.md`
@@ -61,7 +61,7 @@
    - `subsystem`：由多个 service 组合的子系统（如集合多个 NF 的网关子系统）
    - 一 repo 一顶层元素，类型唯一；仓内子层级归 `.agent/design.md`
 4. **跨仓依赖抽取**：从 `.agent/spec.md` §4 外部依赖 或源码 import 关系，识别本元素依赖的其他架构元素（如 amf 依赖 nrf/ausf/udm/smf/pcf/nssf/udr），写入 `dependencies.yaml`，每条依赖引用对应元素名 + 接口 ID。
-5. **质量属性归纳**：从 `.agent/design.md` §11 DFX 设计、§12 关键设计决策 + `.agent/rules.md` §6 可观测性 + `.agent/DTFrame.md` §2 测试防护网分层，归纳元素级质量属性（性能/可靠性/可用性/可扩展性/安全性/可测试性/可观测性），每条标注来源 `.agent/*.md` 章节。
+5. **质量属性归纳**：从 `.agent/design.md` §11 DFX 设计、§12 关键设计决策 + `.agent/rules/约束/可观测性.md`（可观测性约定）+ `.agent/DTFrame.md` §2 测试防护网分层，归纳元素级质量属性（性能/可靠性/可用性/可扩展性/安全性/可测试性/可观测性），每条标注来源 `.agent/*.md` 章节或 `rules/` 文件。
 6. **生成元素文档**：按模板输出 `spec.md` / `interfaces.yaml` / `dependencies.yaml`，同步更新 `elements_tree.yaml` 本仓行的 `last_modified`。
 
 #### 增量更新模式
@@ -74,7 +74,7 @@
    - `.agent/spec.md` 变更（业务功能 / 接口索引 / 模块清单）→ 刷新 spec.md §2 职责、§3 业务能力、§5 提供的接口索引、§7 数据对象
    - `.agent/interfaces.md` 变更（接口契约）→ 刷新 spec.md §5 接口引用 + `interfaces.yaml`（仅索引层，详情引用 interfaces.md）
    - `.agent/design.md` 变更（设计目标 / DFX / 部署 / 数据对象）→ 刷新 spec.md §4 质量属性、§7 数据对象、§8 部署
-   - `.agent/rules.md` 变更（可观测性 / 技术债）→ 刷新 spec.md §4 可观测性子项
+   - `.agent/rules/约束/可观测性.md` 变更（可观测性）→ 刷新 spec.md §4 可观测性子项
    - `.agent/DTFrame.md` 变更（测试防护网）→ 刷新 spec.md §4 可测试性子项
    - 跨仓依赖变更（spec.md §4 外部依赖 或源码 import 变化）→ 刷新 `dependencies.yaml` + `elements_tree.yaml` 依赖边
 4. **刷新决策**：

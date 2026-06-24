@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "updatedAt": 1782271113673,
+  "files": {
+    "purpose.md": {
+      "hash": "4343b27b63b06b4328ee0d022bf2300f",
+      "size": 795,
+      "mtimeMs": 1782268166954
+    },
+    "raw/sources/架构与协议总览.md": {
+      "hash": "a9690d57abbe7b0ccc7d282065d0483c",
+      "size": 11312,
+      "mtimeMs": 1781962941108
+    },
+    "schema.md": {
+      "hash": "f1c1c21b5759ec40dec278a5a551e1a6",
+      "size": 3804,
+      "mtimeMs": 1782268166954
+    },
+    "wiki/index.md": {
+      "hash": "d91e1fb23c75e4ae861b00fd75a7aee1",
+      "size": 93,
+      "mtimeMs": 1782268166917
+    },
+    "wiki/log.md": {
+      "hash": "e144233c9ab5f44b28e7e180247a7138",
+      "size": 49,
+      "mtimeMs": 1782268166920
+    },
+    "wiki/overview.md": {
+      "hash": "3a6b8de12b70516be93fe9f2f947b45c",
+      "size": 210,
+      "mtimeMs": 1782268166922
+    }
+  }
+}

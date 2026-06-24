@@ -71,7 +71,7 @@ confidence: {high|medium|low}
 | interfaces.md | §2.N {接口名} | 新增完整契约 | 高 | §3.1 直接影响 |
 | design.md | §6 模块间接口 | 新增接口 | 高 | §3.1 直接影响 |
 | design.md | §9 关键跨模块流程 | 更新流程图 | 中 | §3.2 间接影响 |
-| rules.md | §7 文档同步约定 | 检查是否需补充 | 低 | - |
+| rules/约束/文档同步.md | 文档同步约定 | 检查是否需补充 | 低 | - |
 
 ## 6. 一致性校验建议
 > 供 qa-artifact-auto-verify 执行。
