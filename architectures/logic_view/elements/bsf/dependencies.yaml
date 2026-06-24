@@ -1,7 +1,8 @@
 element_name: bsf
 element_id: bsf
+element_type: service
 repo_path: repos/bsf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 bsf 元素依赖的外部接口清单。
@@ -13,11 +14,11 @@ external_dependencies:
     provider_element: nrf
     protocol: SBI (Nnrf_NFManagement, HTTP/2 + JSON)
     operations:
-      - PUT /nnrf-nfm/v1/nf-instances/{nfInstanceId}   # NF 实例注册（启动时，2s 间隔无限重试）
+      - PUT /nnrf-nfm/v1/nf-instances/{nfInstanceId}     # NF 实例注册（启动时，2s 间隔无限重试）
       - DELETE /nnrf-nfm/v1/nf-instances/{nfInstanceId}  # NF 实例反注册（终止时）
     purpose: BSF 启动时向 NRF 注册自身实例（声明 Nbsf-management 服务，API v1，版本 1.5.0），终止时反注册；使 PCF/SMF/NEF/AF 可发现本元素
     evidence: repos/bsf/.agent/spec.md §4.1
-    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+    cross_check: ok  # nrf 元素 interfaces.yaml 已提供 Nnrf_NFManagement 接口
 
   - if_ext_id: IF-EXT-002
     provider_element: MongoDB  # 外部基础设施
@@ -44,9 +45,9 @@ external_dependencies:
 consumers_for_reference:
   - consumer_element: pcf
     interfaces_consumed:
-      - IF-001 CreatePCFBinding   # PDU 会话建立时
-      - IF-004 UpdateIndPCFBinding  # 会话修改时
-      - IF-005 DeleteIndPCFBinding  # 会话释放时
+      - IF-001 CreatePCFBinding       # PDU 会话建立时
+      - IF-004 UpdateIndPCFBinding    # 会话修改时
+      - IF-005 DeleteIndPCFBinding    # 会话释放时
       - IF-006 CreatePCFforUEBinding
       - IF-010 CreatePCFMbsBinding
     evidence: repos/bsf/.agent/spec.md §4.2
@@ -67,5 +68,5 @@ summary:
   total: 3
   system_internal: 1   # nrf
   external: 2          # MongoDB / prometheus
-  pending_cross_check: 1  # 待 nrf 元素 interfaces.yaml 生成
+  pending_cross_check: 0
   consumers_count: 3   # 仅供参考：被 pcf/smf/nef 消费

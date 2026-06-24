@@ -1,7 +1,7 @@
 element_name: n3iwf
 element_id: n3iwf
 repo_path: repos/n3iwf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 n3iwf 元素对外提供的接口索引（摘要层）。
@@ -46,7 +46,7 @@ provided_interfaces:
     if_name: NGAP (AMF-to-N3IWF)
     protocol: NGAP/SCTP (port 38412)
     direction: consumed-as-server  # n3iwf 接收 AMF 主导的程序
-    summary: 接收 AMF 主导的 N2 程式码（InitialContextSetupRequest / DownlinkNASTransport / PDUSessionResource Setup/Modify/Release / UEContextRelease Command / AMFConfigurationUpdate / OverloadStart/Stop / NGReset 等）
+    summary: 接收 AMF 主导的 N2 程序（InitialContextSetupRequest / DownlinkNASTransport / PDUSessionResource Setup/Modify/Release / UEContextRelease Command / AMFConfigurationUpdate / OverloadStart/Stop / NGReset 等）
     contract_ref: repos/n3iwf/.agent/interfaces.md §2.5
 
   # UE 侧：用户面 GRE

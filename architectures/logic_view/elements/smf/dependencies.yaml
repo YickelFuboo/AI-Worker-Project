@@ -1,7 +1,8 @@
 element_name: smf
 element_id: smf
+element_type: service
 repo_path: repos/smf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 smf 元素依赖的外部接口清单。
@@ -19,7 +20,7 @@ external_dependencies:
       - GET /nnrf-disc/v1/nf-instances           # NF 发现（AMF/PCF/CHF/UDM/BSF）
     purpose: 启动注册 NF 实例；调用其他 NF 前发现实例；OAuth2 token 颁发
     evidence: repos/smf/.agent/spec.md §4.1
-    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+    cross_check: pending  # 待 nrf 元素 interfaces.yaml 完成双向校验
 
   - if_ext_id: IF-EXT-002
     provider_element: amf
@@ -29,7 +30,7 @@ external_dependencies:
       - POST /namf-comm/v1/callback/.../smContextStatus/{supi}/{pduSessionId}
     purpose: 下行 NAS/N2 SM 信息投递；SM 上下文释放状态通知
     evidence: repos/smf/.agent/spec.md §4.2
-    cross_check: bidirectional  # amf 元素 dependencies.yaml IF-EXT-004 反向指向 smf 提供的 Nsmf_PDUSession
+    cross_check: bidirectional  # amf 元素 dependencies.yaml 反向指向 smf 提供的 Nsmf_PDUSession
 
   - if_ext_id: IF-EXT-003
     provider_element: pcf
@@ -68,7 +69,7 @@ external_dependencies:
       - DELETE /nbsf-management/v1/pcfBindings  # 释放 PCF 绑定
     purpose: PCF 选择前查询 UE 既有绑定（BSF 感知 PCF 选择，PR #176）；会话释放时解绑
     evidence: repos/smf/.agent/spec.md §4.1 / §4.2
-    cross_check: pending  # bsf 元素 interfaces.yaml 待生成
+    cross_check: pending
 
   - if_ext_id: IF-EXT-007
     provider_element: smf  # 其他 SMF 实例（H-SMF / V-SMF）
@@ -77,12 +78,12 @@ external_dependencies:
       - POST /nsmf-pdusession/v1/pdu-sessions
       - POST /nsmf-pdusession/v1/pdu-sessions/{ref}/modify
       - POST /nsmf-pdusession/v1/pdu-sessions/{ref}/release
-    purpose: H-SMF/V-SMF 跨 SMF 会话族（当前实现占位 501，依赖关系保留）
+    purpose: H-SMF / V-SMF 跨 SMF 会话族（当前实现占位 501，依赖关系保留）
     evidence: repos/smf/.agent/spec.md §4.1
     cross_check: self  # 自反依赖，对应本元素 IF-006（占位）
 
   - if_ext_id: IF-EXT-008
-    provider_element: prometheus  # 监控系统，非本系统元素
+    provider_element: prometheus  # 监控系统，非本系统 NF 元素
     protocol: HTTP scrape
     operations:
       - GET /metrics
@@ -105,7 +106,7 @@ protocol_dependencies:
     direction: outbound (smf 主控，upf 应答；upf 发起 Heartbeat/Report)
     evidence: repos/smf/.agent/spec.md §4.1 / §4.2，repos/smf/.agent/design.md §8.12 / §11.2
     note: PFCP 非 SBI/REST 接口，是 smf 架构上的核心出站协议依赖
-    cross_check: pending  # upf 元素 interfaces.yaml 待生成（需在 upf 侧以 protocol_interfaces 形式登记 PFCP 入站）
+    cross_check: pending  # 待 upf 元素 protocol_interfaces 完成双向校验
 
 # 依赖统计
 summary:
@@ -115,4 +116,4 @@ summary:
   self_reference: 1      # smf 自反（H-SMF/V-SMF 占位）
   external_system: 1     # prometheus
   pending_cross_check: 6 # nrf/pcf/chf/udm/bsf/upf
-  bidirectional_verified: 1  # amf（已通过 amf/dependencies.yaml IF-EXT-004 反向校验）
+  bidirectional_verified: 1  # amf

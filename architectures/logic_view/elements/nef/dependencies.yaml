@@ -1,7 +1,7 @@
 element_name: nef
 element_id: nef
 repo_path: repos/nef
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 nef 元素依赖的外部接口清单。
@@ -45,7 +45,7 @@ external_dependencies:
 
   - if_ext_id: IF-EXT-004
     provider_element: smf
-    protocol: SBI (PFD 订阅消费者 + 事件通知发送方)
+    protocol: SBI (PFD 订阅消费者 + 事件通知发送方 + 异步扇出接收方)
     operations:
       - GET /nnef-pfdmanagement/v1/applications      # SMF 作为消费者调本元素
       - POST /nnef-pfdmanagement/v1/subscriptions    # SMF 作为消费者调本元素

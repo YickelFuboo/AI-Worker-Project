@@ -1,7 +1,8 @@
 element_name: ausf
 element_id: ausf
+element_type: service
 repo_path: repos/ausf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 ausf 元素对外提供的接口索引（摘要层）。
@@ -21,7 +22,7 @@ provided_interfaces:
     if_name: UeAuthentications5gAkaConfirmation
     protocol: SBI (Nausf_UEAuthentication)
     direction: provided
-    summary: 5G-AKA 鉴权确认（AMF 上送 RES*，AUSF 比对 XRES* 并上报 UDM）
+    summary: 5G-AKA 鉴权确认（AMF 上送 RES*，AUSF 比对 XRES* 并上报 UDM，返回 Kseaf）
     contract_ref: repos/ausf/.agent/interfaces.md §2.2
 
   - if_id: IF-003

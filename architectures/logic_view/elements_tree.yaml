@@ -47,8 +47,8 @@ elements:
     element_type: service
     repo_path: repos/ausf
     spec_path: architectures/logic_view/elements/ausf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
-    confidence: high
+    last_modified: "2026-06-24T16:00:00+08:00"
+    confidence: medium
     aliases: []
     depends_on:
       - nrf  # NF 注册与发现 UDM
@@ -92,7 +92,7 @@ elements:
     element_type: service
     repo_path: repos/n3iwf
     spec_path: architectures/logic_view/elements/n3iwf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases: []
     depends_on:
@@ -121,7 +121,7 @@ elements:
     element_type: service
     repo_path: repos/nrf
     spec_path: architectures/logic_view/elements/nrf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases: []
     depends_on: []  # nrf 是根服务，不静态依赖其他 NF；动态订阅方在运行时声明
@@ -178,7 +178,7 @@ elements:
     element_type: service
     repo_path: repos/smf
     spec_path: architectures/logic_view/elements/smf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases: []
     depends_on:

@@ -1,110 +1,127 @@
 element_name: amf
 element_id: amf
 repo_path: repos/amf
-last_modified: "2026-06-21T11:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 amf 元素依赖的外部接口清单。
 # 证据来源：repos/amf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
 # 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
-# 其他 NF 元素尚未生成 interfaces.yaml，本批次标注"待对方元素生成后双向校验"。
+# system_internal: 同系统内的 NF 元素，纳入 elements_tree.yaml 依赖边；
+# external_dependencies: 外部基础设施/接入设备，不纳入元素树。
 
-external_dependencies:
+system_internal_dependencies:
   - if_ext_id: IF-EXT-001
     provider_element: nrf
     protocol: SBI (Nnrf_NFManagement / Nnrf_NFDiscovery, HTTP/2 + JSON + mTLS)
     operations:
       - POST /nnrf-nfm/v1/nf-instances  # NF 实例注册
-      - GET /nnrf-disc/v1/nf-instances   # NF 发现
-    purpose: AMF 启动时注册 NF 实例；调用其他 NF 前发现实例
+      - GET  /nnrf-disc/v1/nf-instances # NF 发现
+    purpose: AMF 启动时注册 NF 实例；调用其他 NF 前发现实例；NRF 不可达时 amf 仍可启动但功能受限
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+    cross_check: ok  # nrf/interfaces.yaml 已提供 Nnrf_NFManagement/Nnrf_NFDiscovery
 
   - if_ext_id: IF-EXT-002
     provider_element: ausf
     protocol: SBI (Nausf_UEAuthentication)
     operations:
       - POST /nausf-auth/v1/ue-authentications
-    purpose: UE 注册时 5G-AKA/EAP 鉴权
+    purpose: UE 注册时 5G-AKA / EAP-AKA' 主认证
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: pending
+    cross_check: ok
 
   - if_ext_id: IF-EXT-003
     provider_element: udm
     protocol: SBI (Nudm_SDM / Nudm_UECM)
     operations:
-      - GET/POST/Nudm-SDM/*
-      - Nudm-UECM/*
-    purpose: 订阅数据获取 + 变更订阅
+      - GET /nudm-sdm/v2/{supi}/...   # SDM 订阅数据获取
+      - POST /nudm-sdm/v2/{supi}/sdm-subscriptions  # SDM 订阅
+      - PUT /nudm-uecm/v1/{ueId}/registrations/amf-3gpp-access  # UECM 注册当前 AMF
+    purpose: 订阅数据获取与变更订阅；当前服务 AMF 在 UDM 侧的 UECM 注册
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: pending
+    cross_check: ok
 
   - if_ext_id: IF-EXT-004
     provider_element: smf
     protocol: SBI (Nsmf_PDUSession)
     operations:
-      - POST/PUT /nsmf-pdusession/v1/sm-contexts
-    purpose: PDU 会话建立/修改/释放协调
+      - POST /nsmf-pdusession/v1/sm-contexts          # CreateSmContext
+      - POST /nsmf-pdusession/v1/sm-contexts/{ref}/modify  # UpdateSmContext
+      - POST /nsmf-pdusession/v1/sm-contexts/{ref}/release # ReleaseSmContext
+    purpose: PDU 会话生命周期协调（建立/修改/释放）
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: pending
+    cross_check: ok
 
   - if_ext_id: IF-EXT-005
     provider_element: pcf
-    protocol: SBI (Npcf_AMPolicy)
+    protocol: SBI (Npcf_AMPolicyControl)
     operations:
-      - POST/PATCH/DELETE /npcf-am-policy-control/v1/policies
-    purpose: AM 策略关联建立/更新/删除
+      - POST   /npcf-am-policy-control/v1/policies
+      - PATCH  /npcf-am-policy-control/v1/policies/{polAssoId}
+      - DELETE /npcf-am-policy-control/v1/policies/{polAssoId}
+    purpose: AM 策略关联建立/更新/删除（接入与移动性策略执行）
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: pending
+    cross_check: ok
 
   - if_ext_id: IF-EXT-006
     provider_element: nssf
     protocol: SBI (Nnssf_NSSelection)
     operations:
-      - GET /nnssf-nsselection/v1/network-slice-information
-    purpose: 网络切片选择
+      - GET /nnssf-nsselection/v2/network-slice-information
+    purpose: 网络切片选择（注册与 PDU 会话建立场景）
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: pending
+    cross_check: ok
 
   - if_ext_id: IF-EXT-007
-    provider_element: amf  # 目标 AMF（跨 AMF 切换）
+    provider_element: amf  # 目标 AMF（跨 AMF 切换 / 重定位场景）
     protocol: SBI (Namf_Communication)
     operations:
-      - POST /namf-comm/v1/ue-contexts/:id/transfer
-    purpose: 跨 AMF 切换时 UE 上下文转移（本元素既是提供方也是消费方）
+      - POST /namf-comm/v1/ue-contexts/{ueContextId}/transfer
+    purpose: 跨 AMF 切换 / 重定位时向源/目标 AMF 取或转移 UE 上下文（本元素既是提供方也是消费方）
     evidence: repos/amf/.agent/spec.md §4.2
     cross_check: self  # 自反依赖，对应本元素 IF-001 UEContextTransfer
 
-  - if_ext_id: IF-EXT-008
-    provider_element: RAN  # gNB，非本系统元素
+external_dependencies:
+  - if_ext_id: IF-EXT-100
+    provider: RAN (gNB)
+    category: 接入设备（非本系统 NF 元素）
     protocol: NGAP over SCTP (3GPP TS 38.413)
     operations:
-      - NGAP 消息双向收发
-    purpose: N2 接口信令承载
+      - NGAP 消息双向收发（NGSetup / InitialUEMessage / DownlinkNasTransport / Handover 等）
+    purpose: N2 接口控制面信令承载
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: external  # 非系统内元素，不参与双向校验
 
-  - if_ext_id: IF-EXT-009
-    provider_element: UE  # 非本系统元素
+  - if_ext_id: IF-EXT-101
+    provider: UE
+    category: 接入设备（非本系统 NF 元素，经 RAN 透传）
     protocol: NAS over N1 (3GPP TS 24.501)
     operations:
-      - NAS 消息双向收发（经 RAN 透传）
-    purpose: N1 接口信令承载
+      - NAS 消息双向收发（RegistrationRequest / ServiceRequest / UL/DL NAS Transport 等）
+    purpose: N1 接口控制面信令承载
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: external
 
-  - if_ext_id: IF-EXT-010
-    provider_element: prometheus  # 监控系统，非本系统元素
+  - if_ext_id: IF-EXT-102
+    provider: Prometheus
+    category: 外部监控基础设施
     protocol: HTTP scrape
     operations:
       - GET /metrics
-    purpose: 指标暴露（独立 metrics server 端口）
+    purpose: 指标 scrape（独立 metrics server 端口暴露）
     evidence: repos/amf/.agent/spec.md §4.1
-    cross_check: external
 
-# 依赖统计
+  - if_ext_id: IF-EXT-103
+    provider: OpenTelemetry collector
+    category: 外部观测基础设施（间接依赖）
+    protocol: OTLP（由 go.opentelemetry.io/otel 间接引入）
+    operations:
+      - span export
+    purpose: SBI 出站调用分布式追踪上报
+    evidence: repos/amf/.agent/spec.md §4.1（go.mod indirect）
+
 summary:
-  total: 10
-  system_internal: 7  # nrf/ausf/udm/smf/pcf/nssf/amf(self)
-  external: 3         # RAN/UE/prometheus
-  pending_cross_check: 6  # 待 nrf/ausf/udm/smf/pcf/nssf 元素 interfaces.yaml 生成
+  system_internal_count: 7        # nrf / ausf / udm / smf / pcf / nssf / amf(self)
+  external_count: 4               # RAN / UE / Prometheus / OpenTelemetry collector
+  total: 11
+  cross_check_pending: 0
+  cross_check_self: 1             # amf 自反
+  cross_check_ok: 6               # nrf / ausf / udm / smf / pcf / nssf 均已生成 interfaces.yaml

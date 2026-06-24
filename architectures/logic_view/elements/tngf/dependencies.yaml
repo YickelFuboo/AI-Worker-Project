@@ -1,7 +1,7 @@
 element_name: tngf
 element_id: tngf
 repo_path: repos/tngf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 tngf 元素依赖的外部接口清单。
@@ -30,7 +30,7 @@ external_dependencies:
       - GTP-U T-PDU 双向收发（按 TEID/PDU Session）
     purpose: 与 UPF 用户面隧道（N3），承载 UE 上下行用户面 PDU
     evidence: repos/tngf/.agent/spec.md §4.1, §4.2
-    cross_check: pending  # 待 upf 元素 interfaces.yaml 生成后双向校验
+    cross_check: pending  # 待 upf 元素 interfaces.yaml N3 端点条目完整后双向校验
 
   - if_ext_id: IF-EXT-003
     provider_element: TWAN_AP  # 受信 WLAN 接入点，非本系统 NF 元素
@@ -78,7 +78,7 @@ summary:
   total: 6
   system_internal: 2          # amf / upf
   external: 4                 # TWAN_AP / UE / linux_kernel_xfrm / prometheus
-  pending_cross_check: 2      # amf（N2 端点需在 amf interfaces.yaml 补充）, upf（待生成）
+  pending_cross_check: 2      # amf（N2 端点需在 amf interfaces.yaml 补充）, upf（待补 N3 端点）
   sbi_dependencies: 0         # tngf 非 SBI 元素，无 SBI 出向依赖
   non_sbi_note: |
     tngf 所有跨 NF 依赖均为非 SBI 协议：
