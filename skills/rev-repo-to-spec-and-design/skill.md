@@ -65,7 +65,7 @@
 - 仓级一次执行产 3 文件：spec.md + design.md + interfaces.md，共享同一次代码扫描结果，保证三文件信息一致
 - 模块级文档路径：`repos/{repo}/.agent/modules/{目录相对路径}/spec.md` 与 `design.md`，支持嵌套（如 `modules/internal/ngap/dispatcher/spec.md`）
 - 代码定位用 `文件路径::符号名` 格式，不使用行号
-- 低置信章节末尾标注"本节置信度：低"，frontmatter 整体置信度不低于最低分节置信度
+- 置信度仅写入 frontmatter，正文不写降级提示
 - 增量模式下，若仓内有 rebase/squash 导致 `last_modified` 早于实际最近提交，需以锚点提交为准
 - 删除文件若对应废弃模块/特性，需从仓级模块清单、目录概览、对外接口契约中同步移除；模块级 md 对应目录删除时同步移除
 - 增量刷新不应降低置信度；若变更引入不确定项，置信度维持原值并在报告中标注新增不确定项

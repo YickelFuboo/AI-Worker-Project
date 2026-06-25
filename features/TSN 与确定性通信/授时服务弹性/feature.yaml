@@ -1,0 +1,44 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_tsn_deterministic
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: tsn_time_resilience
+  name: 授时服务弹性
+  description: 时钟质量标准/度量/劣化通知
+  releases:
+  - R18
+  ref: TS 23.501 §5.27.2
+  status: planned
+  level: L2
+  path: features/TSN 与确定性通信/授时服务弹性/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 授时服务弹性业务成功
+  description: 授时服务弹性业务场景成功完成。
+  scenario_type: 成功场景
+  path: SCENARIO_001_授时服务弹性业务成功_场景流程.md
+- id: SCENARIO_002
+  name: 授时服务弹性业务失败
+  description: 授时服务弹性因配置、订阅、策略、拓扑或对端能力不满足而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_授时服务弹性业务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md

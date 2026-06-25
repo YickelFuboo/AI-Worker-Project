@@ -2,7 +2,7 @@
 
 ## 功能描述
 
-从存量代码仓中逆向提取 DT（Development Test，开发自验/单元测试）框架相关信息，生成 `repos/{仓名}/.agent/DTFrame.md`。该文件集中记录测试框架、DT 代码存放位置、Mock 框架与 Mock 要求、测试数据组织、执行命令、覆盖率统计方式等，供 `fwd-ut-generate` / `fwd-ut-execute-coverage` / `fwd-test-script-convert` 等正向 Skill 在生成与执行 UT 时作为输入约束，避免每个 Skill 重复扫描仓内测试基础设施。
+从存量代码仓中逆向提取 DT（Development Test，开发自验/单元测试）框架相关信息，生成 `repos/{仓名}/.agent/DTFrame.md`。该文件集中记录测试框架、DT 代码存放位置、Mock 框架与 Mock 要求、测试数据组织、执行命令、覆盖率统计方式等，供 `10-fwd-ut-generate` / `11-fwd-ut-execute-coverage` / `15-fwd-test-script-convert` 等正向 Skill 在生成与执行 UT 时作为输入约束，避免每个 Skill 重复扫描仓内测试基础设施。
 
 ## 所属 Agent
 

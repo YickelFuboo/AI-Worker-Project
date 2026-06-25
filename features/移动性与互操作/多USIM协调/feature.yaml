@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_mobility_interworking
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: mob_multi_usim
+  name: 多USIM协调
+  description: 一台 UE 多 USIM 协调，避免寻呼冲突
+  releases:
+  - R17
+  ref: TS 23.501 §5.38
+  status: planned
+  level: L2
+  path: features/移动性与互操作/多USIM协调/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 多USIM协调移动性处理成功
+  description: UE移动性过程成功应用多USIM协调能力。
+  scenario_type: 成功场景
+  path: SCENARIO_001_多USIM协调移动性处理成功_场景流程.md
+- id: SCENARIO_002
+  name: 多USIM协调互操作回退
+  description: 跨系统或跨功能条件变化时多USIM协调进入回退路径。
+  scenario_type: 回退场景
+  path: SCENARIO_002_多USIM协调互操作回退_场景流程.md
+- id: SCENARIO_003
+  name: 多USIM协调移动性处理失败
+  description: 目标系统、策略或上下文不满足导致多USIM协调失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_多USIM协调移动性处理失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md

@@ -1,0 +1,35 @@
+arch_ref_meta:
+  l1_id: cat_mobility_interworking
+  l1_name: 移动性与互操作
+  feature_id: mob_nssai_reroute
+  feature_name: NSSAI不匹配时NAS重路由
+  last_modified: "2026-06-25T13:45:33+08:00"
+  last_modified_by: rev-code-to-scenario
+  confidence: high
+elements_used:
+- element_id: amf
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/amf/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+- element_id: nssf
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/nssf/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+- element_id: nrf
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/nrf/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+external_dependencies: []
+code_anchors:
+- repo: repos/amf
+  path: internal/gmm/handler.go
+  symbol: handleRequestedNssai
+  role: 切片不匹配时 NAS 重路由入口
+- repo: repos/amf
+  path: internal/ngap/message/build.go
+  symbol: BuildRerouteNasRequest
+  role: RAN Reroute NAS Request 报文构造
+confidence_note: 本文件仅引用可定位的架构元素与代码锚点；缺失事实源不编造。

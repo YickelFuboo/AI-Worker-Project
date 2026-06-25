@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_edge_computing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: edge_eas_relocation
+  name: 边缘应用服务器迁移
+  description: EAS 变更触发的 PSA UPF 重定位、缓冲与延迟感知重定位
+  releases:
+  - R17
+  ref: TS 23.548
+  status: planned
+  level: L2
+  path: features/边缘计算/边缘应用服务器迁移/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: EAS重定位成功
+  description: UE移动或应用条件变化时完成EAS重定位。
+  scenario_type: 迁移场景
+  path: SCENARIO_001_EAS重定位成功_场景流程.md
+- id: SCENARIO_002
+  name: 应用上下文迁移成功
+  description: 边缘应用上下文随EAS迁移保持业务连续。
+  scenario_type: 迁移场景
+  path: SCENARIO_002_应用上下文迁移成功_场景流程.md
+- id: SCENARIO_003
+  name: EAS重定位失败
+  description: 目标EAS不可用或上下文迁移失败导致业务受影响。
+  scenario_type: 失败场景
+  path: SCENARIO_003_EAS重定位失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md

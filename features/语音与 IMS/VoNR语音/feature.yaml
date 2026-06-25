@@ -1,0 +1,54 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_voice_ims
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: voice_vonr
+  name: VoNR语音
+  description: 基于 IMS 的 5G NR 语音
+  releases:
+  - R15
+  ref: TS 23.501 §5.16
+  status: planned
+  level: L2
+  path: features/语音与 IMS/VoNR语音/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 主叫呼叫成功
+  description: UE发起VoNR主叫呼叫并完成IMS语音建立。
+  scenario_type: 成功场景
+  path: SCENARIO_001_主叫呼叫成功_场景流程.md
+- id: SCENARIO_002
+  name: 被叫呼叫成功
+  description: UE作为被叫接收VoNR呼叫并完成语音建立。
+  scenario_type: 成功场景
+  path: SCENARIO_002_被叫呼叫成功_场景流程.md
+- id: SCENARIO_003
+  name: 被叫无响应呼叫失败
+  description: 被叫未响应或不可达导致语音呼叫失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_被叫无响应呼叫失败_场景流程.md
+- id: SCENARIO_004
+  name: 网络能力不满足呼叫失败
+  description: 注册、IMS或无线能力不满足导致VoNR呼叫失败。
+  scenario_type: 失败场景
+  path: SCENARIO_004_网络能力不满足呼叫失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md

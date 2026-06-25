@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_charging
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: chg_converged
+  name: 融合计费
+  description: 在线+离线合一，SMF 经 N40 上报 Usage Report
+  releases:
+  - R15
+  ref: TS 32.255, TS 29.594
+  status: implemented
+  level: L2
+  path: features/计费特性/融合计费/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 融合计费会话建立
+  description: SMF为PDU会话建立融合计费上下文。
+  scenario_type: 计费场景
+  path: SCENARIO_001_融合计费会话建立_场景流程.md
+- id: SCENARIO_002
+  name: 在线计费额度控制
+  description: CHF按额度授权控制业务使用。
+  scenario_type: 计费场景
+  path: SCENARIO_002_在线计费额度控制_场景流程.md
+- id: SCENARIO_003
+  name: 计费会话终止
+  description: PDU会话释放时终止计费并上报最终用量。
+  scenario_type: 计费场景
+  path: SCENARIO_003_计费会话终止_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: chf
+    path: architectures/logic_view/elements/chf/spec.md
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md

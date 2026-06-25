@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_edge_computing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: edge_app_controlled_easdf
+  name: 应用控制的EASDF配置
+  description: 应用层向 5GC 控制面提供 EAS 部署数据
+  releases:
+  - R17
+  ref: TS 23.548
+  status: planned
+  level: L2
+  path: features/边缘计算/应用控制的EASDF配置/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 应用控制的EASDF配置边缘服务成功
+  description: 业务成功使用应用控制的EASDF配置相关边缘能力。
+  scenario_type: 成功场景
+  path: SCENARIO_001_应用控制的EASDF配置边缘服务成功_场景流程.md
+- id: SCENARIO_002
+  name: 应用控制的EASDF配置边缘服务迁移
+  description: UE或应用变化触发应用控制的EASDF配置迁移或重选择。
+  scenario_type: 迁移场景
+  path: SCENARIO_002_应用控制的EASDF配置边缘服务迁移_场景流程.md
+- id: SCENARIO_003
+  name: 应用控制的EASDF配置边缘服务失败
+  description: 边缘能力、策略或应用上下文不满足导致应用控制的EASDF配置失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_应用控制的EASDF配置边缘服务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md

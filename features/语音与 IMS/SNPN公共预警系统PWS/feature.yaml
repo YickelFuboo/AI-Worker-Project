@@ -1,0 +1,46 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_voice_ims
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: voice_pws_snpn
+  name: SNPN公共预警系统PWS
+  description: SNPN 上的 PWS (ETWS/CMAS)
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.6
+  status: planned
+  level: L2
+  path: features/语音与 IMS/SNPN公共预警系统PWS/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: SNPN公共预警下发成功
+  description: SNPN向UE成功下发公共预警消息。
+  scenario_type: 成功场景
+  path: SCENARIO_001_SNPN公共预警下发成功_场景流程.md
+- id: SCENARIO_002
+  name: 预警区域不匹配
+  description: UE不在目标预警区域导致消息不投递。
+  scenario_type: 失败场景
+  path: SCENARIO_002_预警区域不匹配_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md
+  - element_id: ausf
+    path: architectures/logic_view/elements/ausf/spec.md

@@ -14,7 +14,7 @@ confidence: {high|medium|low}
 > - `约束/` — 长期不变的编码约束(代码扫描沉淀,MR 检视补充)
 > - `模式/` — 修改模式与实现模式(从 MR 归纳 + 代码扫描)
 >
-> **AI 加载约定**:正向 skill(`fwd-generate-code` / `fwd-code-compliance-check` / `fwd-ut-generate` 等)按任务关键词匹配本索引中文件名,只加载相关文件,不读全文。
+> **AI 加载约定**:正向 skill(`08-fwd-generate-code` / `09-fwd-code-compliance-check` / `10-fwd-ut-generate` 等)按任务关键词匹配本索引中文件名,只加载相关文件,不读全文。
 >
 > **代码定位约定**:所有"代码证据"列使用 `文件路径::符号名` 格式(如 `go.mod::require free5gc/nas`、`internal/sbi/consumer/ausf_service.go::AusfService`),不使用行号。
 

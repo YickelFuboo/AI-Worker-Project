@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_voice_ims
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: voice_eps_fallback
+  name: 语音EPS Fallback
+  description: 5G NR 不支持 VoNR 时回退到 EPS 做语音
+  releases:
+  - R15
+  ref: TS 23.502 §4.13
+  status: planned
+  level: L2
+  path: features/语音与 IMS/语音EPS_Fallback/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: EPS Fallback成功建立语音
+  description: 5GS无法直接承载语音时回退到EPS并成功建立语音。
+  scenario_type: 回退场景
+  path: SCENARIO_001_EPS_Fallback成功建立语音_场景流程.md
+- id: SCENARIO_002
+  name: EPS Fallback回退失败
+  description: EPS回退过程中目标能力或移动性条件不满足导致呼叫失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_EPS_Fallback回退失败_场景流程.md
+- id: SCENARIO_003
+  name: 回退后返回5GS
+  description: 语音业务完成后UE从EPS返回5GS保持业务连续性。
+  scenario_type: 迁移场景
+  path: SCENARIO_003_回退后返回5GS_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md

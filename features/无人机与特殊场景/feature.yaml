@@ -1,0 +1,62 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_uav_special
+  name: 无人机与特殊场景
+  description: 无人机与关键任务通信、网络节能等特殊场景，含 UAV 基础、UAS NF、MCX、网络节能。
+  status: planned
+  level: L1
+  path: features/无人机与特殊场景/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: uav_basic
+  name: UAV无人机支持
+  description: 无人机 UE 识别、订阅、飞行轨迹与控制
+  status: planned
+  level: L2
+  path: UAV无人机支持/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.255
+- id: uav_uas_nf
+  name: UAS网络功能UAS NF
+  description: 与 C2 (Command & Control) 通信系统交互
+  status: planned
+  level: L2
+  path: UAS网络功能UAS_NF/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.255
+- id: scenario_mc_service
+  name: 5G关键任务通信MCX
+  description: MCPTT/MCData/MCVideo over 5GS
+  status: planned
+  level: L2
+  path: 5G关键任务通信MCX/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.280/281/282
+- id: scenario_nes
+  name: 网络节能
+  description: NF/UPF/RAN 协同节能，按需关停
+  status: planned
+  level: L2
+  path: 网络节能/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.41
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

@@ -86,7 +86,7 @@ confidence: high | medium | low
 | 测试框架 | 详见 `.agent/DTFrame.md` | - | DT 框架信息独立产物 | - |
 
 ## 6. 构建与部署
-> 供 fwd-version-packaging / fwd-env-topology-modeling 使用。
+> 供 13-fwd-version-packaging / 16-fwd-env-topology-modeling 使用。
 
 ### 6.1 构建与运行
 | 项目 | 内容 | 代码证据 |

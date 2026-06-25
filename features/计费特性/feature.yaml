@@ -1,0 +1,53 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_charging
+  name: 计费特性
+  description: 计费相关特性，含融合计费、基于业务流的计费、漫游计费。
+  status: partial
+  level: L1
+  path: features/计费特性/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: chg_converged
+  name: 融合计费
+  description: 在线+离线合一，SMF 经 N40 上报 Usage Report
+  status: implemented
+  level: L2
+  path: 融合计费/feature.yaml
+  releases:
+  - R15
+  ref: TS 32.255, TS 29.594
+- id: chg_fbc
+  name: 基于流的计费FBC
+  description: 基于业务流的计费 (Rating Group + Service ID)
+  status: implemented
+  level: L2
+  path: 基于流的计费FBC/feature.yaml
+  releases:
+  - R15
+  ref: TS 32.255
+- id: chg_roaming
+  name: 漫游计费
+  description: 漫游场景的计费分离 (hPLMN/vPLMN)
+  status: planned
+  level: L2
+  path: 漫游计费/feature.yaml
+  releases:
+  - R15
+  ref: TS 32.255, TS 32.256
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

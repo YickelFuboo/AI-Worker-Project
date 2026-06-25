@@ -1,0 +1,55 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_authentication_security
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: sec_suci_protection
+  name: SUCI保护与SUPI隐私
+  description: 用运营商公钥加密 SUPI 防止 IMSI catcher
+  releases:
+  - R15
+  ref: TS 33.501 §6.12
+  status: implemented
+  level: L2
+  path: features/鉴权与安全特性/SUCI保护与SUPI隐私/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: SUCI保护与SUPI隐私鉴权授权成功
+  description: UE或业务方成功完成SUCI保护与SUPI隐私相关鉴权授权。
+  scenario_type: 授权场景
+  path: SCENARIO_001_SUCI保护与SUPI隐私鉴权授权成功_场景流程.md
+- id: SCENARIO_002
+  name: SUCI保护与SUPI隐私鉴权授权失败
+  description: 凭据、订阅、密钥或策略不满足导致SUCI保护与SUPI隐私失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_SUCI保护与SUPI隐私鉴权授权失败_场景流程.md
+- id: SCENARIO_003
+  name: SUCI保护与SUPI隐私安全上下文更新
+  description: SUCI保护与SUPI隐私相关安全上下文或授权状态发生更新。
+  scenario_type: 授权场景
+  path: SCENARIO_003_SUCI保护与SUPI隐私安全上下文更新_场景流程.md
+traceability:
+  code_anchors:
+  - repo: repos/udm
+    path: internal/sbi/processor/generate_auth_data.go
+    symbol: GenerateAuthDataProcedure
+    role: SUCI 解隐藏与鉴权向量生成
+  test_anchors: []
+  architecture_refs:
+  - element_id: ausf
+    path: architectures/logic_view/elements/ausf/spec.md
+  - element_id: udm
+    path: architectures/logic_view/elements/udm/spec.md

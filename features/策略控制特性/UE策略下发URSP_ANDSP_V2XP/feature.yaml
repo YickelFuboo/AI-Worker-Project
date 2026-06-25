@@ -1,0 +1,44 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_policy_control
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: pcc_ue_policy
+  name: UE策略下发URSP_ANDSP_V2XP
+  description: 通过 NAS 下发 UE Policy，含 URSP 路由选择策略
+  releases:
+  - R15
+  ref: TS 23.502 §4.20, TS 29.525
+  status: partial
+  level: L2
+  path: features/策略控制特性/UE策略下发URSP_ANDSP_V2XP/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: UE策略下发URSP_ANDSP_V2XP业务成功
+  description: UE策略下发URSP_ANDSP_V2XP业务场景成功完成。
+  scenario_type: 成功场景
+  path: SCENARIO_001_UE策略下发URSP_ANDSP_V2XP业务成功_场景流程.md
+- id: SCENARIO_002
+  name: UE策略下发URSP_ANDSP_V2XP业务失败
+  description: UE策略下发URSP_ANDSP_V2XP因配置、订阅、策略、拓扑或对端能力不满足而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_UE策略下发URSP_ANDSP_V2XP业务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: pcf
+    path: architectures/logic_view/elements/pcf/spec.md

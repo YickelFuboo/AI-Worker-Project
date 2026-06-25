@@ -1,0 +1,12 @@
+arch_ref_meta:
+  l1_id: cat_non_3gpp_access
+  l1_name: 非 3GPP 接入与多接入
+  feature_id: access_wagf
+  feature_name: 有线接入网关功能W-AGF
+  last_modified: "2026-06-25T13:45:33+08:00"
+  last_modified_by: rev-code-to-scenario
+  confidence: low
+elements_used: []
+external_dependencies: []
+code_anchors: []
+confidence_note: 本文件仅引用可定位的架构元素与代码锚点；缺失事实源不编造。

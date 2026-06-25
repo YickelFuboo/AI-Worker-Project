@@ -1,0 +1,48 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_policy_control
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: pcc_traffic_influence
+  name: AF影响UPF路由的流量引导
+  description: AF 影响 UPF 路由，把流量导向指定 DNAI
+  releases:
+  - R15
+  ref: TS 23.502 §4.3.6, TS 29.522
+  status: implemented
+  level: L2
+  path: features/策略控制特性/AF影响UPF路由的流量引导/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: AF影响UPF路由的流量引导业务成功
+  description: AF影响UPF路由的流量引导业务场景成功完成。
+  scenario_type: 成功场景
+  path: SCENARIO_001_AF影响UPF路由的流量引导业务成功_场景流程.md
+- id: SCENARIO_002
+  name: AF影响UPF路由的流量引导业务失败
+  description: AF影响UPF路由的流量引导因配置、订阅、策略、拓扑或对端能力不满足而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_AF影响UPF路由的流量引导业务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md
+  - element_id: pcf
+    path: architectures/logic_view/elements/pcf/spec.md
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md

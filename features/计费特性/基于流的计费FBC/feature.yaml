@@ -1,0 +1,57 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_charging
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: chg_fbc
+  name: 基于流的计费FBC
+  description: 基于业务流的计费 (Rating Group + Service ID)
+  releases:
+  - R15
+  ref: TS 32.255
+  status: implemented
+  level: L2
+  path: features/计费特性/基于流的计费FBC/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 业务流计费成功
+  description: UPF/SMF按业务流规则生成计费数据。
+  scenario_type: 计费场景
+  path: SCENARIO_001_业务流计费成功_场景流程.md
+- id: SCENARIO_002
+  name: 计费规则更新
+  description: PCF或CHF更新业务流计费规则并生效。
+  scenario_type: 计费场景
+  path: SCENARIO_002_计费规则更新_场景流程.md
+- id: SCENARIO_003
+  name: 计费上报失败
+  description: CHF不可用或计费会话异常导致上报失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_计费上报失败_场景流程.md
+traceability:
+  code_anchors:
+  - repo: repos/smf
+    path: internal/sbi/processor/charging_trigger.go
+    symbol: UpdateChargingSession
+    role: 业务流用量上报与计费会话更新
+  test_anchors: []
+  architecture_refs:
+  - element_id: chf
+    path: architectures/logic_view/elements/chf/spec.md
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md

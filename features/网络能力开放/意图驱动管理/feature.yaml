@@ -1,0 +1,47 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_exposure
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: exp_intent_driven_mgmt
+  name: 意图驱动管理
+  description: 运营商用 intent 描述期望结果，自动编排
+  releases:
+  - R18
+  ref: TS 28.31x
+  status: planned
+  level: L2
+  path: features/网络能力开放/意图驱动管理/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 意图驱动管理能力开放成功
+  description: AF通过意图驱动管理获得网络能力开放结果。
+  scenario_type: 开放场景
+  path: SCENARIO_001_意图驱动管理能力开放成功_场景流程.md
+- id: SCENARIO_002
+  name: 意图驱动管理授权失败
+  description: AF授权、参数或策略不满足导致意图驱动管理失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_意图驱动管理授权失败_场景流程.md
+- id: SCENARIO_003
+  name: 意图驱动管理订阅更新
+  description: 业务方更新意图驱动管理相关订阅或参数。
+  scenario_type: 开放场景
+  path: SCENARIO_003_意图驱动管理订阅更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

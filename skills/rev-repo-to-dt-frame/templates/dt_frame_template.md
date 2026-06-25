@@ -8,7 +8,7 @@ confidence: {high|medium|low}
 
 # {repo_id} DT 框架信息
 
-> 本文档集中记录本仓 DT（开发自验/单元测试）基础设施，供 `fwd-ut-generate` / `fwd-ut-execute-coverage` / `fwd-test-script-convert` 等正向 Skill 作为输入约束。首次由 `rev-repo-to-dt-frame` skill 逆向生成，后续可由 `fwd-doc-sync` 等正向 skill 增量刷新。
+> 本文档集中记录本仓 DT（开发自验/单元测试）基础设施，供 `10-fwd-ut-generate` / `11-fwd-ut-execute-coverage` / `15-fwd-test-script-convert` 等正向 Skill 作为输入约束。首次由 `rev-repo-to-dt-frame` skill 逆向生成，后续可由 `fwd-doc-sync` 等正向 skill 增量刷新。
 >
 > **代码定位约定**：所有"代码证据"列使用 `文件路径::符号名` 格式，不使用行号。
 
@@ -22,7 +22,7 @@ confidence: {high|medium|low}
 | 覆盖率工具 | {如 go cover / coverage.py / istanbul} | {版本} | 覆盖率统计 | {go.mod::require 段} |
 
 ## 2. 测试防护网分层
-> UT / IT / E2E 分层与门禁，供 fwd-ut-generate 判断用例归属、供 qa-stage-gate-check 判断门禁。
+> UT / IT / E2E 分层与门禁，供 10-fwd-ut-generate 判断用例归属、供 qa-stage-gate-check 判断门禁。
 
 | 层级 | 范围 | 执行环境 | Mock 边界 | 门禁要求 | 代码证据 |
 |------|------|----------|-----------|----------|----------|
@@ -44,7 +44,7 @@ confidence: {high|medium|low}
 | 测试辅助 | {如 testutil/ / testhelpers/} | {如 helper.go} | {具体示例} | 公共 fixture / 工具 |
 
 ### 3.2 用例组织约定
-> fwd-ut-generate 生成 UT 时需遵循仓内既有风格。
+> 10-fwd-ut-generate 生成 UT 时需遵循仓内既有风格。
 
 | 维度 | 约定 | 代码证据 |
 |------|------|----------|
@@ -72,7 +72,7 @@ confidence: {high|medium|low}
 | 内部有状态对象 | 视场景 | 接口抽象或测试替身 | {路径} |
 
 ### 4.3 已有 Mock 清单
-> fwd-ut-generate 决定"复用既有 Mock 还是新建"的依据。
+> 10-fwd-ut-generate 决定"复用既有 Mock 还是新建"的依据。
 
 | 接口名 | Mock 文件 | 对应模块 | 是否随接口同步 | 代码证据 |
 |--------|----------|----------|----------------|----------|
@@ -91,7 +91,7 @@ confidence: {high|medium|low}
 | 黄金文件 | {如 testdata/golden/} | {回归基线} | {路径} |
 
 ## 6. 测试环境依赖
-> fwd-ut-execute-coverage 执行前需检查的环境前提。
+> 11-fwd-ut-execute-coverage 执行前需检查的环境前提。
 
 | 依赖项 | 是否必须 | 用途 | 准备方式 | 代码证据 |
 |--------|----------|------|----------|----------|

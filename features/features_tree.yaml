@@ -1,976 +1,128 @@
-# 5GC 特性树 (Features Tree)
-# ============================================================================
-# 用途：5GC 全量"特性"索引框架，作为后续反向生成详细特性文档的骨架。
-#      每个特性含 id(稳定标识)、name、brief(一句话描述)、releases(引入版本)、ref(3GPP引用)、status。
-#
-# 严格区分原则：
-#   - 仅收录 3GPP 意义上的"特性"(feature)——可被运营商选择性部署的能力
-#   - 不收录"架构原则"(SBA / CP-UP 分离 / NF Set 等)——这些是系统设计，不是可选特性
-#   - 不收录"基础流程"(initial registration / PDU session establishment / handover 等)
-#     ——这些是 5GC 基础运行机制，规范在 TS 23.502 流程章节
-#   - 不收录"基础机制"(5G-AKA / NAS 加密 / 5QI / GBR / Session-AMBR / 地址分配等)
-#     ——这些是特性下的实现细节，不独立成特性
-#
-# 版本基线：3GPP Release 15–18
-# 来源：
-#   - free5GC features: https://free5gc.org/guide/features/
-#   - 3GPP TS 23.501 (System architecture): Rel-15/16/17/18
-#   - 3GPP TS 23.502 (Procedures): Rel-15/16/17/18
-#   - 3GPP TS 23.503 (PCC): Rel-15/16/17/18
-#   - NTT DOCOMO Rel-17/18 Core overview: technical_journal vol24_3, vol26_3
-#   - 3GPP Release 16/17/18 features pages: 3gpp.org/specifications-technologies/releases
-#
-# 维护约定：
-#   - id 用 snake_case，按 类别前缀_特性名 命名，稳定不变
-#   - releases 列出引入版本及后续增强版本，例 [R15, R16] 表示 R15 引入、R16 增强
-#   - ref 留空表示纯 free5GC 工程实现特性，无 3GPP 对应条款
-#   - status: implemented=free5GC当前实现, partial=部分实现, planned=未实现
-# ============================================================================
-
 meta:
-  version: "2.0"
-  last_updated: "2026-06-21"
-  total_features: 112
-  categories: 18
-  scope: "严格特性 (3GPP feature)，排除架构原则/基础流程/基础机制"
-
-# ============================================================================
-# 特性按类别分组。每个特性是一个独立条目，便于后续按 id 拆解详细文档。
-# ============================================================================
-features:
-
-  # --------------------------------------------------------------------------
-  # 1. 漫游与跨域通信 (Roaming & Cross-Domain)
-  # --------------------------------------------------------------------------
-  - category: 漫游与跨域通信
-    items:
-      - id: roaming_home_routed_local_breakout
-        name: Roaming (Home-Routed & Local Breakout)
-        brief: hPLMN 与 vPLMN 各部署 NF，支持两种漫游路由模式
-        releases: [R15]
-        ref: "TS 23.501 §5.16"
-        status: partial
-
-      - id: roaming_sepp
-        name: Security Edge Protection Proxy (SEPP)
-        brief: 跨 PLMN SBI 通信的安全边界代理
-        releases: [R15]
-        ref: "TS 23.501 §6.2.13B, TS 29.500"
-        status: planned
-
-      - id: roaming_scp
-        name: Service Communication Proxy (SCP) — Indirect/Delegated
-        brief: SBI 通信代理，支持 indirect/delegated 通信模式
-        releases: [R15]
-        ref: "TS 23.501 §6.2.13A, TS 29.500"
-        status: planned
-
-      - id: roaming_home_routing_security
-        name: Home Routing Security
-        brief: 漫游 home-routed PDU 会话的端到端安全
-        releases: [R15]
-        ref: "TS 33.501 §6.7"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 2. 移动性与互操作 (Mobility & Interworking)
-  # --------------------------------------------------------------------------
-  - category: 移动性与互操作
-    items:
-      - id: mob_nssai_reroute
-        name: NAS Reroute on NSSAI mismatch
-        brief: 服务 AMF 无法处理 UE 切片时 NAS 重路由到目标 AMF
-        releases: [R15]
-        ref: "TS 23.502 §4.2.2.2.3"
-        status: implemented
-
-      - id: mob_5gs_eps_interworking
-        name: 5GS-EPS Interworking & Mobility
-        brief: 5G 与 4G EPC 互操作与跨系统切换
-        releases: [R15]
-        ref: "TS 23.501 §5.17, TS 23.502 §4.11"
-        status: planned
-
-      - id: mob_restricted_local_service
-        name: Mobility for Restricted Local Service
-        brief: 限定区域服务 (如 V2X/MBS) 的移动性管理
-        releases: [R17]
-        ref: "TS 23.501 §5.40"
-        status: planned
-
-      - id: mob_multi_usim
-        name: Multiple USIM Coordination
-        brief: 一台 UE 多 USIM 协调，避免寻呼冲突
-        releases: [R17]
-        ref: "TS 23.501 §5.38"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 3. 鉴权与安全特性 (Authentication & Security Features)
-  # --------------------------------------------------------------------------
-  - category: 鉴权与安全特性
-    items:
-      - id: sec_suci_protection
-        name: SUCI Protection (SUPI Privacy)
-        brief: 用运营商公钥加密 SUPI 防止 IMSI catcher
-        releases: [R15]
-        ref: "TS 33.501 §6.12"
-        status: implemented
-
-      - id: sec_oauth2_sbi
-        name: OAuth2 on SBI
-        brief: NRF 作为授权服务器，NF 调用前获取 access token
-        releases: [R15]
-        ref: "TS 29.510 §5.5"
-        status: implemented
-
-      - id: sec_rn_aa_capif
-        name: Resource-Owner-Network-API-Authorization (RNAA) for CAPIF
-        brief: 北向 API 资源拥有者授权，OAuth 2.0 机制
-        releases: [R18]
-        ref: "TS 23.501 §5.20, TS 29.222"
-        status: planned
-
-      - id: sec_snpn_ch_aaa
-        name: SNPN Authentication via CH AAA Server
-        brief: SNPN 场景通过 NSSAAF 中继 EAP 到外部 CH AAA
-        releases: [R17]
-        ref: "TS 23.501 §5.30, TS 33.501 §6.1.4"
-        status: planned
-
-      - id: sec_snpn_ausf_udm
-        name: SNPN Authentication via AUSF/UDM (CH-based)
-        brief: 漫游模型下用 AUSF/UDM 做 CH 鉴权
-        releases: [R17]
-        ref: "TS 23.501 §5.30.2"
-        status: planned
-
-      - id: sec_dcs_onboarding
-        name: SNPN UE Onboarding via Default Credential Server
-        brief: UE 用默认凭据从 DCS 获取 SNPN 正式凭据
-        releases: [R17]
-        ref: "TS 23.501 §5.30.3"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 4. 会话管理特性 (Session Management Features)
-  # --------------------------------------------------------------------------
-  - category: 会话管理特性
-    items:
-      - id: sm_ssc_mode_1
-        name: SSC Mode 1
-        brief: 会话业务连续性模式 1：UE IP 不变、UPF 不变
-        releases: [R15]
-        ref: "TS 23.501 §5.6.9"
-        status: implemented
-
-      - id: sm_ssc_mode_2_3
-        name: SSC Mode 2 & 3
-        brief: 模式2 销毁重建、模式3 重建保持 IP，需 PSA UPF 重选
-        releases: [R15]
-        ref: "TS 23.501 §5.6.9"
-        status: planned
-
-      - id: sm_ulcl
-        name: Uplink Classifier (ULCL)
-        brief: UPF 按上行流量过滤器分流到不同 PDU 会话
-        releases: [R15]
-        ref: "TS 23.501 §5.6.4, TS 23.502 §4.3.5"
-        status: implemented
-
-      - id: sm_ipv6_multi_home
-        name: IPv6 Multi-Home PDU Session (Branching Point)
-        brief: 单会话多 IPv6 前缀，按前缀分流
-        releases: [R15]
-        ref: "TS 23.501 §5.6.4"
-        status: planned
-
-      - id: sm_local_breakout
-        name: Local Breakout / Session Breakout
-        brief: 选择靠近 UE 的 PSA UPF 实现本地业务出口
-        releases: [R15]
-        ref: "TS 23.501 §5.6.4"
-        status: implemented
-
-      - id: sm_atsss
-        name: Access Traffic Steering, Switching, Splitting (ATSSS)
-        brief: 多接入 PDU 会话的流量引导/切换/分裂
-        releases: [R16]
-        ref: "TS 23.501 §5.32, TS 23.548"
-        status: planned
-
-      - id: sm_ma_pdu
-        name: Multi-Access PDU Session
-        brief: 3GPP 与非 3GPP 接入同时承载同一 PDU 会话
-        releases: [R16]
-        ref: "TS 23.501 §5.32"
-        status: planned
-
-      - id: sm_5g_lan
-        name: 5G LAN-type Service
-        brief: 5G LAN 类型会话，支持组成员间直接通信
-        releases: [R16]
-        ref: "TS 23.501 §5.27, TS 23.502 §4.4.6"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 5. QoS 与流量管理特性 (QoS & Traffic Features)
-  # --------------------------------------------------------------------------
-  - category: QoS 与流量管理特性
-    items:
-      - id: qos_reflective
-        name: Reflective QoS
-        brief: UE 从下行包反推上行 QoS 规则，无需显式下发
-        releases: [R15]
-        ref: "TS 23.501 §5.7.5"
-        status: partial
-
-      - id: qos_urlcc
-        name: URLLC QoS Enhancement
-        brief: URLLC 高可靠低时延 QoS 支持
-        releases: [R16]
-        ref: "TS 23.501 §5.29"
-        status: planned
-
-      - id: qos_redundant_transmission
-        name: Redundant Transmission for URLLC
-        brief: 双 PDU 会话双 N3 隧道冗余传输
-        releases: [R16]
-        ref: "TS 23.501 §5.29.3"
-        status: planned
-
-      - id: qos_xr_per_pdu_set
-        name: XR Per-PDU-Set QoS
-        brief: 针对扩展现实流量的 per-PDU-set 处理，拥塞时优先关键包
-        releases: [R18]
-        ref: "TS 23.501 §5.33"
-        status: planned
-
-      - id: qos_xr_power_saving
-        name: XR Device Power Saving
-        brief: 调整连接态 DRX 以匹配媒体流周期与突发性
-        releases: [R18]
-        ref: "TS 23.501 §5.33.3"
-        status: planned
-
-      - id: qos_l4s_ecn
-        name: L4S ECN Support
-        brief: 低时延低损耗拥塞控制的 ECN 标记
-        releases: [R18]
-        ref: "TS 23.501 §5.33.4"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 6. 网络切片 (Network Slicing)
-  # --------------------------------------------------------------------------
-  - category: 网络切片
-    items:
-      - id: ns_basic
-        name: Network Slicing Basic
-        brief: S-NSSAI(SST+SD) 标识切片，NSSF 选 AMF/SMF
-        releases: [R15]
-        ref: "TS 23.501 §5.15"
-        status: implemented
-
-      - id: ns_nssaa
-        name: Network Slice-Specific Authentication & Authorization (NSSAA)
-        brief: 对切片访问的二次 EAP 鉴权授权
-        releases: [R16]
-        ref: "TS 23.501 §5.15.10"
-        status: planned
-
-      - id: ns_nsacf
-        name: Network Slice Admission Control (NSACF)
-        brief: 监控并限制每切片 UE 数与 PDU 会话数
-        releases: [R17]
-        ref: "TS 23.501 §6.2.18, TS 29.536"
-        status: planned
-
-      - id: ns_early_admission
-        name: Early Admission Control for Slicing
-        brief: AMF 在 NSACF 配额检查完成前先接受注册以降低延迟
-        releases: [R17]
-        ref: "TS 23.501 §5.15.11"
-        status: planned
-
-      - id: ns_ue_slice_mbr
-        name: UE Slice Maximum Bit Rate
-        brief: 控制单 UE 在指定切片的总比特率
-        releases: [R17]
-        ref: "TS 23.501 §5.15.13"
-        status: planned
-
-      - id: ns_slice_wide_mbr
-        name: Slice-wide Data Rate Control
-        brief: PCF/UDR 限制切片内所有 UE 的聚合速率
-        releases: [R17]
-        ref: "TS 23.501 §5.15.14"
-        status: planned
-
-      - id: ns_nssrg
-        name: Simultaneous Slice Registration Restrictions (NSSRG)
-        brief: UDM 存 NSSRG 数据，AMF 阻止不允许的并发切片访问
-        releases: [R17]
-        ref: "TS 23.501 §5.15.15"
-        status: planned
-
-      - id: ns_slice_specific_freq
-        name: Slice-specific Frequency Band Redirection
-        brief: AMF 把目标 NSSAI 发给 RAN，引导 UE 重定向到支持该切片的小区
-        releases: [R17]
-        ref: "TS 23.501 §5.15.12"
-        status: planned
-
-      - id: ns_temporary_slice
-        name: Temporary Network Slice Availability
-        brief: 支持限时有效切片，切片不可用时优雅处理
-        releases: [R18]
-        ref: "TS 23.501 §5.15.16"
-        status: planned
-
-      - id: ns_slice_replacement
-        name: Network Slice Replacement
-        brief: 临时把不可用或拥塞的 S-NSSAI 映射到替代切片
-        releases: [R18]
-        ref: "TS 23.501 §5.15.17"
-        status: planned
-
-      - id: ns_slice_usage_control
-        name: Network Slice Usage Control
-        brief: 网络引导 UE 仅在应用需要时使用切片
-        releases: [R18]
-        ref: "TS 23.501 §5.15.18"
-        status: planned
-
-      - id: ns_slice_service_area
-        name: Slice Service Area Restrictions
-        brief: 支持不与 TA 边界对齐的切片可用性区域
-        releases: [R18]
-        ref: "TS 23.501 §5.15.19"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 7. 策略控制特性 (Policy Control Features)
-  # --------------------------------------------------------------------------
-  - category: 策略控制特性
-    items:
-      - id: pcc_ue_policy
-        name: UE Policy Delivery (URSP/ANDSP/V2XP)
-        brief: 通过 NAS 下发 UE Policy，含 URSP 路由选择策略
-        releases: [R15]
-        ref: "TS 23.502 §4.20, TS 29.525"
-        status: partial
-
-      - id: pcc_policy_authorization
-        name: Policy Authorization (AF→PCF)
-        brief: AF 通过 PCF 申请资源预留与 QoS
-        releases: [R15]
-        ref: "TS 29.514"
-        status: partial
-
-      - id: pcc_bsf_binding
-        name: BSF PCC Session Binding
-        brief: BSF 把 UE IP 绑定到 SUPI/DNN/S-NSSAI/PCF ID
-        releases: [R15]
-        ref: "TS 29.521"
-        status: implemented
-
-      - id: pcc_traffic_influence
-        name: Traffic Influence (AF→UPF Routing)
-        brief: AF 影响 UPF 路由，把流量导向指定 DNAI
-        releases: [R15]
-        ref: "TS 23.502 §4.3.6, TS 29.522"
-        status: implemented
-
-      - id: pcc_smf_backoff
-        name: SMF Back-off & DBDD
-        brief: 拥塞时 SMF 通知 UE 推迟会话建立
-        releases: [R15]
-        ref: "TS 23.501 §5.19"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 8. 计费特性 (Charging Features)
-  # --------------------------------------------------------------------------
-  - category: 计费特性
-    items:
-      - id: chg_converged
-        name: Converged Charging
-        brief: 在线+离线合一，SMF 经 N40 上报 Usage Report
-        releases: [R15]
-        ref: "TS 32.255, TS 29.594"
-        status: implemented
-
-      - id: chg_fbc
-        name: Flow-based Charging (FBC)
-        brief: 基于业务流的计费 (Rating Group + Service ID)
-        releases: [R15]
-        ref: "TS 32.255"
-        status: implemented
-
-      - id: chg_roaming
-        name: Roaming Charging
-        brief: 漫游场景的计费分离 (hPLMN/vPLMN)
-        releases: [R15]
-        ref: "TS 32.255, TS 32.256"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 9. 网络能力开放 (Network Exposure & APIs)
-  # --------------------------------------------------------------------------
-  - category: 网络能力开放
-    items:
-      - id: exp_nef_basic
-        name: NEF Basic Exposure
-        brief: 对 AF/第三方暴露 5GC 能力，做鉴权与转译
-        releases: [R15]
-        ref: "TS 23.501 §6.2.10, TS 29.522"
-        status: implemented
-
-      - id: exp_event_exposure
-        name: Event Exposure (UE reachability/loc/loss)
-        brief: AF 订阅 UE 事件 (可达/位置/丢失连接)
-        releases: [R15]
-        ref: "TS 23.502 §4.24"
-        status: implemented
-
-      - id: exp_pfd_management
-        name: PFD Management
-        brief: NEF 管理应用包的 Packet Flow Description
-        releases: [R15]
-        ref: "TS 29.551"
-        status: implemented
-
-      - id: exp_parameter_provision
-        name: Parameter Provision
-        brief: AF 向 5GC 提供应用参数 (预期 UE 行为)
-        releases: [R15]
-        ref: "TS 23.502 §4.15"
-        status: partial
-
-      - id: exp_capif
-        name: Common API Framework (CAPIF)
-        brief: 统一 API 框架，含 API provider/invoker/_publish
-        releases: [R15]
-        ref: "TS 23.222"
-        status: planned
-
-      - id: exp_intent_driven_mgmt
-        name: Intent Driven Management
-        brief: 运营商用 intent 描述期望结果，自动编排
-        releases: [R18]
-        ref: "TS 28.31x"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 10. 数据分析与 AI/ML (Analytics & AI/ML)
-  # --------------------------------------------------------------------------
-  - category: 数据分析与 AI
-    items:
-      - id: ai_nwdaf_basic
-        name: NWDAF Basic Analytics
-        brief: 网络数据分析功能，向 NF/AF 提供切片/UE/会话级统计
-        releases: [R15]
-        ref: "TS 23.501 §6.2.11, TS 29.520"
-        status: planned
-
-      - id: ai_nwdaf_ml_split
-        name: NWDAF AI/ML Functional Split (MTLF & AnLF)
-        brief: MTLF 训练模型，AnLF 推理，可分离部署
-        releases: [R18]
-        ref: "TS 23.501 §6.2.11"
-        status: planned
-
-      - id: ai_ml_model_sharing
-        name: ML Model Sharing Service
-        brief: Nnwdaf_MLModel 让 MTLF 把训练好的模型给 AnLF
-        releases: [R18]
-        ref: "TS 29.520"
-        status: planned
-
-      - id: ai_dccf
-        name: Data Collection Coordination Function (DCCF)
-        brief: 协调数据请求，避免重复采集
-        releases: [R18]
-        ref: "TS 23.501 §6.2.20"
-        status: planned
-
-      - id: ai_mfaf
-        name: Messaging Framework Adaptor Function (MFAF)
-        brief: 5GS 与非标准化消息框架交互
-        releases: [R18]
-        ref: "TS 23.501 §6.2.21"
-        status: planned
-
-      - id: ai_adrf
-        name: Analytics Data Repository Function (ADRF)
-        brief: 存储与检索采集数据和分析结果
-        releases: [R18]
-        ref: "TS 23.501 §6.2.22"
-        status: planned
-
-      - id: ai_analytics_sm_cc
-        name: SM Congestion Control Analytics
-        brief: 拥塞控制执行统计
-        releases: [R18]
-        ref: "TS 23.288 §6.4"
-        status: planned
-
-      - id: ai_analytics_redundant
-        name: Redundant Transmission Experience Analytics
-        brief: 评估冗余传输对 URLLC 的有效性
-        releases: [R18]
-        ref: "TS 23.288 §6.6"
-        status: planned
-
-      - id: ai_analytics_wlan
-        name: WLAN Performance Analytics
-        brief: 评估 UE 的 WLAN 性能
-        releases: [R18]
-        ref: "TS 23.288 §6.7"
-        status: planned
-
-      - id: ai_analytics_dispersion
-        name: Dispersion Analytics
-        brief: 识别高使用率的位置/切片/UE
-        releases: [R18]
-        ref: "TS 23.288 §6.13"
-        status: planned
-
-      - id: ai_analytics_dn_perf
-        name: Data Network Performance Analytics
-        brief: 评估边缘应用的用户性能
-        releases: [R18]
-        ref: "TS 23.288 §6.10"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 11. 非 3GPP 接入与多接入 (Non-3GPP & Multi-Access)
-  # --------------------------------------------------------------------------
-  - category: 非 3GPP 接入与多接入
-    items:
-      - id: access_untrusted_non3gpp
-        name: Untrusted Non-3GPP Access (N3IWF)
-        brief: 不可信非 3GPP (如公共 Wi-Fi) 经 N3IWF 接入 5GC
-        releases: [R15]
-        ref: "TS 23.501 §5.2"
-        status: implemented
-
-      - id: access_trusted_non3gpp
-        name: Trusted Non-3GPP Access (TNGF)
-        brief: 可信非 3GPP 接入网关
-        releases: [R16]
-        ref: "TS 23.501 §5.2, TS 23.316"
-        status: implemented
-
-      - id: access_wagf
-        name: Wireline Access Gateway Function (W-AGF)
-        brief: 有线接入 (5G-RG/FN-RG) 网关
-        releases: [R16]
-        ref: "TS 23.316"
-        status: planned
-
-      - id: access_twif
-        name: Trusted WLAN Interworking Function (TWIF)
-        brief: 可信 WLAN 互通
-        releases: [R16]
-        ref: "TS 23.316"
-        status: planned
-
-      - id: access_ntn
-        name: Non-Terrestrial Networks (NTN) Access
-        brief: 卫星接入 5GC，适配长时延与移动小区
-        releases: [R17]
-        ref: "TS 23.501 §5.4.2"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 12. TSN 与确定性通信 (TSN & Deterministic)
-  # --------------------------------------------------------------------------
-  - category: TSN 与确定性通信
-    items:
-      - id: tsn_integration
-        name: TSN Integration with 5GS
-        brief: 5GS 作为 TSN 网桥接入 IEEE 802.1 TSN 网络
-        releases: [R16]
-        ref: "TS 23.501 §5.27, TS 23.502 §4.4.8"
-        status: planned
-
-      - id: tsn_time_sync
-        name: 5G Timing Service / Time Synchronization
-        brief: 5GS 向 UE 提供时间同步 (PTP/ASTI)
-        releases: [R16]
-        ref: "TS 23.501 §5.27.2"
-        status: planned
-
-      - id: tsn_time_resilience
-        name: Timing Service Resilience
-        brief: 时钟质量标准/度量/劣化通知
-        releases: [R18]
-        ref: "TS 23.501 §5.27.2"
-        status: planned
-
-      - id: tsn_coverage_control
-        name: Timing-service Coverage Control
-        brief: AF 按区域启用/禁用 PTP/ASTI
-        releases: [R18]
-        ref: "TS 23.501 §5.27.2"
-        status: planned
-
-      - id: tsn_subscriber_controlled
-        name: Subscriber-controlled Timing Services
-        brief: UDM 签约数据控制时间同步参数
-        releases: [R18]
-        ref: "TS 23.501 §5.27.2"
-        status: planned
-
-      - id: tsn_tn_integration
-        name: TSN Integration in Transport Network
-        brief: 5GS QoS 与流量需求暴露给 TN 做 TSN 控制
-        releases: [R18]
-        ref: "TS 23.501 §5.27.3"
-        status: planned
-
-      - id: tsn_rr_alignment
-        name: Radio-Resource Alignment for Deterministic Streams
-        brief: NG-RAN 向 AF 提供突发到达时间偏移与调整后周期
-        releases: [R18]
-        ref: "TS 23.501 §5.27.4"
-        status: planned
-
-      - id: tsn_detnet
-        name: IETF DetNet Support
-        brief: 5GS 作为 DetNet transit router 处理确定性 IP 流
-        releases: [R18]
-        ref: "TS 23.501 §5.35"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 13. 物联网与垂直行业 (IoT & Verticals)
-  # --------------------------------------------------------------------------
-  - category: 物联网与垂直行业
-    items:
-      - id: iot_ciot_5gs
-        name: Cellular IoT 5GS Optimization
-        brief: 控制面 CIoT 5GS 优化 (小数据传输)
-        releases: [R16]
-        ref: "TS 23.501 §5.31.1"
-        status: planned
-
-      - id: iot_nidd
-        name: Non-IP Data Delivery (NIDD)
-        brief: 非 IP 数据通过 NEF/SMF 传输
-        releases: [R15]
-        ref: "TS 23.502 §4.25"
-        status: partial
-
-      - id: iot_positioning
-        name: High-Precision Positioning
-        brief: 基于 NR 的厘米级定位 (DL-TDOA/AoA/RTK)
-        releases: [R16]
-        ref: "TS 23.501 §5.5, TS 37.355"
-        status: planned
-
-      - id: iot_v2x
-        name: Enhanced V2X (eV2X)
-        brief: 车联网增强：编队/远程驾驶/扩展传感器/半自动驾驶
-        releases: [R16]
-        ref: "TS 23.285, TS 23.501 §5.4.2"
-        status: planned
-
-      - id: iot_ambient
-        name: Ambient IoT (Passive IoT)
-        brief: 无电池/无源 IoT 设备通过反向散射通信
-        releases: [R18]
-        ref: "TS 23.501 §5.39"
-        status: planned
-
-      - id: iot_redcap
-        name: Reduced Capability UEs (RedCap)
-        brief: 降低复杂度的 NR UE，适配可穿戴/工业传感器
-        releases: [R17]
-        ref: "TS 23.501 §5.34"
-        status: planned
-
-      - id: iot_mt_edrx
-        name: IoT Mobile Terminated EDT/eDRX
-        brief: 物联网终端的扩展 DRX 与移动终端早传
-        releases: [R15]
-        ref: "TS 23.501 §5.31.4"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 14. 语音与 IMS (Voice & IMS)
-  # --------------------------------------------------------------------------
-  - category: 语音与 IMS
-    items:
-      - id: voice_vonr
-        name: Voice over NR (VoNR)
-        brief: 基于 IMS 的 5G NR 语音
-        releases: [R15]
-        ref: "TS 23.501 §5.16"
-        status: planned
-
-      - id: voice_eps_fallback
-        name: EPS Fallback for Voice
-        brief: 5G NR 不支持 VoNR 时回退到 EPS 做语音
-        releases: [R15]
-        ref: "TS 23.502 §4.13"
-        status: planned
-
-      - id: voice_ims_emergency
-        name: IMS Emergency Services
-        brief: 紧急呼叫与定位
-        releases: [R15]
-        ref: "TS 23.502 §4.14"
-        status: planned
-
-      - id: voice_sms_nas
-        name: SMS over NAS
-        brief: 通过 NAS 短消息传输，不依赖 IMS
-        releases: [R15]
-        ref: "TS 23.502 §4.13"
-        status: planned
-
-      - id: voice_snpn_ims
-        name: IMS Voice & Emergency for SNPN
-        brief: SNPN 场景下 IMS 语音与紧急服务
-        releases: [R17]
-        ref: "TS 23.501 §5.30.5"
-        status: planned
-
-      - id: voice_pws_snpn
-        name: Public Warning System (PWS) for SNPN
-        brief: SNPN 上的 PWS (ETWS/CMAS)
-        releases: [R17]
-        ref: "TS 23.501 §5.30.6"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 15. 非公众网络 (Non-Public Networks)
-  # --------------------------------------------------------------------------
-  - category: 非公众网络
-    items:
-      - id: npn_pni
-        name: Public Network Integrated NPN (PNI-NPN)
-        brief: 公网承载的 NPN，用 CAG (Closed Access Group) 接入控制
-        releases: [R16]
-        ref: "TS 23.501 §5.30"
-        status: planned
-
-      - id: npn_snpn
-        name: Standalone NPN (SNPN)
-        brief: 独立部署的非公众网络，不依赖 PLMN
-        releases: [R16]
-        ref: "TS 23.501 §5.30"
-        status: planned
-
-      - id: npn_snpn_onboarding
-        name: SNPN UE Onboarding
-        brief: UE 用默认凭据从 provisioning server 获取 SNPN 凭据
-        releases: [R17]
-        ref: "TS 23.501 §5.30.3"
-        status: planned
-
-      - id: npn_plmn_via_snpn
-        name: PLMN use of SNPN Radio Access
-        brief: PLMN 运营商把 SNPN 当作无线接入使用
-        releases: [R17]
-        ref: "TS 23.501 §5.30.7"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 16. 边缘计算 (Edge Computing)
-  # --------------------------------------------------------------------------
-  - category: 边缘计算
-    items:
-      - id: edge_basic
-        name: Edge Computing Basic Support
-        brief: AF 流量影响 + DNAI + PSA UPF 选择实现边缘业务
-        releases: [R15]
-        ref: "TS 23.501 §5.13"
-        status: partial
-
-      - id: edge_easdf
-        name: EASDF-based EAS Discovery
-        brief: EASDF 把 EAS FQDN 映射到附近 EAS IP
-        releases: [R17]
-        ref: "TS 23.501 §5.13, TS 23.548"
-        status: planned
-
-      - id: edge_dynamic_breakout
-        name: Dynamic Session Breakout with EASDF
-        brief: DNS 响应触发 SMF 加 ULCL/BP 或迁 PSA UPF
-        releases: [R17]
-        ref: "TS 23.548"
-        status: planned
-
-      - id: edge_eas_relocation
-        name: Edge Application Server Relocation
-        brief: EAS 变更触发的 PSA UPF 重定位、缓冲与延迟感知重定位
-        releases: [R17]
-        ref: "TS 23.548"
-        status: planned
-
-      - id: edge_app_controlled_easdf
-        name: Application-controlled EASDF Configuration
-        brief: 应用层向 5GC 控制面提供 EAS 部署数据
-        releases: [R17]
-        ref: "TS 23.548"
-        status: planned
-
-      - id: edge_ur_sp_routing
-        name: URSP-based Edge Traffic Routing
-        brief: UE 路由选择策略把应用流量导向合适的边缘 PDU 会话
-        releases: [R17]
-        ref: "TS 23.501 §5.6.12, TS 24.526"
-        status: planned
-
-      - id: edge_app_layer_arch
-        name: 3GPP Edge Application Layer Architecture
-        brief: ECS/EEC/EES/EAS 实体交互
-        releases: [R17]
-        ref: "TS 23.558"
-        status: planned
-
-      - id: edge_service_provisioning
-        name: Edge Service Provisioning
-        brief: ECS 向 EEC 提供 edge service 配置 (含 EES 地址)
-        releases: [R17]
-        ref: "TS 23.558"
-        status: planned
-
-      - id: edge_entity_registration
-        name: Edge Entity Registration
-        brief: EEC/EES/ECS/EAS 间注册/更新/删除
-        releases: [R17]
-        ref: "TS 23.558"
-        status: planned
-
-      - id: edge_service_continuity
-        name: Edge Service Continuity (Application Context Relocation)
-        brief: EEC 上下文迁移与 ACR 在源/目标 EAS 间
-        releases: [R17]
-        ref: "TS 23.558"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 17. 多播广播 (Multicast/Broadcast)
-  # --------------------------------------------------------------------------
-  - category: 多播广播
-    items:
-      - id: mbs_basic
-        name: 5MBS Basic (Multicast & Broadcast)
-        brief: 5G 多播广播服务，MBSF/MBSF-AF/MB-UPF/MB-SMF
-        releases: [R17]
-        ref: "TS 23.247"
-        status: planned
-
-      - id: mbs_session_mgmt
-        name: Multicast/Broadcast Session Management
-        brief: 多播会话建立/加入/离开/释放
-        releases: [R17]
-        ref: "TS 23.247"
-        status: planned
-
-      - id: mbs_service_area
-        name: MBS Service Area
-        brief: 定义多播广播业务生效区域
-        releases: [R17]
-        ref: "TS 23.247"
-        status: planned
-
-  # --------------------------------------------------------------------------
-  # 18. 无人机与特殊场景 (UAV & Special Scenarios)
-  # --------------------------------------------------------------------------
-  - category: 无人机与特殊场景
-    items:
-      - id: uav_basic
-        name: UAV (Drone) Support
-        brief: 无人机 UE 识别、订阅、飞行轨迹与控制
-        releases: [R17]
-        ref: "TS 23.255"
-        status: planned
-
-      - id: uav_uas_nf
-        name: UAS Network Function (UAS NF)
-        brief: 与 C2 (Command & Control) 通信系统交互
-        releases: [R17]
-        ref: "TS 23.255"
-        status: planned
-
-      - id: scenario_mc_service
-        name: Mission Critical over 5G (MCX)
-        brief: MCPTT/MCData/MCVideo over 5GS
-        releases: [R17]
-        ref: "TS 23.280/281/282"
-        status: planned
-
-      - id: scenario_nes
-        name: Network Energy Saving
-        brief: NF/UPF/RAN 协同节能，按需关停
-        releases: [R18]
-        ref: "TS 23.501 §5.41"
-        status: planned
-
-# ============================================================================
-# 已排除的内容（不属于"特性"）
-# ============================================================================
-# 以下内容在 v1.0 中曾收录，v2.0 按严格特性定义移除：
-#
-# 【架构原则】— 系统设计，不是可选特性
-#   - Service-Based Architecture (SBA)
-#   - Control / User Plane Separation
-#   - NF Set & Stateless
-#   - UDSF (Unstructured Data Storage Function)
-#
-# 【基础流程】— 5GC 基础运行机制，规范在 TS 23.502 流程章节
-#   - Initial / Periodic / Mobility Registration
-#   - Registration without Authentication
-#   - UE/Network-initiated Deregistration
-#   - UE/Network-triggered Service Request
-#   - AN Release
-#   - N2 Handover / Xn Handover (基础变体)
-#   - PDU Session Establishment / Modification / release
-#   - IPv4/IPv6 Address Allocation
-#   - Multiple DNN
-#   - Multiple UPF & PSA Selection
-#   - QoS Flow Establishment & Modification
-#   - AM Policy Control / SM Policy Control (基础流程)
-#
-# 【基础机制】— 特性下的实现细节，不独立成特性
-#   - 5G-AKA / EAP-AKA' (鉴权协议本身)
-#   - NAS Ciphering (NEA0-3) / NAS Integrity (NIA0-3)
-#   - User Plane Security (基础)
-#   - SBI TLS (基础安全)
-#   - 5QI & ARP / GBR & MBR / Session-AMBR / UE-AMBR (基础 QoS 参数)
-#   - Offline/Online Charging (基础计费模式)
-#   - Volume/Time/Event Measurement (基础计量)
-#
-# 这些内容如需文档化，建议放在单独的 `procedures/` 或 `architecture/` 目录下，
-# 不混入 features 索引。
-
-# ============================================================================
-# 反向生成详细特性文档的模板约定
-# ============================================================================
-# 后续按 id 扩展时，每个特性文档应包含以下结构 (markdown)：
-#
-#   # {feature.name}
-#   - **ID**: {feature.id}
-#   - **Release**: {feature.releases}
-#   - **3GPP Ref**: {feature.ref}
-#   - **Status**: free5GC {feature.status}
-#
-#   ## 1. 背景与目标
-#   ## 2. 涉及的 Network Functions
-#   ## 3. 关键流程 (sequence diagram)
-#   ## 4. 接口与消息
-#   ## 5. 关键数据结构 / IE
-#   ## 6. 配置项 (free5GC yaml)
-#   ## 7. 测试点 / 验证清单
-#   ## 8. free5GC 代码位置 (按 NF 模块)
-#   ## 9. 已知限制与未实现部分
-#   ## 10. 相关特性 (按 id 引用)
-#
-# 文件命名：features/detailed/{category_id}/{feature_id}.md
-# ============================================================================
+  schema: root_feature_index_v1
+  version: '4.0'
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  scope: 严格特性 (3GPP feature)，排除架构原则/基础流程/基础机制；本文件只做根索引，只列 L1 特性，L2 及以下见各目录 feature.yaml
+  root_path: features/
+  index_level: root
+  child_level: L1
+  stats:
+    l1_count: 18
+    feature_count: 130
+    implemented_count: 16
+    partial_count: 19
+    planned_count: 95
+    scenario_count: 301
+    leaf_count: 112
+    leaf_with_spec_count: 112
+    leaf_with_scenario_count: 112
+child_features:
+- id: cat_roaming_cross_domain
+  name: 漫游与跨域通信
+  description: 漫游与跨 PLMN/跨域通信相关特性，含归属路由/本地疏导、SEPP/SCP 代理、漫游安全。
+  status: partial
+  level: L1
+  path: 漫游与跨域通信/feature.yaml
+- id: cat_mobility_interworking
+  name: 移动性与互操作
+  description: UE 移动性管理与跨系统互操作相关特性，含切片重路由、5GS-EPS 互操作、受限服务移动性、多 USIM 协调。
+  status: partial
+  level: L1
+  path: 移动性与互操作/feature.yaml
+- id: cat_authentication_security
+  name: 鉴权与安全特性
+  description: 5GC 鉴权与安全相关特性，含 SUCI/SUPI 隐私保护、SBI 上的 OAuth2 授权、CAPIF RNAA、SNPN 多种鉴权模式、DCS 入网。
+  status: partial
+  level: L1
+  path: 鉴权与安全特性/feature.yaml
+- id: cat_session_management
+  name: 会话管理特性
+  description: PDU 会话管理相关特性，含 SSC 模式、上行分类器、IPv6 多归属、本地疏导、多接入会话、5G LAN。
+  status: partial
+  level: L1
+  path: 会话管理特性/feature.yaml
+- id: cat_qos_traffic
+  name: QoS 与流量管理特性
+  description: QoS 与流量管理相关特性，含反射式 QoS、URLLC 增强、XR 业务 QoS、L4S ECN。
+  status: partial
+  level: L1
+  path: QoS 与流量管理特性/feature.yaml
+- id: cat_network_slicing
+  name: 网络切片
+  description: 网络切片相关特性，含基础切片、NSSAA、NSACF、提前准入、切片级 MBR、NSSRG、切片专用频段、临时切片、切片替换、切片使用控制、切片服务区域。
+  status: partial
+  level: L1
+  path: 网络切片/feature.yaml
+- id: cat_policy_control
+  name: 策略控制特性
+  description: 策略控制相关特性，含 UE 策略下发、AF 策略授权、BSF PCC 绑定、流量影响、SMF 退避。
+  status: partial
+  level: L1
+  path: 策略控制特性/feature.yaml
+- id: cat_charging
+  name: 计费特性
+  description: 计费相关特性，含融合计费、基于业务流的计费、漫游计费。
+  status: partial
+  level: L1
+  path: 计费特性/feature.yaml
+- id: cat_exposure
+  name: 网络能力开放
+  description: 网络能力对 AF/第三方开放，含 NEF 基础、事件开放、PFD 管理、参数预配置、CAPIF、意图驱动管理。
+  status: partial
+  level: L1
+  path: 网络能力开放/feature.yaml
+- id: cat_analytics_ai
+  name: 数据分析与 AI
+  description: 网络数据分析与 AI/ML 相关特性，含 NWDAF 基础、AI/ML 功能拆分、模型共享、DCCF/MFAF/ADRF、各类分析能力。
+  status: planned
+  level: L1
+  path: 数据分析与 AI/feature.yaml
+- id: cat_non_3gpp_access
+  name: 非 3GPP 接入与多接入
+  description: 非 3GPP 接入与多接入相关特性，含 N3IWF/TNGF/W-AGF/TWIF/NTN。
+  status: partial
+  level: L1
+  path: 非 3GPP 接入与多接入/feature.yaml
+- id: cat_tsn_deterministic
+  name: TSN 与确定性通信
+  description: TSN 与确定性通信相关特性，含 TSN 集成、时间同步、定时服务弹性/覆盖控制/签约控制、TN 集成、无线资源对齐、DetNet。
+  status: planned
+  level: L1
+  path: TSN 与确定性通信/feature.yaml
+- id: cat_iot_vertical
+  name: 物联网与垂直行业
+  description: 物联网与垂直行业相关特性，含 CIoT 5GS 优化、NIDD、高精度定位、V2X、环境物联网、RedCap、EDT/eDRX。
+  status: partial
+  level: L1
+  path: 物联网与垂直行业/feature.yaml
+- id: cat_voice_ims
+  name: 语音与 IMS
+  description: 语音与 IMS 相关特性，含 VoNR、EPS Fallback、IMS 紧急呼叫、基于NAS的SMS、SNPN IMS 与 PWS。
+  status: planned
+  level: L1
+  path: 语音与 IMS/feature.yaml
+- id: cat_npn
+  name: 非公众网络
+  description: 非公众网络相关特性，含 PNI-NPN、SNPN、SNPN 入网、PLMN 复用 SNPN 无线接入。
+  status: planned
+  level: L1
+  path: 非公众网络/feature.yaml
+- id: cat_edge_computing
+  name: 边缘计算
+  description: 边缘计算相关特性，含基础边缘、EASDF/EAS 发现、动态会话疏导、EAS 重定位、应用控制 EASDF、URSP 边缘路由、边缘应用层架构、边缘服务下发、实体注册、业务连续性。
+  status: partial
+  level: L1
+  path: 边缘计算/feature.yaml
+- id: cat_mbs
+  name: 多播广播
+  description: 5G 多播广播相关特性，含 5MBS 基础、会话管理、服务区域。
+  status: planned
+  level: L1
+  path: 多播广播/feature.yaml
+- id: cat_uav_special
+  name: 无人机与特殊场景
+  description: 无人机与关键任务通信、网络节能等特殊场景，含 UAV 基础、UAS NF、MCX、网络节能。
+  status: planned
+  level: L1
+  path: 无人机与特殊场景/feature.yaml

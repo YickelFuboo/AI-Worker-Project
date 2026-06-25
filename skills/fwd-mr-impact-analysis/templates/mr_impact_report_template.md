@@ -83,7 +83,7 @@ confidence: {high|medium|low}
 | 跨仓调用关系同步 | 本仓 spec.md §4.2 ↔ 下游仓 spec.md §4.2 | 调用关系一致 | 高 |
 
 ## 7. 测试建议
-> 供 fwd-ut-generate / fwd-regression-test-select 执行。
+> 供 10-fwd-ut-generate / fwd-regression-test-select 执行。
 
 | 测试层级 | 建议 | 用例数 | 代码证据 |
 |----------|------|--------|----------|

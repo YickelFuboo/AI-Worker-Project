@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_session_management
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: sm_ssc_mode_2_3
+  name: SSC模式2和3
+  description: 模式2 销毁重建、模式3 重建保持 IP，需 PSA UPF 重选
+  releases:
+  - R15
+  ref: TS 23.501 §5.6.9
+  status: planned
+  level: L2
+  path: features/会话管理特性/SSC模式2和3/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: SSC模式2和3会话建立成功
+  description: UE成功建立满足SSC模式2和3约束的PDU会话。
+  scenario_type: 成功场景
+  path: SCENARIO_001_SSC模式2和3会话建立成功_场景流程.md
+- id: SCENARIO_002
+  name: SSC模式2和3会话变更成功
+  description: 会话策略、路径或锚点按SSC模式2和3发生变更。
+  scenario_type: 迁移场景
+  path: SCENARIO_002_SSC模式2和3会话变更成功_场景流程.md
+- id: SCENARIO_003
+  name: SSC模式2和3会话建立失败
+  description: 订阅、策略或网络能力不满足导致SSC模式2和3失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_SSC模式2和3会话建立失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md

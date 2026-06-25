@@ -1,0 +1,89 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_iot_vertical
+  name: 物联网与垂直行业
+  description: 物联网与垂直行业相关特性，含 CIoT 5GS 优化、NIDD、高精度定位、V2X、环境物联网、RedCap、EDT/eDRX。
+  status: partial
+  level: L1
+  path: features/物联网与垂直行业/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: iot_ciot_5gs
+  name: 蜂窝IoT 5GS优化
+  description: 控制面 CIoT 5GS 优化 (小数据传输)
+  status: planned
+  level: L2
+  path: 蜂窝IoT_5GS优化/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.31.1
+- id: iot_nidd
+  name: 非IP数据传送NIDD
+  description: 非 IP 数据通过 NEF/SMF 传输
+  status: partial
+  level: L2
+  path: 非IP数据传送NIDD/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.25
+- id: iot_positioning
+  name: 高精度定位
+  description: 基于 NR 的厘米级定位 (DL-TDOA/AoA/RTK)
+  status: planned
+  level: L2
+  path: 高精度定位/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.5, TS 37.355
+- id: iot_v2x
+  name: 增强型V2X
+  description: 车联网增强：编队/远程驾驶/扩展传感器/半自动驾驶
+  status: planned
+  level: L2
+  path: 增强型V2X/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.285, TS 23.501 §5.4.2
+- id: iot_ambient
+  name: 环境IoT
+  description: 无电池/无源 IoT 设备通过反向散射通信
+  status: planned
+  level: L2
+  path: 环境IoT/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.39
+- id: iot_redcap
+  name: RedCap低能力UE
+  description: 降低复杂度的 NR UE，适配可穿戴/工业传感器
+  status: planned
+  level: L2
+  path: RedCap低能力UE/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.34
+- id: iot_mt_edrx
+  name: IoT移动终止EDT和eDRX
+  description: 物联网终端的扩展 DRX 与移动终端早传
+  status: planned
+  level: L2
+  path: IoT移动终止EDT和eDRX/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.31.4
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

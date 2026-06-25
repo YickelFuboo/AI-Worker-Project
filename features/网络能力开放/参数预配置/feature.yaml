@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_exposure
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: exp_parameter_provision
+  name: 参数预配置
+  description: AF 向 5GC 提供应用参数 (预期 UE 行为)
+  releases:
+  - R15
+  ref: TS 23.502 §4.15
+  status: partial
+  level: L2
+  path: features/网络能力开放/参数预配置/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 参数预配置能力开放成功
+  description: AF通过参数预配置获得网络能力开放结果。
+  scenario_type: 开放场景
+  path: SCENARIO_001_参数预配置能力开放成功_场景流程.md
+- id: SCENARIO_002
+  name: 参数预配置授权失败
+  description: AF授权、参数或策略不满足导致参数预配置失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_参数预配置授权失败_场景流程.md
+- id: SCENARIO_003
+  name: 参数预配置订阅更新
+  description: 业务方更新参数预配置相关订阅或参数。
+  scenario_type: 开放场景
+  path: SCENARIO_003_参数预配置订阅更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md

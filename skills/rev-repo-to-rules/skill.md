@@ -25,7 +25,7 @@
 - 需要将"老手才知道的坑与最佳实践"显式化,如某接口必须走封装层、某定时器必须配套取消、某错误码必须上报
 - MR 检视意见沉淀的修改模式需要从候选报告转为正式规则
 - 作为 `rev-repo-to-spec-and-design` 的补充,在仓级 `spec.md` / `design.md` 生成后触发
-- 正向开发阶段,`fwd-generate-code` / `fwd-code-compliance-check` / `fwd-ut-generate` 按需加载 rules/ 下相关文件
+- 正向开发阶段,`08-fwd-generate-code` / `09-fwd-code-compliance-check` / `10-fwd-ut-generate` 按需加载 rules/ 下相关文件
 
 ## 工作方式
 

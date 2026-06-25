@@ -42,7 +42,7 @@
 5. **跨仓影响分析**：基于 `spec.md` §4.2 跨仓调用关系，识别本 MR 变更是否影响下游仓的调用方，列出需通知的下游仓清单及对应 spec.md 引用
 6. **文档刷新建议**：列出本次 MR 需刷新的 .agent/*.md 章节（精确到章节号），供 fwd-doc-sync 执行
 7. **一致性校验建议**：列出本次 MR 触发的一致性规则（如接口签名三处一致、配置项与 spec 同步），供 qa-artifact-auto-verify 执行
-8. **测试建议**：列出需新增/回归的测试用例（UT/IT/E2E 层级），供 fwd-ut-generate / fwd-regression-test-select 执行
+8. **测试建议**：列出需新增/回归的测试用例（UT/IT/E2E 层级），供 10-fwd-ut-generate / fwd-regression-test-select 执行
 9. **生成影响分析报告**：按模板输出
 
 ### 注意事项

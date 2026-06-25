@@ -1,0 +1,53 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_authentication_security
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: sec_rn_aa_capif
+  name: CAPIF资源拥有者网络API授权RNAA
+  description: 北向 API 资源拥有者授权，OAuth 2.0 机制
+  releases:
+  - R18
+  ref: TS 23.501 §5.20, TS 29.222
+  status: planned
+  level: L2
+  path: features/鉴权与安全特性/CAPIF资源拥有者网络API授权RNAA/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: CAPIF资源拥有者网络API授权RNAA鉴权授权成功
+  description: UE或业务方成功完成CAPIF资源拥有者网络API授权RNAA相关鉴权授权。
+  scenario_type: 授权场景
+  path: SCENARIO_001_CAPIF资源拥有者网络API授权RNAA鉴权授权成功_场景流程.md
+- id: SCENARIO_002
+  name: CAPIF资源拥有者网络API授权RNAA鉴权授权失败
+  description: 凭据、订阅、密钥或策略不满足导致CAPIF资源拥有者网络API授权RNAA失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_CAPIF资源拥有者网络API授权RNAA鉴权授权失败_场景流程.md
+- id: SCENARIO_003
+  name: CAPIF资源拥有者网络API授权RNAA安全上下文更新
+  description: CAPIF资源拥有者网络API授权RNAA相关安全上下文或授权状态发生更新。
+  scenario_type: 授权场景
+  path: SCENARIO_003_CAPIF资源拥有者网络API授权RNAA安全上下文更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md
+  - element_id: ausf
+    path: architectures/logic_view/elements/ausf/spec.md
+  - element_id: udm
+    path: architectures/logic_view/elements/udm/spec.md

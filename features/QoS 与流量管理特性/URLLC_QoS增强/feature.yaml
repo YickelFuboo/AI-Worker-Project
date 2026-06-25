@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_qos_traffic
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: qos_urlcc
+  name: URLLC QoS增强
+  description: URLLC 高可靠低时延 QoS 支持
+  releases:
+  - R16
+  ref: TS 23.501 §5.29
+  status: planned
+  level: L2
+  path: features/QoS 与流量管理特性/URLLC_QoS增强/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: URLLC QoS增强策略生效
+  description: 业务流成功获得URLLC QoS增强相关QoS或流量处理。
+  scenario_type: 成功场景
+  path: SCENARIO_001_URLLC_QoS增强策略生效_场景流程.md
+- id: SCENARIO_002
+  name: URLLC QoS增强策略调整
+  description: 业务条件变化导致URLLC QoS增强策略调整。
+  scenario_type: 迁移场景
+  path: SCENARIO_002_URLLC_QoS增强策略调整_场景流程.md
+- id: SCENARIO_003
+  name: URLLC QoS增强保障失败
+  description: 无线、策略或网络资源不足导致URLLC QoS增强无法满足。
+  scenario_type: 失败场景
+  path: SCENARIO_003_URLLC_QoS增强保障失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: pcf
+    path: architectures/logic_view/elements/pcf/spec.md

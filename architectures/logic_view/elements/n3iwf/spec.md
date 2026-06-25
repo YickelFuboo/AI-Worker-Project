@@ -11,19 +11,13 @@ confidence: high
 
 # 架构元素规格：n3iwf
 
-> 本文件是**架构层抽象**，结合代码逆向（事实域）与历史架构设计文档（意图域）综合生成。
-> - **事实域**（接口、依赖、协议、当前 DFX 实现、当前部署形态）：以代码 + `repos/n3iwf/.agent/*.md` 为准，标注「现状」。
-> - **意图域**（战略角色、设计目的、原 DFX 目标、原部署规划）：以 `knowledge/历史方案/架构方案/` 为准，标注「原设计意图」。
->   本元素历史方案输入为 0（`Pando V1.0版本架构设计说明书.md` 全文检索 n3iwf / Non-3GPP / IKEv2 / IPsec / EAP-5G 均无命中），所有意图域条目均标注「无历史方案输入」。
-> - 实现细节（Handler 清单、字段、代码位置）归 `repos/n3iwf/.agent/*.md`，本文件不重复抄写，仅在节末以「契约详情见…」指引。
-
 ## 1. 元素定位
 
 **现状**（事实域）：
 n3iwf 是 5G 核心网中的**非可信非 3GPP 接入网关**（Non-3GPP Interworking Function，TS 23.501）。它对 UE 侧充当 IKEv2/IPsec 安全网关并嵌入 EAP-5G 完成 NAS 注册鉴权，对核心网控制面侧以 NG-RAN 角色经 NGAP/SCTP 与 AMF 协同，对用户面侧经 GTP-U（N3）与 UPF 互联。在 5GC 拓扑中处于**接入域与核心域之间的协议边界**，使 WiFi 等非 3GPP 接入能透明纳入 5G 控制面与用户面。
 
 **原设计意图**（意图域）：
-无历史方案输入。
+-
 
 | 项目 | 现状 | 原设计意图 |
 |------|------|-----------|
@@ -31,7 +25,7 @@ n3iwf 是 5G 核心网中的**非可信非 3GPP 接入网关**（Non-3GPP Interw
 | 元素名 | n3iwf | - |
 | 元素类型 | service | - |
 | 所属代码仓 | repos/n3iwf | - |
-| 战略角色 | 非 3GPP 接入安全网关（双面：UE 侧 IKEv2/IPsec + 核心网侧 NG-RAN 角色） | 无历史方案输入 |
+| 战略角色 | 非 3GPP 接入安全网关（双面：UE 侧 IKEv2/IPsec + 核心网侧 NG-RAN 角色） | - |
 | 置信度 | 高 | - |
 
 ## 2. 职责描述
@@ -43,7 +37,7 @@ n3iwf 是 5G 核心网中的**非可信非 3GPP 接入网关**（Non-3GPP Interw
 3. **用户面转发**：在 UE 侧（GRE over IPsec，携带 QFI）与 UPF 侧（GTP-U/N3，携带 PDU Session Container 扩展头）之间做双向数据面转发，IPsec 加解密由 Linux 内核 XFRM 卸载。
 
 **原设计意图**（意图域）：
-无历史方案输入。
+-
 
 ## 3. 业务能力
 
@@ -51,17 +45,17 @@ n3iwf 是 5G 核心网中的**非可信非 3GPP 接入网关**（Non-3GPP Interw
 
 | 能力ID | 能力名 | 架构用途（现状） | 原设计目的（意图域） |
 |--------|--------|----------------|--------------------|
-| CAP-001 | IKEv2 安全关联建立 | 与 UE 建立 IKE SA 与初始 IPsec Child SA，构筑非可信链路上的安全隧道 | 无历史方案输入 |
-| CAP-002 | EAP-5G 注册鉴权封装 | 在 IKE_AUTH 阶段封装 5GS NAS 完成 UE 注册与鉴权（5G-AKA / EAP-AKA'），桥接非 3GPP 接入与 5GC 鉴权域 | 无历史方案输入 |
-| CAP-003 | IPsec/XFRM 隧道生命周期管理 | 通过 Linux XFRM 安装控制面与每会话用户面 Child SA，并在会话终止时回收 XFRM 接口 | 无历史方案输入 |
-| CAP-004 | NAS over IPsec 中继 | 注册成功后在 UE↔AMF 之间双向中继 NAS 信令（NWuCP TCP ↔ NGAP UL/DL NAS Transport） | 无历史方案输入 |
-| CAP-005 | NGAP/N2 信令处理 | 作为 NG-RAN 节点与 AMF 完成 NG Setup、Initial Context Setup、UE Context、PDU Session Resource 等 N2 程序 | 无历史方案输入 |
-| CAP-006 | PDU 会话用户面建立 | 协同 AMF（PDU Session Resource Setup/Modify/Release）建立每会话 Child SA + GTP-U N3 隧道与 TEID 映射 | 无历史方案输入 |
-| CAP-007 | 用户面双向转发 | UE↔UPF 数据面适配：上行 GRE 解封装→GTP-U 封装；下行 GTP-U 解封装→GRE 封装 | 无历史方案输入 |
-| CAP-008 | UE 多视图上下文管理 | 维护 IKE UE / RAN UE / N3IWF UE 三类视图及 SPI ↔ RAN_UE_NGAP_ID ↔ AMF_UE_NGAP_ID 映射 | 无历史方案输入 |
-| CAP-009 | 多 AMF SCTP 协同 | 支持多 AMF 池、AMF Configuration Update、Overload Start/Stop、NG Reset，实现控制面容灾 | 无历史方案输入 |
-| CAP-010 | Liveness 检测（DPD） | 通过 IKEv2 INFORMATIONAL 心跳检测 UE 通路存活，可调 TransFreq / MaxRetryTimes | 无历史方案输入 |
-| CAP-011 | 指标暴露 | 暴露 Prometheus 端点（NGAP 类指标）供监控拉取，可选 mTLS | 无历史方案输入 |
+| CAP-001 | IKEv2 安全关联建立 | 与 UE 建立 IKE SA 与初始 IPsec Child SA，构筑非可信链路上的安全隧道 | - |
+| CAP-002 | EAP-5G 注册鉴权封装 | 在 IKE_AUTH 阶段封装 5GS NAS 完成 UE 注册与鉴权（5G-AKA / EAP-AKA'），桥接非 3GPP 接入与 5GC 鉴权域 | - |
+| CAP-003 | IPsec/XFRM 隧道生命周期管理 | 通过 Linux XFRM 安装控制面与每会话用户面 Child SA，并在会话终止时回收 XFRM 接口 | - |
+| CAP-004 | NAS over IPsec 中继 | 注册成功后在 UE↔AMF 之间双向中继 NAS 信令（NWuCP TCP ↔ NGAP UL/DL NAS Transport） | - |
+| CAP-005 | NGAP/N2 信令处理 | 作为 NG-RAN 节点与 AMF 完成 NG Setup、Initial Context Setup、UE Context、PDU Session Resource 等 N2 程序 | - |
+| CAP-006 | PDU 会话用户面建立 | 协同 AMF（PDU Session Resource Setup/Modify/Release）建立每会话 Child SA + GTP-U N3 隧道与 TEID 映射 | - |
+| CAP-007 | 用户面双向转发 | UE↔UPF 数据面适配：上行 GRE 解封装→GTP-U 封装；下行 GTP-U 解封装→GRE 封装 | - |
+| CAP-008 | UE 多视图上下文管理 | 维护 IKE UE / RAN UE / N3IWF UE 三类视图及 SPI ↔ RAN_UE_NGAP_ID ↔ AMF_UE_NGAP_ID 映射 | - |
+| CAP-009 | 多 AMF SCTP 协同 | 支持多 AMF 池、AMF Configuration Update、Overload Start/Stop、NG Reset，实现控制面容灾 | - |
+| CAP-010 | Liveness 检测（DPD） | 通过 IKEv2 INFORMATIONAL 心跳检测 UE 通路存活，可调 TransFreq / MaxRetryTimes | - |
+| CAP-011 | 指标暴露 | 暴露 Prometheus 端点（NGAP 类指标）供监控拉取，可选 mTLS | - |
 
 ## 4. 质量属性
 
@@ -69,13 +63,13 @@ n3iwf 是 5G 核心网中的**非可信非 3GPP 接入网关**（Non-3GPP Interw
 
 | 属性 | 现状（事实域） | 原目标值 + 策略原因（意图域） |
 |------|--------------|---------------------------|
-| 性能 | 控制面与数据面解耦：协议栈在用户态，IPsec 加解密 + 转发 IO 下沉到 Linux 内核 XFRM；IKE/NGAP 收包通过长度 512 的 SafeCh 与处理解耦，避免协议栈阻塞 | 无历史方案输入 |
-| 可靠性 | 多 AMF 池支持容灾；NG Reset / AMF Overload Start/Stop 自愈；各子服务 WaitGroup 协同优雅退出并反向清理 XFRM 接口 | 无历史方案输入 |
-| 可用性 | 单 AMF 不可达不影响其他 AMF 关联；启动期 NGSetup 失败标记该 AMF 不可用，仍可对其他 AMF 提供服务 | 无历史方案输入 |
-| 可扩展性 | 多 AMF SCTP 关联可水平扩展；UE 内网 IP 池由 CIDR 配置决定单实例容量上限；XFRM 接口按 PDU 会话独立创建（id=default+offset） | 无历史方案输入 |
-| 安全性 | 所有 UE 流量在 IPsec ESP 内承载，启用 Replay Window 抗重放；IKEv2 证书 + EAP-5G 双向身份认证；协议解码严格 bounds check（GRE、IKE Internal IP4 等）；AN-Parameter 四类异常显式拒绝；TLS Key Log 仅 debug 启用 | 无历史方案输入 |
-| 可测试性 | UT 与源码同包 `*_test.go` + testify；XFRM/SCTP/netlink/raw socket 类系统依赖通过接口隔离或手写桩（`internal/context/testing_app.go`）；UT 不依赖网络/磁盘/root | 无历史方案输入 |
-| 可观测性 | 分模块 logger（MainLog/CfgLog/InitLog/IKELog/NgapLog/NWuCPLog/NWuUPLog 等）+ nested-logrus-formatter；Prometheus 默认关闭、启用时强制 https + namespace=free5gc，可选 mTLS；pprof 仅 `-debug` 启用，独占 :6061 | 无历史方案输入 |
+| 性能 | 控制面与数据面解耦：协议栈在用户态，IPsec 加解密 + 转发 IO 下沉到 Linux 内核 XFRM；IKE/NGAP 收包通过长度 512 的 SafeCh 与处理解耦，避免协议栈阻塞 | - |
+| 可靠性 | 多 AMF 池支持容灾；NG Reset / AMF Overload Start/Stop 自愈；各子服务 WaitGroup 协同优雅退出并反向清理 XFRM 接口 | - |
+| 可用性 | 单 AMF 不可达不影响其他 AMF 关联；启动期 NGSetup 失败标记该 AMF 不可用，仍可对其他 AMF 提供服务 | - |
+| 可扩展性 | 多 AMF SCTP 关联可水平扩展；UE 内网 IP 池由 CIDR 配置决定单实例容量上限；XFRM 接口按 PDU 会话独立创建（id=default+offset） | - |
+| 安全性 | 所有 UE 流量在 IPsec ESP 内承载，启用 Replay Window 抗重放；IKEv2 证书 + EAP-5G 双向身份认证；协议解码严格 bounds check（GRE、IKE Internal IP4 等）；AN-Parameter 四类异常显式拒绝；TLS Key Log 仅 debug 启用 | - |
+| 可测试性 | UT 与源码同包 `*_test.go` + testify；XFRM/SCTP/netlink/raw socket 类系统依赖通过接口隔离或手写桩（`internal/context/testing_app.go`）；UT 不依赖网络/磁盘/root | - |
+| 可观测性 | 分模块 logger（MainLog/CfgLog/InitLog/IKELog/NgapLog/NWuCPLog/NWuUPLog 等）+ nested-logrus-formatter；Prometheus 默认关闭、启用时强制 https + namespace=free5gc，可选 mTLS；pprof 仅 `-debug` 启用，独占 :6061 | - |
 
 实现细节与代码证据见 `repos/n3iwf/.agent/design.md §11 DFX 设计`、`repos/n3iwf/.agent/rules/约束/可观测性.md`、`repos/n3iwf/.agent/DTFrame.md §2 测试防护网分层`。
 
@@ -132,13 +126,13 @@ n3iwf 是 5G 核心网中的**非可信非 3GPP 接入网关**（Non-3GPP Interw
 
 | 维度 | 现状（事实域） | 原规划（意图域） |
 |------|--------------|----------------|
-| 部署形态 | 单进程二进制（`bin/n3iwf`）；运行在 Linux 主机或具备 CAP_NET_ADMIN 与 XFRM 模块的特权容器中 | 无历史方案输入 |
-| 副本策略 | 单实例为主；多实例需各自绑定独立 IKE/NAS/GTP 监听 IP 并由 UE 侧选择，控制面通过多 AMF SCTP 关联水平协同 | 无历史方案输入 |
-| 启动依赖 | AMF 至少一条 SCTP 关联可达；Linux 内核 XFRM 模块、netlink、root（绑 UDP 500/4500、创建 XFRM 接口）；配置文件 `info.version=1.0.5` 强校验；UPF 可后启 | 无历史方案输入 |
-| 可观测出口 | 分模块 logrus 日志（stdout / 文件）；可选 Prometheus `/metrics`（默认 9091，https，可 mTLS）；可选 pprof `:6061`（`-debug`） | 无历史方案输入 |
-| 终止行为 | SIGINT/SIGTERM → cancel ctx → 各子服务 Stop → WaitGroup 等待 → 删除所有 XFRM 接口；NGAP 子服务 panic 走 Fatalf 退出以便容器编排重启 | 无历史方案输入 |
-| 容量规格 | UE 数受 `ueIpAddressRange` CIDR 决定；TEID/SPI 受 32 位地址空间约束；SafeCh 长度 512 触发背压；SCTP 单包缓冲 65535 | 无历史方案输入 |
-| 监听端口 | UDP 500 / 4500（IKE / NAT-T）、TCP `nasTcpPort`（IPsec 内）、SCTP 38412 出方向（→AMF）、UDP 2152（GTP-U）、HTTPS 9091（Metrics 可选）、HTTP 6061（pprof 可选） | 无历史方案输入 |
+| 部署形态 | 单进程二进制（`bin/n3iwf`）；运行在 Linux 主机或具备 CAP_NET_ADMIN 与 XFRM 模块的特权容器中 | - |
+| 副本策略 | 单实例为主；多实例需各自绑定独立 IKE/NAS/GTP 监听 IP 并由 UE 侧选择，控制面通过多 AMF SCTP 关联水平协同 | - |
+| 启动依赖 | AMF 至少一条 SCTP 关联可达；Linux 内核 XFRM 模块、netlink、root（绑 UDP 500/4500、创建 XFRM 接口）；配置文件 `info.version=1.0.5` 强校验；UPF 可后启 | - |
+| 可观测出口 | 分模块 logrus 日志（stdout / 文件）；可选 Prometheus `/metrics`（默认 9091，https，可 mTLS）；可选 pprof `:6061`（`-debug`） | - |
+| 终止行为 | SIGINT/SIGTERM → cancel ctx → 各子服务 Stop → WaitGroup 等待 → 删除所有 XFRM 接口；NGAP 子服务 panic 走 Fatalf 退出以便容器编排重启 | - |
+| 容量规格 | UE 数受 `ueIpAddressRange` CIDR 决定；TEID/SPI 受 32 位地址空间约束；SafeCh 长度 512 触发背压；SCTP 单包缓冲 65535 | - |
+| 监听端口 | UDP 500 / 4500（IKE / NAT-T）、TCP `nasTcpPort`（IPsec 内）、SCTP 38412 出方向（→AMF）、UDP 2152（GTP-U）、HTTPS 9091（Metrics 可选）、HTTP 6061（pprof 可选） | - |
 
 部署细节见 `repos/n3iwf/.agent/spec.md §6 构建与部署` 与 `repos/n3iwf/.agent/design.md §1 设计目标与约束`。
 
@@ -148,4 +142,4 @@ n3iwf 是 5G 核心网中的**非可信非 3GPP 接入网关**（Non-3GPP Interw
 
 | solution_name | 主要采纳章节 |
 |---------------|------------|
-| 无历史方案输入 | `Pando V1.0版本架构设计说明书.md` 全文检索 n3iwf / Non-3GPP / IKEv2 / IPsec / EAP-5G 均无命中；本元素所有意图域章节均已标注「无历史方案输入」，confidence 仅基于事实域评级 |
+| - | - |

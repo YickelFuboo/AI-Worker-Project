@@ -1,0 +1,63 @@
+# Directory-local feature.yaml template for rev-code-to-scenario
+# This file describes the feature represented by the current directory, its direct children, and traceability anchors.
+# Do not recursively copy grandchildren into child_features.
+
+meta:
+  schema: "directory_feature_node_v1"
+  version: "1.0"
+  level: "L1 | L2 | L3 | L4 | L5"
+  parent_feature_id: "{parent_feature_id | null}"
+  parent_feature_path: "{../feature.yaml | null}"
+  feature_path: "feature.yaml"
+  last_updated: "YYYY-MM-DDTHH:MM:SS+08:00"
+  last_modified_by: "rev-code-to-scenario"
+  source: "feature-catalog | code+architecture | code+architecture+intent"
+  confidence: "high | medium | low"
+  intent_source_count: 0
+
+feature:
+  id: "{feature_id}"
+  name: "{特性中文名}"
+  description: "{特性业务定义、边界和共性约束}"
+  releases:
+    - "{R15 | R16 | R17 | R18}"
+  ref: "{3GPP TS / RFC / 接口规范章节}"
+  status: "implemented | partial | planned"
+  level: "L1 | L2 | L3 | L4 | L5"
+  path: "features/{一级特性}/{当前特性路径}/feature.yaml"
+  spec_path: "spec.md"              # 仅 leaf 且存在 spec.md 时填写
+  arch_ref_path: "arch_ref.yaml"    # 仅 leaf 且存在 arch_ref.yaml 时填写
+  last_modified: "YYYY-MM-DDTHH:MM:SS+08:00"
+  last_modified_by: "rev-code-to-scenario"
+
+child_features:
+  - id: "{child_feature_id}"
+    name: "{子特性中文名}"
+    description: "{子特性摘要}"
+    status: "implemented | partial | planned"
+    level: "L2 | L3 | L4 | L5"
+    path: "{子特性目录}/feature.yaml"
+
+scenarios:
+  - id: "SCENARIO_001"
+    name: "{场景中文名}"
+    description: "{场景摘要}"
+    scenario_type: "成功场景 | 失败场景 | 回退场景 | 迁移场景 | 授权场景 | 计费场景 | 开放场景 | 分析场景 | 注册场景 | 发现场景"
+    path: "SCENARIO_001_{name}_场景流程.md"
+
+traceability:
+  code_anchors:
+    - repo: "repos/{repo_name}"
+      path: "{relative/code/file}"
+      symbol: "{function_or_type_name}"
+      line: 1
+      role: "{该代码锚点在特性中的作用}"
+  test_anchors:
+    - repo: "repos/{repo_name}"
+      path: "{relative/test/file}"
+      test: "{test_name}"
+      type: "unit | integration | e2e"
+      role: "{该测试覆盖的特性行为}"
+  architecture_refs:
+    - element_id: "{architecture_element_id}"
+      path: "architectures/logic_view/elements/{element_id}/spec.md"

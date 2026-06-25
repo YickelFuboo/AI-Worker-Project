@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_voice_ims
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: voice_ims_emergency
+  name: IMS紧急服务
+  description: 紧急呼叫与定位
+  releases:
+  - R15
+  ref: TS 23.502 §4.14
+  status: planned
+  level: L2
+  path: features/语音与 IMS/IMS紧急服务/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: IMS紧急呼叫成功
+  description: UE发起IMS紧急呼叫并完成紧急业务建立。
+  scenario_type: 成功场景
+  path: SCENARIO_001_IMS紧急呼叫成功_场景流程.md
+- id: SCENARIO_002
+  name: 受限服务紧急呼叫
+  description: UE处于受限服务状态但仍允许紧急呼叫。
+  scenario_type: 成功场景
+  path: SCENARIO_002_受限服务紧急呼叫_场景流程.md
+- id: SCENARIO_003
+  name: 紧急呼叫建立失败
+  description: IMS或接入条件不满足导致紧急呼叫失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_紧急呼叫建立失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md

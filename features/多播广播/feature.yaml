@@ -1,0 +1,53 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_mbs
+  name: 多播广播
+  description: 5G 多播广播相关特性，含 5MBS 基础、会话管理、服务区域。
+  status: planned
+  level: L1
+  path: features/多播广播/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: mbs_basic
+  name: 5MBS基础多播广播
+  description: 5G 多播广播服务，MBSF/MBSF-AF/MB-UPF/MB-SMF
+  status: planned
+  level: L2
+  path: 5MBS基础多播广播/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.247
+- id: mbs_session_mgmt
+  name: 多播广播会话管理
+  description: 多播会话建立/加入/离开/释放
+  status: planned
+  level: L2
+  path: 多播广播会话管理/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.247
+- id: mbs_service_area
+  name: MBS服务区域
+  description: 定义多播广播业务生效区域
+  status: planned
+  level: L2
+  path: MBS服务区域/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.247
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

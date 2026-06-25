@@ -1,0 +1,80 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: '2026-06-25T15:58:53+08:00'
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_voice_ims
+  name: 语音与 IMS
+  description: 语音与 IMS 相关特性，含 VoNR、EPS Fallback、IMS 紧急呼叫、基于NAS的SMS、SNPN IMS 与 PWS。
+  status: planned
+  level: L1
+  path: features/语音与 IMS/feature.yaml
+  last_modified: '2026-06-25T15:58:53+08:00'
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: voice_vonr
+  name: VoNR语音
+  description: 基于 IMS 的 5G NR 语音
+  status: planned
+  level: L2
+  path: VoNR语音/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.16
+- id: voice_eps_fallback
+  name: 语音EPS Fallback
+  description: 5G NR 不支持 VoNR 时回退到 EPS 做语音
+  status: planned
+  level: L2
+  path: 语音EPS_Fallback/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.13
+- id: voice_ims_emergency
+  name: IMS紧急服务
+  description: 紧急呼叫与定位
+  status: planned
+  level: L2
+  path: IMS紧急服务/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.14
+- id: voice_sms_nas
+  name: 基于NAS的SMS
+  description: 通过 NAS 短消息传输，不依赖 IMS
+  status: planned
+  level: L2
+  path: 基于NAS的SMS/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.13
+- id: voice_snpn_ims
+  name: SNPN IMS语音与紧急服务
+  description: SNPN 场景下 IMS 语音与紧急服务
+  status: planned
+  level: L2
+  path: SNPN_IMS语音与紧急服务/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.5
+- id: voice_pws_snpn
+  name: SNPN公共预警系统PWS
+  description: SNPN 上的 PWS (ETWS/CMAS)
+  status: planned
+  level: L2
+  path: SNPN公共预警系统PWS/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.6
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

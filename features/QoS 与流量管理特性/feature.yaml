@@ -1,0 +1,80 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_qos_traffic
+  name: QoS 与流量管理特性
+  description: QoS 与流量管理相关特性，含反射式 QoS、URLLC 增强、XR 业务 QoS、L4S ECN。
+  status: partial
+  level: L1
+  path: features/QoS 与流量管理特性/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: qos_reflective
+  name: 反射式QoS
+  description: UE 从下行包反推上行 QoS 规则，无需显式下发
+  status: partial
+  level: L2
+  path: 反射式QoS/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.7.5
+- id: qos_urlcc
+  name: URLLC QoS增强
+  description: URLLC 高可靠低时延 QoS 支持
+  status: planned
+  level: L2
+  path: URLLC_QoS增强/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.29
+- id: qos_redundant_transmission
+  name: URLLC冗余传输
+  description: 双 PDU 会话双 N3 隧道冗余传输
+  status: planned
+  level: L2
+  path: URLLC冗余传输/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.29.3
+- id: qos_xr_per_pdu_set
+  name: XR按PDU集合QoS
+  description: 针对扩展现实流量的 per-PDU-set 处理，拥塞时优先关键包
+  status: planned
+  level: L2
+  path: XR按PDU集合QoS/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.33
+- id: qos_xr_power_saving
+  name: XR设备节能
+  description: 调整连接态 DRX 以匹配媒体流周期与突发性
+  status: planned
+  level: L2
+  path: XR设备节能/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.33.3
+- id: qos_l4s_ecn
+  name: L4S ECN支持
+  description: 低时延低损耗拥塞控制的 ECN 标记
+  status: planned
+  level: L2
+  path: L4S_ECN支持/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.33.4
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

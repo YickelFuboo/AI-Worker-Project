@@ -1,0 +1,61 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_mobility_interworking
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: mob_nssai_reroute
+  name: NSSAI不匹配时NAS重路由
+  description: 服务 AMF 无法处理 UE 切片时 NAS 重路由到目标 AMF
+  releases:
+  - R15
+  ref: TS 23.502 §4.2.2.2.3
+  status: implemented
+  level: L2
+  path: features/移动性与互操作/NSSAI不匹配时NAS重路由/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 经N1MessageNotify重定向
+  description: 初始AMF通过NRF找到目标AMF并经N1MessageNotify转交注册请求。
+  scenario_type: 重路由场景
+  path: SCENARIO_001_经N1MessageNotify重定向_场景流程.md
+- id: SCENARIO_002
+  name: 回退至RAN_Reroute_NAS
+  description: 目标AMF不可投递时初始AMF回退为RAN Reroute NAS方式。
+  scenario_type: 回退场景
+  path: SCENARIO_002_回退至RAN_Reroute_NAS_场景流程.md
+- id: SCENARIO_003
+  name: 目标AMF不可用重路由失败
+  description: NSSF或NRF无法提供可用目标AMF导致重路由失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_目标AMF不可用重路由失败_场景流程.md
+traceability:
+  code_anchors:
+  - repo: repos/amf
+    path: internal/gmm/handler.go
+    symbol: handleRequestedNssai
+    role: 切片不匹配时 NAS 重路由入口
+  - repo: repos/amf
+    path: internal/ngap/message/build.go
+    symbol: BuildRerouteNasRequest
+    role: RAN Reroute NAS Request 报文构造
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md
+  - element_id: nssf
+    path: architectures/logic_view/elements/nssf/spec.md
+  - element_id: nrf
+    path: architectures/logic_view/elements/nrf/spec.md

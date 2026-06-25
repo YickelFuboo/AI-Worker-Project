@@ -1,0 +1,53 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_edge_computing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: edge_basic
+  name: 边缘计算基础支持
+  description: AF 流量影响 + DNAI + PSA UPF 选择实现边缘业务
+  releases:
+  - R15
+  ref: TS 23.501 §5.13
+  status: partial
+  level: L2
+  path: features/边缘计算/边缘计算基础支持/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 边缘计算基础支持边缘服务成功
+  description: 业务成功使用边缘计算基础支持相关边缘能力。
+  scenario_type: 成功场景
+  path: SCENARIO_001_边缘计算基础支持边缘服务成功_场景流程.md
+- id: SCENARIO_002
+  name: 边缘计算基础支持边缘服务迁移
+  description: UE或应用变化触发边缘计算基础支持迁移或重选择。
+  scenario_type: 迁移场景
+  path: SCENARIO_002_边缘计算基础支持边缘服务迁移_场景流程.md
+- id: SCENARIO_003
+  name: 边缘计算基础支持边缘服务失败
+  description: 边缘能力、策略或应用上下文不满足导致边缘计算基础支持失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_边缘计算基础支持边缘服务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md

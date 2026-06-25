@@ -1,0 +1,42 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_policy_control
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: pcc_smf_backoff
+  name: SMF退避与DBDD
+  description: 拥塞时 SMF 通知 UE 推迟会话建立
+  releases:
+  - R15
+  ref: TS 23.501 §5.19
+  status: planned
+  level: L2
+  path: features/策略控制特性/SMF退避与DBDD/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: SMF退避与DBDD业务成功
+  description: SMF退避与DBDD业务场景成功完成。
+  scenario_type: 成功场景
+  path: SCENARIO_001_SMF退避与DBDD业务成功_场景流程.md
+- id: SCENARIO_002
+  name: SMF退避与DBDD业务失败
+  description: SMF退避与DBDD因配置、订阅、策略、拓扑或对端能力不满足而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_SMF退避与DBDD业务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

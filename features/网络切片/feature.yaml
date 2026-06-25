@@ -1,0 +1,134 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_network_slicing
+  name: 网络切片
+  description: 网络切片相关特性，含基础切片、NSSAA、NSACF、提前准入、切片级 MBR、NSSRG、切片专用频段、临时切片、切片替换、切片使用控制、切片服务区域。
+  status: partial
+  level: L1
+  path: features/网络切片/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: ns_basic
+  name: 网络切片基础
+  description: S-NSSAI(SST+SD) 标识切片，NSSF 选 AMF/SMF
+  status: implemented
+  level: L2
+  path: 网络切片基础/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.15
+- id: ns_nssaa
+  name: 网络切片特定鉴权授权NSSAA
+  description: 对切片访问的二次 EAP 鉴权授权
+  status: planned
+  level: L2
+  path: 网络切片特定鉴权授权NSSAA/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.15.10
+- id: ns_nsacf
+  name: 网络切片准入控制NSACF
+  description: 监控并限制每切片 UE 数与 PDU 会话数
+  status: planned
+  level: L2
+  path: 网络切片准入控制NSACF/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §6.2.18, TS 29.536
+- id: ns_early_admission
+  name: 切片提前准入控制
+  description: AMF 在 NSACF 配额检查完成前先接受注册以降低延迟
+  status: planned
+  level: L2
+  path: 切片提前准入控制/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.15.11
+- id: ns_ue_slice_mbr
+  name: UE切片最大比特率
+  description: 控制单 UE 在指定切片的总比特率
+  status: planned
+  level: L2
+  path: UE切片最大比特率/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.15.13
+- id: ns_slice_wide_mbr
+  name: 切片级数据速率控制
+  description: PCF/UDR 限制切片内所有 UE 的聚合速率
+  status: planned
+  level: L2
+  path: 切片级数据速率控制/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.15.14
+- id: ns_nssrg
+  name: 同时切片注册限制NSSRG
+  description: UDM 存 NSSRG 数据，AMF 阻止不允许的并发切片访问
+  status: planned
+  level: L2
+  path: 同时切片注册限制NSSRG/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.15.15
+- id: ns_slice_specific_freq
+  name: 切片专用频段重定向
+  description: AMF 把目标 NSSAI 发给 RAN，引导 UE 重定向到支持该切片的小区
+  status: planned
+  level: L2
+  path: 切片专用频段重定向/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.15.12
+- id: ns_temporary_slice
+  name: 临时网络切片可用性
+  description: 支持限时有效切片，切片不可用时优雅处理
+  status: planned
+  level: L2
+  path: 临时网络切片可用性/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.15.16
+- id: ns_slice_replacement
+  name: 网络切片替换
+  description: 临时把不可用或拥塞的 S-NSSAI 映射到替代切片
+  status: planned
+  level: L2
+  path: 网络切片替换/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.15.17
+- id: ns_slice_usage_control
+  name: 网络切片使用控制
+  description: 网络引导 UE 仅在应用需要时使用切片
+  status: planned
+  level: L2
+  path: 网络切片使用控制/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.15.18
+- id: ns_slice_service_area
+  name: 切片服务区域限制
+  description: 支持不与 TA 边界对齐的切片可用性区域
+  status: planned
+  level: L2
+  path: 切片服务区域限制/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.15.19
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

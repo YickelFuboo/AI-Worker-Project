@@ -1,7 +1,7 @@
 element_name: udm
 element_id: udm
 repo_path: repos/udm
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 udm 元素对外提供的接口索引（摘要层）。
@@ -37,7 +37,7 @@ provided_interfaces:
     if_name: GetSmData
     protocol: SBI (Nudm_SDM v2)
     direction: provided
-    summary: 查询 SM 订阅数据（SMF PDU 会话建立）
+    summary: 查询 SM 订阅数据(SMF PDU 会话建立)
     contract_ref: repos/udm/.agent/interfaces.md §2.2.2
 
   - if_id: IF-005

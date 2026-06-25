@@ -1,0 +1,12 @@
+arch_ref_meta:
+  l1_id: cat_uav_special
+  l1_name: 无人机与特殊场景
+  feature_id: uav_uas_nf
+  feature_name: UAS网络功能UAS NF
+  last_modified: "2026-06-25T13:45:33+08:00"
+  last_modified_by: rev-code-to-scenario
+  confidence: low
+elements_used: []
+external_dependencies: []
+code_anchors: []
+confidence_note: 本文件仅引用可定位的架构元素与代码锚点；缺失事实源不编造。

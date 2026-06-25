@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_exposure
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: exp_nef_basic
+  name: NEF基础能力开放
+  description: 对 AF/第三方暴露 5GC 能力，做鉴权与转译
+  releases:
+  - R15
+  ref: TS 23.501 §6.2.10, TS 29.522
+  status: implemented
+  level: L2
+  path: features/网络能力开放/NEF基础能力开放/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: NEF基础能力开放能力开放成功
+  description: AF通过NEF基础能力开放获得网络能力开放结果。
+  scenario_type: 开放场景
+  path: SCENARIO_001_NEF基础能力开放能力开放成功_场景流程.md
+- id: SCENARIO_002
+  name: NEF基础能力开放授权失败
+  description: AF授权、参数或策略不满足导致NEF基础能力开放失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_NEF基础能力开放授权失败_场景流程.md
+- id: SCENARIO_003
+  name: NEF基础能力开放订阅更新
+  description: 业务方更新NEF基础能力开放相关订阅或参数。
+  scenario_type: 开放场景
+  path: SCENARIO_003_NEF基础能力开放订阅更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md

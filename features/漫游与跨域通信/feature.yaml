@@ -1,0 +1,62 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_roaming_cross_domain
+  name: 漫游与跨域通信
+  description: 漫游与跨 PLMN/跨域通信相关特性，含归属路由/本地疏导、SEPP/SCP 代理、漫游安全。
+  status: partial
+  level: L1
+  path: features/漫游与跨域通信/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: roaming_home_routed_local_breakout
+  name: 漫游归属路由与本地疏导
+  description: hPLMN 与 vPLMN 各部署 NF，支持两种漫游路由模式
+  status: partial
+  level: L2
+  path: 漫游归属路由与本地疏导/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.16
+- id: roaming_sepp
+  name: 安全边缘保护代理SEPP
+  description: 跨 PLMN SBI 通信的安全边界代理
+  status: planned
+  level: L2
+  path: 安全边缘保护代理SEPP/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §6.2.13B, TS 29.500
+- id: roaming_scp
+  name: 服务通信代理SCP间接与委托通信
+  description: SBI 通信代理，支持 indirect/delegated 通信模式
+  status: planned
+  level: L2
+  path: 服务通信代理SCP间接与委托通信/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §6.2.13A, TS 29.500
+- id: roaming_home_routing_security
+  name: 归属路由安全
+  description: 漫游 home-routed PDU 会话的端到端安全
+  status: planned
+  level: L2
+  path: 归属路由安全/feature.yaml
+  releases:
+  - R15
+  ref: TS 33.501 §6.7
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

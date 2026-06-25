@@ -11,12 +11,6 @@ confidence: high | medium | low
 
 # 系统架构设计：<产品名>
 
-> 本文件是**系统级架构总览**，由 `rev-arch-system-design` skill 结合代码逆向（事实域）与历史架构设计文档（意图域）综合生成。
-> - **事实域**（接口签名、依赖关系、协议层、部署现状、容量现状）：以代码 + `architectures/logic_view/elements/` 为准，标注"现状"。
-> - **意图域**（切分理由、决策背景、流程编排意图、架构假设、演进路线）：以 `knowledge/历史方案/架构方案/` 为准，标注"原设计意图"。
-> - 同章节内两类信息并存表达，明示标签。
-> - 元素级细节归 `architectures/logic_view/elements/{name}/`；ADR 详情归 `architectures/decisions/ADR-{NNN}-{topic}.md`；本文件只做系统级聚合与索引。
-
 ## 1. 系统定位
 
 **现状**（事实域，归纳自元素层）：
@@ -40,7 +34,7 @@ confidence: high | medium | low
 | <name> | service / component / subsystem | <聚合自元素 spec §2> | <参考自 {solution_name} §X：当年为什么独立成元素> | repos/<name> |
 
 **切分原则**（意图域，抽取自历史方案）：
-<3-5 句话说明本系统的元素切分主线；若历史方案缺失，写"无历史方案输入，仅按 3GPP 规范继承推断切分主线，置信度降级"。>
+<3-5 句话说明本系统的元素切分主线>
 
 参考来源：`<solution_name_1> §X.Y`、`<solution_name_2> §X.Y`
 
@@ -113,8 +107,6 @@ confidence: high | medium | low
 
 （其余流程同格式：F-002 ~ F-008，每个流程一节）
 
-历史方案缺失时本节标注「无历史方案覆盖该流程，仅基于代码事实给出现状时序，置信度降级」。
-
 ## 6. 系统级 DFX 策略
 
 ### 6.1 安全
@@ -158,7 +150,7 @@ confidence: high | medium | low
 | ADR-005 | 非 3GPP 接入分支 | n3iwf 不受信 + tngf 受信 | <如有原方案> | decisions/ADR-005-non-3gpp.md |
 | ADR-006 | 用户面数据转发位置 | gtp5g 内核模块下沉 | <如有原方案> | decisions/ADR-006-gtp5g-kernel.md |
 
-> 历史方案覆盖列为空的 ADR：`architectures/decisions/` 下只生成 frontmatter + 决策声明占位，正文待人工或历史方案补全。
+> 历史方案覆盖列为空的 ADR：`architectures/decisions/` 下只生成 frontmatter + 决策声明占位。
 
 ## 8. 外部域整合关系
 
@@ -192,9 +184,7 @@ confidence: high | medium | low
 |--------|------|--------------------|
 | <如多 region 部署> | <现状> | <参考自 {solution_name} §X> |
 | <如切片增强> | <现状> | <同上> |
-| <如边缘下沉> | <现状> | <同上> |
-
-历史方案缺失时本章节标注「无历史方案输入，仅基于现行代码暴露风险给出现状项，置信度降级」。
+| <演进项> | <现状> | <同上> |
 
 ## 参考源
 
@@ -205,7 +195,7 @@ confidence: high | medium | low
 | <方案名 1> | <时段> | 现行/已演进 | §1, §2, §7-ADR-001 |
 | <方案名 2> | <时段> | 现行 | §5-F-002, §9.1 |
 
-`intent_source_count`：<int>。若为 0，全文意图域章节均已标注「无历史方案输入」。
+`intent_source_count`：<int>。
 
 ## 差异摘要（一次性，不持久化）
 

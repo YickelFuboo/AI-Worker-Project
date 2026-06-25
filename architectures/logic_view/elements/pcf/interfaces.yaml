@@ -1,7 +1,7 @@
 element_name: pcf
 element_id: pcf
 repo_path: repos/pcf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 pcf 元素对外提供的接口索引（摘要层）。
@@ -25,13 +25,13 @@ provided_interfaces:
     summary: AM 策略关联创建/查询/删除与事件触发器上报
     contract_ref: repos/pcf/.agent/interfaces.md §2.2
 
-  # Npcf_UEPolicyControl 服务组
+  # Npcf_UEPolicyControl 服务组（TS 29.525）
   - if_id: IF-003
     if_name: Npcf_UEPolicyControl
     protocol: SBI (Npcf_UEPolicyControl)
     direction: provided
-    summary: UE 路由选择策略关联（演化 stub，沿用 AmPolicy handler 派发）
-    contract_ref: repos/pcf/.agent/interfaces.md §2.3
+    summary: UE 路由选择策略关联（占位 stub，沿用 AmPolicy handler 派发）
+    contract_ref: repos/pcf/.agent/interfaces.md §2.5
 
   # Npcf_BDTPolicyControl 服务组（TS 29.554）
   - if_id: IF-004

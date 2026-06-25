@@ -1,8 +1,10 @@
-element_name: upf
 element_id: upf
+element_name: upf
+element_type: service
 repo_path: repos/go-upf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
+confidence: medium
 
 # 本文件是 upf 元素对外提供的接口索引（摘要层）。
 # 完整契约（PFCP MessageType / IE 字段 / Cause 错误码 / 事务序号管理）见 repos/go-upf/.agent/interfaces.md。
@@ -17,7 +19,7 @@ provided_interfaces:
     if_name: HeartbeatRequest/Response
     protocol: PFCP (N4, UDP/8805, 3GPP TS 29.244)
     message_type: 1 / 2
-    direction: provided (被动响应 SMF 请求)
+    direction: provided  # 被动响应 SMF 请求
     summary: N4 链路保活，返回 RecoveryTimeStamp
     contract_ref: repos/go-upf/.agent/interfaces.md §2.1
 
@@ -78,7 +80,7 @@ provided_interfaces:
     if_name: SessionReportRequest/Response
     protocol: PFCP (N4)
     message_type: 56 / 57
-    direction: provided-outbound (UPF→SMF Request；SMF→UPF Response)
+    direction: provided-outbound  # UPF→SMF Request；SMF→UPF Response
     summary: 主动上报下行数据触发（DLDR，含 PDRID）与用量测量（USAR，含 URRID/URSEQN/Trigger/Volume/Duration）
     contract_ref: repos/go-upf/.agent/interfaces.md §2.8
 
@@ -86,7 +88,7 @@ provided_interfaces:
   - if_id: IF-009
     if_name: GTP-U Data (N3)
     protocol: GTP-U (UDP/2152, 3GPP TS 29.281)
-    direction: provided (数据面，内核态处理)
+    direction: provided  # 数据面，内核态处理
     summary: gNB↔UPF 用户面隧道，内核 gtp5g 解封 GTP-U → 路由出 N6（或 N9 再封）
     contract_ref: repos/go-upf/.agent/interfaces.md §2.9
     implementation: kernel (gtp5g module)
@@ -101,7 +103,7 @@ provided_interfaces:
 
   - if_id: IF-011
     if_name: N6 IP Output
-    protocol: Raw IP (无 GTP 封装)
+    protocol: Raw IP  # 无 GTP 封装
     direction: provided
     summary: UPF↔DN 出口，经内核路由直出（启动时按 DnnList.Cidr 添加路由到 gtp5g 链路）
     contract_ref: repos/go-upf/.agent/interfaces.md §2.9
@@ -109,9 +111,10 @@ provided_interfaces:
 
 # 关键架构特征
 characteristics:
-  no_sbi: true              # 不提供 SBI HTTP/REST 接口
-  passive_pfcp: true        # PFCP 被动方，由 SMF 发起关联
+  no_sbi: true               # 不提供 SBI HTTP/REST 接口
+  passive_pfcp: true         # PFCP 被动方，由 SMF 发起关联
   data_plane_in_kernel: true # 用户面数据转发委托内核 gtp5g 模块
-  pfcp_unencrypted: true    # PFCP over UDP 明文，无 TLS/IPSec，依赖网络隔离
+  pfcp_unencrypted: true     # PFCP over UDP 明文，无 TLS/IPSec，依赖网络隔离
+  no_nrf_registration: true  # 不接入 NRF 服务发现（PFCP NodeID 由 smf 静态配置）
 
 full_contract_index: repos/go-upf/.agent/interfaces.md

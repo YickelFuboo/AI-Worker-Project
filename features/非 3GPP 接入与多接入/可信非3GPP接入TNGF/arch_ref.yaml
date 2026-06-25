@@ -1,0 +1,17 @@
+arch_ref_meta:
+  l1_id: cat_non_3gpp_access
+  l1_name: 非 3GPP 接入与多接入
+  feature_id: access_trusted_non3gpp
+  feature_name: 可信非3GPP接入TNGF
+  last_modified: "2026-06-25T13:45:33+08:00"
+  last_modified_by: rev-code-to-scenario
+  confidence: high
+elements_used:
+- element_id: tngf
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/tngf/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+external_dependencies: []
+code_anchors: []
+confidence_note: 本文件仅引用可定位的架构元素与代码锚点；缺失事实源不编造。

@@ -1,0 +1,80 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_exposure
+  name: 网络能力开放
+  description: 网络能力对 AF/第三方开放，含 NEF 基础、事件开放、PFD 管理、参数预配置、CAPIF、意图驱动管理。
+  status: partial
+  level: L1
+  path: features/网络能力开放/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: exp_nef_basic
+  name: NEF基础能力开放
+  description: 对 AF/第三方暴露 5GC 能力，做鉴权与转译
+  status: implemented
+  level: L2
+  path: NEF基础能力开放/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §6.2.10, TS 29.522
+- id: exp_event_exposure
+  name: 事件开放
+  description: AF 订阅 UE 事件 (可达/位置/丢失连接)
+  status: implemented
+  level: L2
+  path: 事件开放/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.24
+- id: exp_pfd_management
+  name: PFD管理
+  description: NEF 管理应用包的 Packet Flow Description
+  status: implemented
+  level: L2
+  path: PFD管理/feature.yaml
+  releases:
+  - R15
+  ref: TS 29.551
+- id: exp_parameter_provision
+  name: 参数预配置
+  description: AF 向 5GC 提供应用参数 (预期 UE 行为)
+  status: partial
+  level: L2
+  path: 参数预配置/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.15
+- id: exp_capif
+  name: 通用API框架CAPIF
+  description: 统一 API 框架，含 API provider/invoker/_publish
+  status: planned
+  level: L2
+  path: 通用API框架CAPIF/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.222
+- id: exp_intent_driven_mgmt
+  name: 意图驱动管理
+  description: 运营商用 intent 描述期望结果，自动编排
+  status: planned
+  level: L2
+  path: 意图驱动管理/feature.yaml
+  releases:
+  - R18
+  ref: TS 28.31x
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

@@ -1,0 +1,81 @@
+---
+id: mbs_basic
+name: 5MBS基础多播广播
+feature_path:
+  - { level: L1, id: cat_mbs, name: 多播广播 }
+  - { level: L2, id: mbs_basic, name: 5MBS基础多播广播 }
+last_modified: "2026-06-25T13:45:33+08:00"
+last_modified_by: rev-code-to-scenario
+intent_source_count: 0
+confidence: low
+---
+
+# 特性说明：5MBS基础多播广播
+
+## 1. 特性概述
+
+| 项目 | 内容 |
+|------|------|
+| 特性 ID | mbs_basic |
+| 特性名 | 5MBS基础多播广播 |
+| 所属 L1 | cat_mbs — 多播广播 |
+| 状态 | planned |
+| 规范参考 | TS 23.247 |
+| 置信度 | low |
+| 意图源覆盖 | 0 |
+
+## 2. 业务定义与目标（意图域）
+
+**业务定义**：5G 多播广播服务，MBSF/MBSF-AF/MB-UPF/MB-SMF
+
+**业务目标**：围绕 `5MBS基础多播广播` 提供对应 5GC 业务能力。当前未采纳有效历史系统方案，业务目标以后续意图源增量补充为准。
+
+**范围边界**：
+
+- 包含：`5MBS基础多播广播` 对应的业务能力、规范约束、触发条件、架构参与方和场景流程。
+- 不包含：不属于 `多播广播` / `5MBS基础多播广播` 特性目录的其他业务能力。
+
+## 3. 规范基线与触发条件（事实域）
+
+| 项目 | 内容 |
+|------|------|
+| 规范基线 | TS 23.247 |
+| 触发条件 | 参见场景文档和后续代码事实源。 |
+| 重试退避 | 以代码事实源和场景文档中的异常分支现状为准。 |
+| 关键约束 | 5G 多播广播服务，MBSF/MBSF-AF/MB-UPF/MB-SMF |
+
+## 4. 架构关联（事实域）
+
+参见同目录 [`arch_ref.yaml`](arch_ref.yaml)。
+
+| 架构元素 | 角色 | 关键接口 / 文档 |
+|---------|------|----------------|
+| upf | 相关架构元素 | architectures/logic_view/elements/upf/spec.md |
+| pcf | 相关架构元素 | architectures/logic_view/elements/pcf/spec.md |
+| bsf | 相关架构元素 | architectures/logic_view/elements/bsf/spec.md |
+| nef | 相关架构元素 | architectures/logic_view/elements/nef/spec.md |
+
+## 5. 实现现状（事实域）
+
+- 当前特性暂无可确认代码锚点；后续由事实源增量补充。
+
+## 6. 场景清单
+
+| 场景 ID | 场景名 | 类型 | 文档 |
+|---------|--------|------|------|
+| SCENARIO_001 | 5MBS基础多播广播主场景 | 主场景 | [SCENARIO_001_5MBS_Basic_(Multicast_&_Broadcast)主场景_场景流程.md](SCENARIO_001_5MBS_Basic_(Multicast_&_Broadcast)主场景_场景流程.md) |
+
+## 6. 子场景清单
+
+| 场景 ID | 场景名 | 类型 | 文件 |
+|---------|--------|------|------|
+| SCENARIO_001 | 5MBS基础多播广播业务成功 | 成功场景 | [SCENARIO_001_5MBS基础多播广播业务成功_场景流程.md](SCENARIO_001_5MBS基础多播广播业务成功_场景流程.md) |
+| SCENARIO_002 | 5MBS基础多播广播业务失败 | 失败场景 | [SCENARIO_002_5MBS基础多播广播业务失败_场景流程.md](SCENARIO_002_5MBS基础多播广播业务失败_场景流程.md) |
+
+## 7. 参考源
+
+本特性采纳的历史方案：
+
+| solution_name | 状态 | 主要采纳章节 | 采纳节 |
+|---------------|------|------------|--------|
+| - | - | - | - |

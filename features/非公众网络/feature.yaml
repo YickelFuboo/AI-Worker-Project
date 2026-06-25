@@ -1,0 +1,62 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_npn
+  name: 非公众网络
+  description: 非公众网络相关特性，含 PNI-NPN、SNPN、SNPN 入网、PLMN 复用 SNPN 无线接入。
+  status: planned
+  level: L1
+  path: features/非公众网络/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: npn_pni
+  name: 公网集成NPN PNI-NPN
+  description: 公网承载的 NPN，用 CAG (Closed Access Group) 接入控制
+  status: planned
+  level: L2
+  path: 公网集成NPN_PNI-NPN/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.30
+- id: npn_snpn
+  name: 独立NPN SNPN
+  description: 独立部署的非公众网络，不依赖 PLMN
+  status: planned
+  level: L2
+  path: 独立NPN_SNPN/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.30
+- id: npn_snpn_onboarding
+  name: SNPN UE入网
+  description: UE 用默认凭据从 provisioning server 获取 SNPN 凭据
+  status: planned
+  level: L2
+  path: SNPN_UE入网/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.3
+- id: npn_plmn_via_snpn
+  name: PLMN使用SNPN无线接入
+  description: PLMN 运营商把 SNPN 当作无线接入使用
+  status: planned
+  level: L2
+  path: PLMN使用SNPN无线接入/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.7
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

@@ -1,0 +1,17 @@
+arch_ref_meta:
+  l1_id: cat_analytics_ai
+  l1_name: 数据分析与 AI
+  feature_id: ai_mfaf
+  feature_name: 消息框架适配功能MFAF
+  last_modified: "2026-06-25T13:45:33+08:00"
+  last_modified_by: rev-code-to-scenario
+  confidence: low
+elements_used:
+- element_id: nef
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/nef/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+external_dependencies: []
+code_anchors: []
+confidence_note: 本文件仅引用可定位的架构元素与代码锚点；缺失事实源不编造。

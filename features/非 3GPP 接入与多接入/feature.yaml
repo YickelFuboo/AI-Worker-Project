@@ -1,0 +1,71 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_non_3gpp_access
+  name: 非 3GPP 接入与多接入
+  description: 非 3GPP 接入与多接入相关特性，含 N3IWF/TNGF/W-AGF/TWIF/NTN。
+  status: partial
+  level: L1
+  path: features/非 3GPP 接入与多接入/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: access_untrusted_non3gpp
+  name: 非可信非3GPP接入N3IWF
+  description: 不可信非 3GPP (如公共 Wi-Fi) 经 N3IWF 接入 5GC
+  status: implemented
+  level: L2
+  path: 非可信非3GPP接入N3IWF/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.2
+- id: access_trusted_non3gpp
+  name: 可信非3GPP接入TNGF
+  description: 可信非 3GPP 接入网关
+  status: implemented
+  level: L2
+  path: 可信非3GPP接入TNGF/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.2, TS 23.316
+- id: access_wagf
+  name: 有线接入网关功能W-AGF
+  description: 有线接入 (5G-RG/FN-RG) 网关
+  status: planned
+  level: L2
+  path: 有线接入网关功能W-AGF/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.316
+- id: access_twif
+  name: 可信WLAN互通功能TWIF
+  description: 可信 WLAN 互通
+  status: planned
+  level: L2
+  path: 可信WLAN互通功能TWIF/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.316
+- id: access_ntn
+  name: 非地面网络NTN接入
+  description: 卫星接入 5GC，适配长时延与移动小区
+  status: planned
+  level: L2
+  path: 非地面网络NTN接入/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.4.2
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

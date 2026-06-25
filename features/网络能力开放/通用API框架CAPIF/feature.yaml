@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_exposure
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: exp_capif
+  name: 通用API框架CAPIF
+  description: 统一 API 框架，含 API provider/invoker/_publish
+  releases:
+  - R15
+  ref: TS 23.222
+  status: planned
+  level: L2
+  path: features/网络能力开放/通用API框架CAPIF/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 通用API框架CAPIF能力开放成功
+  description: AF通过通用API框架CAPIF获得网络能力开放结果。
+  scenario_type: 开放场景
+  path: SCENARIO_001_通用API框架CAPIF能力开放成功_场景流程.md
+- id: SCENARIO_002
+  name: 通用API框架CAPIF授权失败
+  description: AF授权、参数或策略不满足导致通用API框架CAPIF失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_通用API框架CAPIF授权失败_场景流程.md
+- id: SCENARIO_003
+  name: 通用API框架CAPIF订阅更新
+  description: 业务方更新通用API框架CAPIF相关订阅或参数。
+  scenario_type: 开放场景
+  path: SCENARIO_003_通用API框架CAPIF订阅更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md

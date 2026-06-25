@@ -1,0 +1,71 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_policy_control
+  name: 策略控制特性
+  description: 策略控制相关特性，含 UE 策略下发、AF 策略授权、BSF PCC 绑定、流量影响、SMF 退避。
+  status: partial
+  level: L1
+  path: features/策略控制特性/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: pcc_ue_policy
+  name: UE策略下发URSP_ANDSP_V2XP
+  description: 通过 NAS 下发 UE Policy，含 URSP 路由选择策略
+  status: partial
+  level: L2
+  path: UE策略下发URSP_ANDSP_V2XP/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.20, TS 29.525
+- id: pcc_policy_authorization
+  name: AF到PCF策略授权
+  description: AF 通过 PCF 申请资源预留与 QoS
+  status: partial
+  level: L2
+  path: AF到PCF策略授权/feature.yaml
+  releases:
+  - R15
+  ref: TS 29.514
+- id: pcc_bsf_binding
+  name: BSF PCC会话绑定
+  description: BSF 把 UE IP 绑定到 SUPI/DNN/S-NSSAI/PCF ID
+  status: implemented
+  level: L2
+  path: BSF_PCC会话绑定/feature.yaml
+  releases:
+  - R15
+  ref: TS 29.521
+- id: pcc_traffic_influence
+  name: AF影响UPF路由的流量引导
+  description: AF 影响 UPF 路由，把流量导向指定 DNAI
+  status: implemented
+  level: L2
+  path: AF影响UPF路由的流量引导/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.3.6, TS 29.522
+- id: pcc_smf_backoff
+  name: SMF退避与DBDD
+  description: 拥塞时 SMF 通知 UE 推迟会话建立
+  status: planned
+  level: L2
+  path: SMF退避与DBDD/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.19
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

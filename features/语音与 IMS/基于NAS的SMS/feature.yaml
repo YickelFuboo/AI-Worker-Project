@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_voice_ims
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: voice_sms_nas
+  name: 基于NAS的SMS
+  description: 通过 NAS 短消息传输，不依赖 IMS
+  releases:
+  - R15
+  ref: TS 23.502 §4.13
+  status: planned
+  level: L2
+  path: features/语音与 IMS/基于NAS的SMS/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: SMS上行发送成功
+  description: UE通过NAS承载发送SMS并获得网络确认。
+  scenario_type: 成功场景
+  path: SCENARIO_001_SMS上行发送成功_场景流程.md
+- id: SCENARIO_002
+  name: SMS下行接收成功
+  description: 网络通过NAS向UE投递SMS。
+  scenario_type: 成功场景
+  path: SCENARIO_002_SMS下行接收成功_场景流程.md
+- id: SCENARIO_003
+  name: SMS投递失败
+  description: UE注册状态、订阅或路由条件不满足导致SMS投递失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_SMS投递失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md

@@ -1,0 +1,53 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_network_slicing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: ns_nssaa
+  name: 网络切片特定鉴权授权NSSAA
+  description: 对切片访问的二次 EAP 鉴权授权
+  releases:
+  - R16
+  ref: TS 23.501 §5.15.10
+  status: planned
+  level: L2
+  path: features/网络切片/网络切片特定鉴权授权NSSAA/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 切片特定鉴权成功
+  description: UE通过NSSAA完成切片特定鉴权授权。
+  scenario_type: 授权场景
+  path: SCENARIO_001_切片特定鉴权成功_场景流程.md
+- id: SCENARIO_002
+  name: 切片特定鉴权失败
+  description: 鉴权或授权失败导致切片不可用。
+  scenario_type: 失败场景
+  path: SCENARIO_002_切片特定鉴权失败_场景流程.md
+- id: SCENARIO_003
+  name: 授权状态更新
+  description: 切片授权状态变化后网络更新UE可用切片。
+  scenario_type: 授权场景
+  path: SCENARIO_003_授权状态更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: nssf
+    path: architectures/logic_view/elements/nssf/spec.md
+  - element_id: ausf
+    path: architectures/logic_view/elements/ausf/spec.md
+  - element_id: udm
+    path: architectures/logic_view/elements/udm/spec.md

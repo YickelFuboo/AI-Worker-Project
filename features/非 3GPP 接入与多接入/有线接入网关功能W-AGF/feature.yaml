@@ -1,0 +1,47 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_non_3gpp_access
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: access_wagf
+  name: 有线接入网关功能W-AGF
+  description: 有线接入 (5G-RG/FN-RG) 网关
+  releases:
+  - R16
+  ref: TS 23.316
+  status: planned
+  level: L2
+  path: features/非 3GPP 接入与多接入/有线接入网关功能W-AGF/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 有线接入网关功能W-AGF接入成功
+  description: UE通过有线接入网关功能W-AGF成功接入5GC。
+  scenario_type: 成功场景
+  path: SCENARIO_001_有线接入网关功能W-AGF接入成功_场景流程.md
+- id: SCENARIO_002
+  name: 有线接入网关功能W-AGF接入失败
+  description: 认证、隧道或接入能力不满足导致有线接入网关功能W-AGF失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_有线接入网关功能W-AGF接入失败_场景流程.md
+- id: SCENARIO_003
+  name: 有线接入网关功能W-AGF接入切换
+  description: UE在有线接入网关功能W-AGF与其他接入之间切换或保持连续性。
+  scenario_type: 迁移场景
+  path: SCENARIO_003_有线接入网关功能W-AGF接入切换_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

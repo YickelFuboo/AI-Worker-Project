@@ -1,0 +1,62 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_mobility_interworking
+  name: 移动性与互操作
+  description: UE 移动性管理与跨系统互操作相关特性，含切片重路由、5GS-EPS 互操作、受限服务移动性、多 USIM 协调。
+  status: partial
+  level: L1
+  path: features/移动性与互操作/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: mob_nssai_reroute
+  name: NSSAI不匹配时NAS重路由
+  description: 服务 AMF 无法处理 UE 切片时 NAS 重路由到目标 AMF
+  status: implemented
+  level: L2
+  path: NSSAI不匹配时NAS重路由/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.502 §4.2.2.2.3
+- id: mob_5gs_eps_interworking
+  name: 5GS-EPS互操作与移动性
+  description: 5G 与 4G EPC 互操作与跨系统切换
+  status: planned
+  level: L2
+  path: 5GS-EPS互操作与移动性/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.17, TS 23.502 §4.11
+- id: mob_restricted_local_service
+  name: 受限本地服务移动性
+  description: 限定区域服务 (如 V2X/MBS) 的移动性管理
+  status: planned
+  level: L2
+  path: 受限本地服务移动性/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.40
+- id: mob_multi_usim
+  name: 多USIM协调
+  description: 一台 UE 多 USIM 协调，避免寻呼冲突
+  status: planned
+  level: L2
+  path: 多USIM协调/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.38
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

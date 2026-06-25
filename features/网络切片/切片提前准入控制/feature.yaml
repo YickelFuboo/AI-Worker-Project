@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_network_slicing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: ns_early_admission
+  name: 切片提前准入控制
+  description: AMF 在 NSACF 配额检查完成前先接受注册以降低延迟
+  releases:
+  - R17
+  ref: TS 23.501 §5.15.11
+  status: planned
+  level: L2
+  path: features/网络切片/切片提前准入控制/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 提前接受注册
+  description: AMF在NSACF配额检查完成前先接受注册以降低接入等待。
+  scenario_type: 准入场景
+  path: SCENARIO_001_提前接受注册_场景流程.md
+- id: SCENARIO_002
+  name: 配额确认后保持切片服务
+  description: NSACF后续确认配额可用后维持已接受的切片服务。
+  scenario_type: 成功场景
+  path: SCENARIO_002_配额确认后保持切片服务_场景流程.md
+- id: SCENARIO_003
+  name: 配额不足后限制切片使用
+  description: 后续准入控制确认配额不足后限制或调整切片使用。
+  scenario_type: 失败场景
+  path: SCENARIO_003_配额不足后限制切片使用_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md
+  - element_id: nssf
+    path: architectures/logic_view/elements/nssf/spec.md

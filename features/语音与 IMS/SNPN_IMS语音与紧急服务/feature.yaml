@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_voice_ims
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: voice_snpn_ims
+  name: SNPN IMS语音与紧急服务
+  description: SNPN 场景下 IMS 语音与紧急服务
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.5
+  status: planned
+  level: L2
+  path: features/语音与 IMS/SNPN_IMS语音与紧急服务/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: SNPN内IMS语音成功
+  description: SNPN用户在非公网网络内完成IMS语音建立。
+  scenario_type: 成功场景
+  path: SCENARIO_001_SNPN内IMS语音成功_场景流程.md
+- id: SCENARIO_002
+  name: SNPN紧急呼叫成功
+  description: SNPN用户完成IMS紧急呼叫。
+  scenario_type: 成功场景
+  path: SCENARIO_002_SNPN紧急呼叫成功_场景流程.md
+- id: SCENARIO_003
+  name: IMS能力缺失呼叫失败
+  description: SNPN IMS能力或策略不足导致呼叫失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_IMS能力缺失呼叫失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md
+  - element_id: ausf
+    path: architectures/logic_view/elements/ausf/spec.md

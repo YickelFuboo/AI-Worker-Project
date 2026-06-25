@@ -11,10 +11,10 @@
 # 不纳入本树。
 
 tree_meta:
-  last_modified: "2026-06-22T12:00:00+08:00"
+  last_modified: "2026-06-24T16:00:00+08:00"
   last_modified_by: rev-arch-element-extract
   element_count: 14
-  note: "14 个 free5gc NF 元素已全部抽取。depended_by 由 depends_on 反向构建，已双向校验。"
+  note: "14 个 free5gc NF 元素已全部抽取并完成覆盖刷新。depended_by 由 depends_on 反向构建，已双向校验。"
 
 elements:
   - element_id: amf
@@ -22,7 +22,7 @@ elements:
     element_type: service
     repo_path: repos/amf
     spec_path: architectures/logic_view/elements/amf/spec.md
-    last_modified: "2026-06-21T11:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases: []
     depends_on:
@@ -62,7 +62,7 @@ elements:
     element_type: service
     repo_path: repos/bsf
     spec_path: architectures/logic_view/elements/bsf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases: []
     depends_on:
@@ -76,8 +76,8 @@ elements:
     element_type: service
     repo_path: repos/chf
     spec_path: architectures/logic_view/elements/chf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
-    confidence: high
+    last_modified: "2026-06-24T16:00:00+08:00"
+    confidence: medium
     aliases: []
     depends_on:
       - nrf  # NF 注册与发现
@@ -105,7 +105,7 @@ elements:
     element_type: service
     repo_path: repos/nef
     spec_path: architectures/logic_view/elements/nef/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases: []
     depends_on:
@@ -143,8 +143,8 @@ elements:
     element_type: service
     repo_path: repos/nssf
     spec_path: architectures/logic_view/elements/nssf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
-    confidence: high
+    last_modified: "2026-06-24T16:00:00+08:00"
+    confidence: medium
     aliases: []
     depends_on:
       - nrf  # NF 注册与发现
@@ -157,8 +157,8 @@ elements:
     element_type: service
     repo_path: repos/pcf
     spec_path: architectures/logic_view/elements/pcf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
-    confidence: high
+    last_modified: "2026-06-24T16:00:00+08:00"
+    confidence: medium
     aliases: []
     depends_on:
       - nrf  # NF 注册与发现
@@ -215,7 +215,7 @@ elements:
     element_type: service
     repo_path: repos/udm
     spec_path: architectures/logic_view/elements/udm/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases: []
     depends_on:
@@ -232,8 +232,8 @@ elements:
     element_type: service
     repo_path: repos/udr
     spec_path: architectures/logic_view/elements/udr/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
-    confidence: high
+    last_modified: "2026-06-24T16:00:00+08:00"
+    confidence: medium
     aliases: []
     depends_on:
       - nrf  # NF 注册与发现
@@ -245,9 +245,9 @@ elements:
   - element_id: upf
     element_name: upf
     element_type: service
-    repo_path: repos/upf
+    repo_path: repos/go-upf
     spec_path: architectures/logic_view/elements/upf/spec.md
-    last_modified: "2026-06-22T12:00:00+08:00"
+    last_modified: "2026-06-24T16:00:00+08:00"
     confidence: high
     aliases:
       - go-upf  # 代码仓名为 go-upf，元素名规整为 upf

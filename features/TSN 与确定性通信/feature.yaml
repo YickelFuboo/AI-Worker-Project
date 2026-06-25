@@ -1,0 +1,98 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_tsn_deterministic
+  name: TSN 与确定性通信
+  description: TSN 与确定性通信相关特性，含 TSN 集成、时间同步、定时服务弹性/覆盖控制/签约控制、TN 集成、无线资源对齐、DetNet。
+  status: planned
+  level: L1
+  path: features/TSN 与确定性通信/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: tsn_integration
+  name: TSN与5GS集成
+  description: 5GS 作为 TSN 网桥接入 IEEE 802.1 TSN 网络
+  status: planned
+  level: L2
+  path: TSN与5GS集成/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.27, TS 23.502 §4.4.8
+- id: tsn_time_sync
+  name: 5G授时服务与时间同步
+  description: 5GS 向 UE 提供时间同步 (PTP/ASTI)
+  status: planned
+  level: L2
+  path: 5G授时服务与时间同步/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.27.2
+- id: tsn_time_resilience
+  name: 授时服务弹性
+  description: 时钟质量标准/度量/劣化通知
+  status: planned
+  level: L2
+  path: 授时服务弹性/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.27.2
+- id: tsn_coverage_control
+  name: 授时服务覆盖控制
+  description: AF 按区域启用/禁用 PTP/ASTI
+  status: planned
+  level: L2
+  path: 授时服务覆盖控制/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.27.2
+- id: tsn_subscriber_controlled
+  name: 签约控制的授时服务
+  description: UDM 签约数据控制时间同步参数
+  status: planned
+  level: L2
+  path: 签约控制的授时服务/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.27.2
+- id: tsn_tn_integration
+  name: 传输网络TSN集成
+  description: 5GS QoS 与流量需求暴露给 TN 做 TSN 控制
+  status: planned
+  level: L2
+  path: 传输网络TSN集成/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.27.3
+- id: tsn_rr_alignment
+  name: 确定性流无线资源对齐
+  description: NG-RAN 向 AF 提供突发到达时间偏移与调整后周期
+  status: planned
+  level: L2
+  path: 确定性流无线资源对齐/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.27.4
+- id: tsn_detnet
+  name: IETF DetNet支持
+  description: 5GS 作为 DetNet transit router 处理确定性 IP 流
+  status: planned
+  level: L2
+  path: IETF_DetNet支持/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.35
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

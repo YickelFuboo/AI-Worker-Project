@@ -1,0 +1,42 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_iot_vertical
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: iot_redcap
+  name: RedCap低能力UE
+  description: 降低复杂度的 NR UE，适配可穿戴/工业传感器
+  releases:
+  - R17
+  ref: TS 23.501 §5.34
+  status: planned
+  level: L2
+  path: features/物联网与垂直行业/RedCap低能力UE/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: RedCap低能力UE业务成功
+  description: RedCap低能力UE业务场景成功完成。
+  scenario_type: 成功场景
+  path: SCENARIO_001_RedCap低能力UE业务成功_场景流程.md
+- id: SCENARIO_002
+  name: RedCap低能力UE业务失败
+  description: RedCap低能力UE因配置、订阅、策略、拓扑或对端能力不满足而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_RedCap低能力UE业务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

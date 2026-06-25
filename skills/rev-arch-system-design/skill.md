@@ -9,7 +9,7 @@
 | 信息域 | 主抽取源 | 写入位置 | 缺失时行为 |
 |--------|----------|----------|-----------|
 | **事实域**：接口签名、依赖关系、协议层、部署形态、容量现状 | 代码 + `.agent/*.md` + 元素层产物 | §3 拓扑 / §4 接口面 / §6 DFX 现状值 / §8 外部域 | 必须有，不应在元素层缺失时执行本 skill |
-| **意图域**：切分理由、决策背景、流程编排意图、架构假设、风险预判、演进路线 | `knowledge/历史方案/架构方案/` 下文档 | §1 系统定位 / §2 切分理由 / §5 流程编排意图 / §7 ADR 背景 / §9 风险与演进 | 标注"无历史方案输入，本节仅基于现行代码归纳，置信度降级"并继续产出 |
+| **意图域**：切分理由、决策背景、流程编排意图、架构假设、风险预判、演进路线 | `knowledge/历史方案/架构方案/` 下文档 | §1 系统定位 / §2 切分理由 / §5 流程编排意图 / §7 ADR 背景 / §9 风险与演进 | 正文不写降级提示，仅通过 frontmatter `intent_source_count: 0` + `confidence: low` 体现；表格意图列填 `-`，不阻断产出 |
 
 **分流规则**（事实 vs 意图冲突时）：事实域以代码为准（即使历史方案有不同描述）；意图域以历史方案为准（除非 status=已废弃）；两域不互相覆盖，并存表达。冲突的"事实域分歧"记入差异摘要请人工裁决，不阻断产出。
 
@@ -58,7 +58,7 @@
    - **冲突识别**：
      a. 事实层冲突（历史方案描述 A，代码事实是 B）→ 事实写代码版本，差异摘要列「历史方案 X 第 Y 章描述为 A，现行实现为 B，建议人工裁决是否更新历史方案或视为合理演进」
      b. 意图层无冲突（历史方案是唯一权威），多方案描述不一致时取最新 status=现行 的方案
-   - **历史方案缺失或不足**：意图域章节标注「无历史方案输入，本节仅基于现行代码归纳，置信度降级；建议补齐历史架构设计文档后重跑」，仍产出文档；frontmatter confidence 降为 medium 或 low
+   - **历史方案缺失或不足**：意图域章节正文不写降级提示，仅通过 frontmatter `intent_source_count: 0` + `confidence: low` 体现；表格意图列填 `-`，不阻断产出
 
 4. **系统级章节归纳**（事实 + 意图融合写作）：
    - **§1 系统定位**：事实部分用一段架构语言描述本系统在产业中的位置、核心能力、不做什么；意图部分从历史方案引入「产品愿景 / 战略定位 / 不做什么的边界声明」原文转写
@@ -71,9 +71,15 @@
    - **§8 外部域整合关系**：与外部实体的系统级关系（MongoDB / Prometheus / OpenTelemetry / gtp5g / xfrm / AF / 计费域 / UE-RAN-WiFi-TWAN）；事实纯度最高的章节
    - **§9 系统级风险与演进**：从历史方案抽取的原设计风险与演进路线（意图） + 元素层暴露的现行风险（事实），两者明示分列
 
-5. **生成 ADR 占位与正文**：识别 §7 中提到的系统级决策，为每个决策生成 `architectures/decisions/ADR-{NNN}-{topic}.md`：
-   - 若有历史方案覆盖该决策：抽取背景、候选方案、决策理由、影响代价四节，confidence 写 high 或 medium
-   - 若无历史方案覆盖：仅生成 frontmatter + 决策声明占位，正文标注「待人工或历史方案补全」
+5. **生成 ADR（按意图覆盖度分档）**：识别 §7 中提到的系统级决策，按下表决定是否落盘 ADR 文件：
+
+   | 该决策的意图源覆盖情况 | 产物行为 |
+   |---------------------|---------|
+   | 有历史方案覆盖（含背景 / 候选方案 / 决策理由任一） | 落盘 `architectures/decisions/ADR-{NNN}-{topic}.md`，抽取背景、候选方案、决策理由、影响代价四节，confidence high 或 medium |
+   | 无该决策的历史方案覆盖，但本次执行 `intent_source_count > 0`（即至少有一份非空意图源被纳入） | 落盘 ADR 文件，仅生成 frontmatter + 决策声明占位，正文标注「待人工或历史方案补全」 |
+   | `intent_source_count == 0`（意图源全缺：目录为空、文件为空、或全部 status=已废弃） | **不落盘任何 ADR 文件**；§7 退化为「事实观察清单」表，列出候选决策的事实层描述 + 事实源指针；frontmatter `adr_count: 0`；差异摘要写明「意图源全缺，本次不生成 ADR，待意图源补齐后增量重跑」 |
+
+   **设计理由**：纯占位 ADR（背景/候选/理由四节全是「待补全」一句话）无信息增量，反而制造审计噪音与误导性「已规划」假象。意图源全缺时应在 §7 留事实清单为后续重跑导引，而不是产出空文件。
 
 6. **生成产物**：按模板 `templates/system_architectures_template.md` 输出 `architectures/system_architectures.md`；frontmatter 含 `last_modified` / `last_modified_by` / `element_count` / `adr_count` / `intent_source_count`（采纳的历史方案数）/ `confidence`
 
@@ -104,16 +110,16 @@
 - **不抢元素层职责**：元素的角色、能力、接口、依赖等已由 `rev-arch-element-extract` 产出；本 skill 只做跨元素聚合 + 历史意图融合，不重复抄写元素级表格行
 - **PlantUML 拓扑图必须准确**：协议层标注必须与元素 dependencies.yaml 的 protocol 字段一致；不可虚构边或协议
 - **§5 端到端流程索引仅给摘要**：详细序列图本 skill 不强制产出；若需补可另起 `rev-scenario-extract` skill 或人工补 `architectures/scenario_view/`
-- **§7 ADR 不只索引**：有历史方案覆盖的决策应在 ADR 正文中抽取背景、候选方案、决策理由；无覆盖的才留占位
+- **§7 ADR 不只索引**：有历史方案覆盖的决策应在 ADR 正文中抽取背景、候选方案、决策理由；无覆盖但有其它意图源时才留占位；**`intent_source_count == 0` 时不生成任何 ADR 文件**，§7 退化为事实观察清单表（详见执行步骤 5）
 - **doc/docx/pptx 历史方案**：投递时先用 pandoc 转 md，本 skill 不内嵌格式转换
-- **置信度评估**：事实源完整 + 历史方案充足覆盖（≥80% 章节有意图来源）→ high；事实源完整 + 历史方案部分覆盖 → medium；事实源完整 + 历史方案缺失 → low（章节标注降级，不阻断产出）；事实源不完整 → 不应执行，先补 `rev-arch-element-extract`
+- **置信度评估**：事实源完整 + 历史方案充足覆盖（≥80% 章节有意图来源）→ high；事实源完整 + 历史方案部分覆盖 → medium；事实源完整 + 历史方案缺失 → low（仅 frontmatter 体现，正文不写降级提示，不阻断产出）；事实源不完整 → 不应执行，先补 `rev-arch-element-extract`
 - **本 skill 不修改元素层**：发现元素层错误时记入差异摘要请人工或回溯触发 `rev-arch-element-extract` 修正
 - **本 skill 不修改历史方案**：历史方案是只读输入，发现描述过时时记入差异摘要请人工裁决
 
 ### 输出要求
 
 - 主产物：`architectures/system_architectures.md`，严格按模板 `templates/system_architectures_template.md`
-- 附产物：`architectures/decisions/ADR-{NNN}-{topic}.md`：有历史方案覆盖的决策抽取完整正文；无覆盖的仅 frontmatter + 决策声明占位
+- 附产物：`architectures/decisions/ADR-{NNN}-{topic}.md`：有历史方案覆盖的决策抽取完整正文；无覆盖但 `intent_source_count > 0` 时仅 frontmatter + 决策声明占位；**`intent_source_count == 0` 时不生成任何 ADR 文件**（§7 改用事实观察清单替代）
 - frontmatter 含：`doc_id`（固定 `system_architectures`）、`product_name`、`last_modified`、`last_modified_by`（写入 `rev-arch-system-design`）、`element_count`、`adr_count`、`intent_source_count`（本次采纳的历史方案数）、`confidence`
 - `last_modified` 格式 ISO 8601 带时区（如 `2026-06-22T14:00:00+08:00`）
 - 正文章节顺序固定：§1 系统定位 / §2 元素分解与切分理由 / §3 系统级拓扑（PlantUML）/ §4 系统级接口面 / §5 端到端流程索引 / §6 系统级 DFX 策略 / §7 关键架构决策索引 / §8 外部域整合关系 / §9 系统级风险与演进 / 参考源 / 差异摘要

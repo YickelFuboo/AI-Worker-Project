@@ -15,7 +15,7 @@
 - 存量项目缺少架构视图，需从代码仓反向构建跨仓元素图谱（elements_tree.yaml）
 - 代码仓已有 `.agent/*.md`，需在架构层补一份元素级索引（定位/质量属性/部署/跨仓依赖）
 - 仓内 `.agent/*.md` 增量刷新后，元素文档需同步增量刷新（以 `last_modified` 锚点判定）
-- 跨仓影响分析（`fwd-arch-impact-analysis` / `fwd-cross-repo-impact`）需要元素级依赖图作为输入
+- 跨仓影响分析（`04-fwd-arch-impact-analysis` / `fwd-cross-repo-impact`）需要元素级依赖图作为输入
 
 ## 工作方式
 
@@ -36,7 +36,7 @@
    - 优先读取 `repos/{repo}/.agent/design.md`（设计目标 / 模块划分 / 数据对象 / 部署 / 质量属性 → §4 质量属性、§7 数据对象、§8 部署）
    - 优先读取 `repos/{repo}/.agent/rules/_index.md` 与 `rules/约束/可观测性.md`（可观测性约定 → §4 质量属性的可观测性子项）、`rules/约束/编码风格.md`（部署运行约定相关）
    - 优先读取 `repos/{repo}/.agent/DTFrame.md`（测试基础设施 → §4 质量属性的可测试性子项）
-   - 若 `.agent/*.md` 部分缺失：对缺失部分降级扫源码 + 构建配置（go.mod / Makefile / CI）补齐，并在 spec.md §1 标注"本节由源码扫描补齐，置信度降级"
+   - 若 `.agent/*.md` 部分缺失：对缺失部分降级扫源码 + 构建配置（go.mod / Makefile / CI）补齐，frontmatter `confidence` 相应降级，正文不写降级标注
    - 若 `.agent/*.md` 全部缺失：执行全量源码扫描（参考 `rev-repo-to-spec-and-design` 的扫描策略），产出的同时**建议**触发 rev-repo-* 系列 skill 先补 `.agent/*.md`，本 skill 不直接生成 `.agent/*.md`
 
    **意图源（针对设计意图、原架构假设、原 DFX 目标值；与事实源并存表达）**：
@@ -54,7 +54,7 @@
      - 同章节内两者并存表达，明示「现状」与「原设计意图」标签
      - 事实层冲突（历史方案 vs 代码）→ 事实写代码版本，差异摘要标注「历史方案描述为 A，现行实现为 B，建议人工裁决」
    - **抽取留痕**：每条意图条目末尾标「参考自 {solution_name} §X」，便于读者回溯原文
-   - **历史方案缺失**：意图域章节标注「无历史方案输入，本节仅基于现行代码归纳」，confidence 降级，但不阻断产出
+   - **历史方案缺失**：意图域章节正文不写降级提示，仅通过 frontmatter `intent_source_count: 0` + `confidence: low` 体现；表格意图域列填 `-`，不阻断产出
 3. **元素类型判定**：根据 repo 在系统中的角色判定 `element_type`：
    - `service`：对外提供 SBI/REST/RPC 接口的独立部署 NF（如 amf/smf/upf）
    - `component`：被其他元素以库形式依赖的组件（如 util/openapi 共享库）
@@ -92,7 +92,7 @@
 - **元素名稳定性**：元素名一旦写入 `elements_tree.yaml` 不得随意改名（跨仓引用依赖此名）；若 repo 改名，元素名保留旧名并在 tree.yaml 加 `aliases` 字段
 - **跨仓依赖必须双向校验**：本元素 `dependencies.yaml` 声明依赖 X 元素 → X 元素的 `interfaces.yaml` 必须有对应接口提供；不一致时标注"待人工裁决"
 - **增量模式以 .agent/*.md 的 last_modified 为主要锚点**：元素文档跟随 .agent/*.md 漂移，不直接跟源码 commit；源码 commit 仅在 .agent/*.md 未及时刷新时作辅助探测
-- **置信度评估**：基于 .agent/*.md 高置信度章节归纳的为高；降级扫码补齐的章节为中；.agent/*.md 全缺全量扫码的为低
+- **置信度评估**：基于 .agent/*.md 高置信度章节归纳的为高；降级扫码补齐的章节为中；.agent/*.md 全缺全量扫码的为低；置信度仅写入 frontmatter `confidence`，正文不写降级提示
 - **不生成 .agent/*.md**：本 skill 只消费 .agent/*.md，不生产；若仓内 .agent/*.md 缺失，建议触发 rev-repo-* skill 补齐后再跑本 skill
 - **历史架构方案是意图源、与事实源并存**：`knowledge/历史方案/架构方案/` 下文档用于强抽取设计意图、原 DFX 目标值、原部署规划、战略角色定位；与事实源（代码/`.agent/*.md`）并存表达，事实层冲突以事实源为准，意图层以历史方案为准；意图条目末尾必须留来源「参考自 {solution_name} §X」；doc/docx/pptx 等格式需投递时先用 pandoc 转 md，本 skill 不内嵌格式转换
 
@@ -106,5 +106,5 @@
 - `last_modified` 格式为 ISO 8601 带时区（如 `2026-06-21T14:30:00+08:00`），用于增量模式下 `git log --before="<last_modified>"` 精确定位锚点提交；仅日期精度会导致同日内多次提交无法区分
 - 元素 spec.md 正文分节：元素定位 / 职责描述 / 业务能力 / 质量属性 / 提供的接口 / 依赖的外部接口 / 关键架构数据 / 部署与运行
 - 元素 spec.md 是**架构层抽象文档**：每节用架构语言自包含描述，禁止表格行挂代码证据列或 `.agent/*.md §N` 引用；`.agent/*.md` 仅在 §5/§6 节末以"契约详情见..."方式出现一次指引
-- 降级扫码补齐的章节：在 §1 置信度说明中标注"本节由源码扫描补齐"，不在正文每行重复标注
+- 降级扫码补齐的章节：通过 frontmatter `confidence` 体现，正文不写降级标注
 - 输出架构抽取报告：识别的元素名、类型、置信度、依赖边统计、PlantUML 依赖图片段

@@ -1,0 +1,47 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_analytics_ai
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: ai_analytics_redundant
+  name: 冗余传输体验分析
+  description: 评估冗余传输对 URLLC 的有效性
+  releases:
+  - R18
+  ref: TS 23.288 §6.6
+  status: planned
+  level: L2
+  path: features/数据分析与 AI/冗余传输体验分析/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 冗余传输体验分析分析请求成功
+  description: 消费方请求冗余传输体验分析并获得分析结果。
+  scenario_type: 分析场景
+  path: SCENARIO_001_冗余传输体验分析分析请求成功_场景流程.md
+- id: SCENARIO_002
+  name: 冗余传输体验分析数据采集不足
+  description: 数据源不足或采集失败导致冗余传输体验分析无法产出。
+  scenario_type: 失败场景
+  path: SCENARIO_002_冗余传输体验分析数据采集不足_场景流程.md
+- id: SCENARIO_003
+  name: 冗余传输体验分析模型或结果更新
+  description: 冗余传输体验分析的模型、订阅或分析结果发生更新。
+  scenario_type: 分析场景
+  path: SCENARIO_003_冗余传输体验分析模型或结果更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

@@ -1,0 +1,44 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_npn
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: npn_snpn
+  name: 独立NPN SNPN
+  description: 独立部署的非公众网络，不依赖 PLMN
+  releases:
+  - R16
+  ref: TS 23.501 §5.30
+  status: planned
+  level: L2
+  path: features/非公众网络/独立NPN_SNPN/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 独立NPN SNPN业务成功
+  description: 独立NPN SNPN业务场景成功完成。
+  scenario_type: 成功场景
+  path: SCENARIO_001_独立NPN_SNPN业务成功_场景流程.md
+- id: SCENARIO_002
+  name: 独立NPN SNPN业务失败
+  description: 独立NPN SNPN因配置、订阅、策略、拓扑或对端能力不满足而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_独立NPN_SNPN业务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: ausf
+    path: architectures/logic_view/elements/ausf/spec.md

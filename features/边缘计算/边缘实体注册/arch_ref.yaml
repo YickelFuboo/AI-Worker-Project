@@ -1,0 +1,27 @@
+arch_ref_meta:
+  l1_id: cat_edge_computing
+  l1_name: 边缘计算
+  feature_id: edge_entity_registration
+  feature_name: 边缘实体注册
+  last_modified: "2026-06-25T13:45:33+08:00"
+  last_modified_by: rev-code-to-scenario
+  confidence: low
+elements_used:
+- element_id: amf
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/amf/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+- element_id: smf
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/smf/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+- element_id: upf
+  role: 相关架构元素
+  spec_path: architectures/logic_view/elements/upf/spec.md
+  interfaces_consumed: []
+  interfaces_provided: []
+external_dependencies: []
+code_anchors: []
+confidence_note: 本文件仅引用可定位的架构元素与代码锚点；缺失事实源不编造。

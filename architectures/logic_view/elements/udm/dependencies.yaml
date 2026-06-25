@@ -1,13 +1,12 @@
 element_name: udm
 element_id: udm
 repo_path: repos/udm
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 udm 元素依赖的外部接口清单。
 # 证据来源：repos/udm/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
 # 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
-# 其他下游 NF 元素若尚未生成 interfaces.yaml，本批次标注 pending。
 
 external_dependencies:
   - if_ext_id: IF-EXT-001
@@ -19,7 +18,7 @@ external_dependencies:
       - GET /nnrf-disc/v1/nf-instances                    # NF 发现（target-nf-type=UDR）
     purpose: UDM 启动时注册自身实例；运行期发现下游 UDR 实例；终止时反注册
     evidence: repos/udm/.agent/spec.md §4.1 / §4.2
-    cross_check: pending  # 待 nrf 元素 interfaces.yaml 生成后双向校验
+    cross_check: ok  # nrf 元素 interfaces.yaml 已存在，提供 NFManagement/NFDiscovery 服务
 
   - if_ext_id: IF-EXT-002
     provider_element: udr
@@ -33,7 +32,7 @@ external_dependencies:
       - PUT    /nudr-dr/v2/subscription-data/.../amf-3gpp-access  /  .../smf-registrations  # UECM 写回
     purpose: 所有订阅数据/鉴权订阅/AuthStatus/UECM 注册数据的实际持久化下游；udm 是 udr 之上的业务封装层
     evidence: repos/udm/.agent/spec.md §4.1 / §4.2
-    cross_check: pending  # 待 udr 元素 interfaces.yaml 生成后双向校验
+    cross_check: ok  # udr 元素 interfaces.yaml 已存在，提供 Nudr_DataRepository 服务
 
   - if_ext_id: IF-EXT-003
     provider_element: udm  # 多 UDM 集群内部互通（自反）
@@ -68,9 +67,6 @@ reverse_consumers:
   - consumer_element: nef
     via_interfaces: [IF-024..IF-030]
     purpose: 事件暴露订阅、参数注入
-  - consumer_element: smsf
-    via_interfaces: [IF-016..IF-023]
-    purpose: UECM 注册（SMSF 注册路径当前在 udm 侧 501，待实现）
   - consumer_element: udr  # UDR 主动回调
     via_interfaces: [IF-031]
     purpose: UDR 数据变更通知回调入口
@@ -80,4 +76,4 @@ summary:
   total: 4
   system_internal: 3   # nrf / udr / udm(self)
   external: 1          # prometheus
-  pending_cross_check: 2  # 待 nrf / udr 元素 interfaces.yaml 生成
+  pending_cross_check: 0

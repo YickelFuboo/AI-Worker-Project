@@ -1,0 +1,55 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_edge_computing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: edge_ur_sp_routing
+  name: 基于URSP的边缘流量路由
+  description: UE 路由选择策略把应用流量导向合适的边缘 PDU 会话
+  releases:
+  - R17
+  ref: TS 23.501 §5.6.12, TS 24.526
+  status: planned
+  level: L2
+  path: features/边缘计算/基于URSP的边缘流量路由/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 基于URSP的边缘流量路由边缘服务成功
+  description: 业务成功使用基于URSP的边缘流量路由相关边缘能力。
+  scenario_type: 成功场景
+  path: SCENARIO_001_基于URSP的边缘流量路由边缘服务成功_场景流程.md
+- id: SCENARIO_002
+  name: 基于URSP的边缘流量路由边缘服务迁移
+  description: UE或应用变化触发基于URSP的边缘流量路由迁移或重选择。
+  scenario_type: 迁移场景
+  path: SCENARIO_002_基于URSP的边缘流量路由边缘服务迁移_场景流程.md
+- id: SCENARIO_003
+  name: 基于URSP的边缘流量路由边缘服务失败
+  description: 边缘能力、策略或应用上下文不满足导致基于URSP的边缘流量路由失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_基于URSP的边缘流量路由边缘服务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md
+  - element_id: pcf
+    path: architectures/logic_view/elements/pcf/spec.md
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md

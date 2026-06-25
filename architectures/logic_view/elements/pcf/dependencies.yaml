@@ -1,96 +1,102 @@
 element_name: pcf
 element_id: pcf
 repo_path: repos/pcf
-last_modified: "2026-06-22T12:00:00+08:00"
+last_modified: "2026-06-24T16:00:00+08:00"
 last_modified_by: rev-arch-element-extract
 
 # 本文件是 pcf 元素依赖的外部接口清单。
 # 证据来源：repos/pcf/.agent/spec.md §4.1 外部依赖清单 + §4.2 跨仓调用关系。
 # 跨仓依赖双向校验：本文件声明的依赖 → 对应元素的 interfaces.yaml 必须有对应接口提供。
-# 其他 NF 元素尚未生成 interfaces.yaml 时标注 "pending"，待生成后双向校验。
+# 其他 NF 元素 interfaces.yaml 已就绪时标注 ok；尚未声明对应接口时标注 pending；
+# 非本系统 NF（MongoDB / Prometheus / OpenTelemetry / AF 等）标注 external。
 
 external_dependencies:
   - if_ext_id: IF-EXT-001
     provider_element: nrf
     protocol: SBI (Nnrf_NFManagement / Nnrf_NFDiscovery, HTTP/2 + JSON + mTLS)
     operations:
-      - POST /nnrf-nfm/v1/nf-instances        # NF 实例注册
-      - DELETE /nnrf-nfm/v1/nf-instances/:id  # NF 注销
-      - GET /nnrf-disc/v1/nf-instances        # 发现 UDR/BSF/AMF
-    purpose: 启动时注册 NF 实例；调用其他 NF 前发现实例；终止时注销
-    evidence: repos/pcf/.agent/spec.md §4.1
-    cross_check: pending
+      - PUT /nnrf-nfm/v1/nf-instances/{nfInstanceID}   # NF 实例注册
+      - DELETE /nnrf-nfm/v1/nf-instances/{nfInstanceID} # NF 注销
+      - GET /nnrf-disc/v1/nf-instances                  # 发现 UDR/BSF/AMF
+      - POST /oauth2/token                              # OAuth2 token 获取
+    purpose: 启动时注册 NF 实例；调用其他 NF 前发现实例；所有 SBI 出站前获取 OAuth2 token；终止时注销
+    evidence: repos/pcf/.agent/spec.md §4.1, §4.2
+    cross_check: ok
 
   - if_ext_id: IF-EXT-002
     provider_element: udr
     protocol: SBI (Nudr_DataRepository)
     operations:
-      - GET/POST /nudr-dr/v2/policy-data/*    # SM/AM Policy Data
-      - GET/POST /nudr-dr/v2/policy-data/bdt-data
-      - 订阅/取消订阅 influence-data
-    purpose: 拉取策略订阅数据（SM/AM/BDT/Influence），驱动策略决策
-    evidence: repos/pcf/.agent/spec.md §4.1
-    cross_check: pending
+      - GET /nudr-dr/v2/policy-data/ues/{ueId}/sm-data     # SM Policy Data
+      - GET /nudr-dr/v2/policy-data/ues/{ueId}/am-data     # AM Policy Data
+      - GET/POST /nudr-dr/v2/policy-data/bdt-data          # BDT 数据
+      - POST/DELETE /nudr-dr/v2/subscriptions              # Influence/Policy 订阅
+    purpose: 拉取策略订阅数据（SM/AM/BDT/Influence）；订阅/取消订阅策略数据变更，驱动策略决策
+    evidence: repos/pcf/.agent/spec.md §4.1, §4.2
+    cross_check: ok
 
   - if_ext_id: IF-EXT-003
     provider_element: bsf
     protocol: SBI (Nbsf_Management)
     operations:
       - POST /nbsf-management/v1/pcfBindings
-      - PATCH /nbsf-management/v1/pcfBindings/:bindingId
-      - DELETE /nbsf-management/v1/pcfBindings/:bindingId
-    purpose: 多 PCF 部署下注册/更新/删除 PCF Binding（可选）
-    evidence: repos/pcf/.agent/spec.md §4.1
-    cross_check: pending
-    optional: true   # 仅多 PCF 场景启用
+      - PATCH /nbsf-management/v1/pcfBindings/{bindingId}
+      - DELETE /nbsf-management/v1/pcfBindings/{bindingId}
+    purpose: 多 PCF 部署下注册/更新/删除 PCF Binding（可选；Bsf.Enable 配置开关；失败按"可选优先"降级，不阻断主流程）
+    evidence: repos/pcf/.agent/spec.md §4.1, §4.2；rules/模式/BSF集成可选化.md
+    cross_check: ok
+    optional: true
 
   - if_ext_id: IF-EXT-004
     provider_element: amf
     protocol: SBI (Namf_Communication)
     operations:
-      - POST /namf-comm/v1/subscriptions      # AMF 状态订阅
-      - 反向回调路径由 AMF 路由暴露：AmPolicy Update/Terminate Notify
-    purpose: 订阅 AMF 状态变更；向 AMF 投递 AM Policy 更新/终止通知
+      - POST /namf-comm/v1/subscriptions     # AMF 状态订阅
+      - POST {amfNotifUri}                   # AmPolicy Update/Terminate Notify（反向回调投递）
+    purpose: 订阅 AMF 状态变更感知接入侧可用性；向 AMF 投递 AM Policy 更新/终止通知
     evidence: repos/pcf/.agent/spec.md §4.1, §4.2
-    cross_check: ok   # 对端 amf 元素 IF-010 AmPolicyControlUpdateNotify 已提供
+    cross_check: ok   # 对端 amf 元素 IF-006 AMFStatusChangeSubscribe + IF-016 AmPolicyControlUpdateNotify 已提供
 
   - if_ext_id: IF-EXT-005
     provider_element: smf
     protocol: SBI 反向回调 (HTTP/2 + JSON + mTLS)
     operations:
-      - POST {SmfNotifUri}  # SM Policy Update/Terminate Notify
-    purpose: 向 SMF 投递 SM Policy 更新/终止通知
+      - POST {SmfNotifUri}        # SM Policy Update Notify
+      - POST {SmfTerminationUri}  # SM Policy Termination Notify
+    purpose: 向 SMF 投递 SM Policy 更新/终止通知，驱动 SMF 收敛会话级策略
     evidence: repos/pcf/.agent/spec.md §4.1, §4.2
-    cross_check: pending
+    cross_check: ok
 
   - if_ext_id: IF-EXT-006
     provider_element: chf
-    protocol: SBI (Nchf_*, 间接)
+    protocol: SBI (Nchf_SpendingLimitControl, 间接)
     operations:
       - 通过 PCC 规则编排 Charging Trigger 与 RatingGroup
-    purpose: 计费策略关联与 Charging Trigger 协同（按 PCC 规则编排，非直接 SBI 出站）
-    evidence: repos/pcf/.agent/spec.md §2.1 SM 策略控制
-    cross_check: pending
+      - 可触发 SpendingLimit 订阅（按场景）
+    purpose: 计费策略关联与 Charging Trigger 协同（按 PCC 规则编排，非直接 SBI 出站调用，依 PCC 规则下发链路实现）
+    evidence: repos/pcf/.agent/spec.md §2.1 SM 策略控制；elements_tree.yaml pcf.depends_on
+    cross_check: ok
     indirect: true
 
   - if_ext_id: IF-EXT-007
-    provider_element: af   # 含 NEF 透传
-    protocol: SBI 反向回调
+    provider_element: nef
+    protocol: SBI 反向回调 (Npcf_PolicyAuthorization 透传)
     operations:
-      - POST {AfNotifUri}                     # App Session 事件通知
-      - POST {AfTerminationUri}               # App Session 终止通知
-    purpose: 向 AF/NEF 投递应用会话事件与终止通知
+      - POST {NefNotifUri}        # App Session 事件通知（经 NEF 北向转发到 AF）
+      - POST {NefTerminationUri}  # App Session 终止通知
+    purpose: NEF 作为 AF 北向网关时的回调投递目标；AF 透传场景下 PCF 经 NEF 与外部 AF 交互
     evidence: repos/pcf/.agent/spec.md §4.1, §4.2
-    cross_check: external  # AF/NEF 仓边界外，按外部系统处理
+    cross_check: ok
 
   - if_ext_id: IF-EXT-008
-    provider_element: nef
-    protocol: SBI 反向回调
+    provider_element: af
+    protocol: SBI 反向回调 (外部 AF 直连场景)
     operations:
-      - 同 af 透传路径
-    purpose: NEF 作为 AF 北向网关时的回调投递目标
-    evidence: repos/pcf/.agent/spec.md §4.1
-    cross_check: external
+      - POST {AfNotifUri}         # App Session 事件通知
+      - POST {AfTerminationUri}   # App Session 终止通知
+    purpose: 直连 AF 场景下向 AF 投递应用会话事件与终止通知
+    evidence: repos/pcf/.agent/spec.md §4.1, §4.2
+    cross_check: external  # AF 为本系统外部应用层网元，非 free5gc NF 元素
 
   - if_ext_id: IF-EXT-009
     provider_element: MongoDB
@@ -98,25 +104,34 @@ external_dependencies:
     operations:
       - InitPcfContext mongoapi.SetMongoDB
       - CRUD policy-data 集合
-    purpose: 策略数据持久化（重启容忍）
-    evidence: repos/pcf/.agent/spec.md §4.1, §2.2.2
+    purpose: 策略数据持久化（重启容忍），SM/AM/BDT/AppSession 关联数据落盘
+    evidence: repos/pcf/.agent/spec.md §4.1, §2.2.2；design.md §12.4
     cross_check: external
 
   - if_ext_id: IF-EXT-010
-    provider_element: prometheus
+    provider_element: Prometheus
     protocol: HTTP scrape
     operations:
-      - GET /metrics
-    purpose: 指标暴露（独立 metrics server 端口）
-    evidence: repos/pcf/.agent/spec.md §4.1
+      - GET /metrics              # 独立 metrics server 端口（默认 9091）
+    purpose: 指标暴露（业务指标 + SBI 入站指标），供外部监控系统 scrape
+    evidence: repos/pcf/.agent/spec.md §4.1；rules/约束/可观测性.md
+    cross_check: external
+
+  - if_ext_id: IF-EXT-011
+    provider_element: OpenTelemetry collector
+    protocol: OTel exporter (间接，经 openapi 客户端注入 span)
+    operations:
+      - SBI 出站调用注入 trace span
+    purpose: 分布式追踪上报到外部观测基础设施（间接依赖，由 free5gc/openapi 客户端集成）
+    evidence: repos/pcf/.agent/spec.md §4.1（go.opentelemetry.io/otel indirect）
     cross_check: external
 
 # 依赖统计
 summary:
-  total: 10
-  system_internal: 6      # nrf/udr/bsf/amf/smf/chf
-  external: 4             # af-nef/MongoDB/prometheus（af 与 nef 同源透传，归一外部）
-  pending_cross_check: 4  # nrf/udr/bsf/smf 元素 interfaces.yaml 待生成
-  cross_check_ok: 1       # amf
-  indirect: 1             # chf（经 PCC 规则间接编排）
-  optional: 1             # bsf
+  total: 11
+  system_internal: 7         # nrf/udr/bsf/amf/smf/chf/nef
+  external: 4                # af/MongoDB/Prometheus/OpenTelemetry
+  cross_check_ok: 7          # 系统内 NF 元素 interfaces.yaml/elements_tree.yaml 已校验
+  external_marked: 4         # 外部系统按 external 处理
+  indirect: 1                # chf（经 PCC 规则间接编排）
+  optional: 1                # bsf（多 PCF 场景启用）

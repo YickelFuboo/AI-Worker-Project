@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_exposure
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: exp_pfd_management
+  name: PFD管理
+  description: NEF 管理应用包的 Packet Flow Description
+  releases:
+  - R15
+  ref: TS 29.551
+  status: implemented
+  level: L2
+  path: features/网络能力开放/PFD管理/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: PFD管理能力开放成功
+  description: AF通过PFD管理获得网络能力开放结果。
+  scenario_type: 开放场景
+  path: SCENARIO_001_PFD管理能力开放成功_场景流程.md
+- id: SCENARIO_002
+  name: PFD管理授权失败
+  description: AF授权、参数或策略不满足导致PFD管理失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_PFD管理授权失败_场景流程.md
+- id: SCENARIO_003
+  name: PFD管理订阅更新
+  description: 业务方更新PFD管理相关订阅或参数。
+  scenario_type: 开放场景
+  path: SCENARIO_003_PFD管理订阅更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: nef
+    path: architectures/logic_view/elements/nef/spec.md

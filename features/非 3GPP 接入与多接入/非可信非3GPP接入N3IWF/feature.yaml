@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_non_3gpp_access
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: access_untrusted_non3gpp
+  name: 非可信非3GPP接入N3IWF
+  description: 不可信非 3GPP (如公共 Wi-Fi) 经 N3IWF 接入 5GC
+  releases:
+  - R15
+  ref: TS 23.501 §5.2
+  status: implemented
+  level: L2
+  path: features/非 3GPP 接入与多接入/非可信非3GPP接入N3IWF/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 非可信非3GPP接入N3IWF接入成功
+  description: UE通过非可信非3GPP接入N3IWF成功接入5GC。
+  scenario_type: 成功场景
+  path: SCENARIO_001_非可信非3GPP接入N3IWF接入成功_场景流程.md
+- id: SCENARIO_002
+  name: 非可信非3GPP接入N3IWF接入失败
+  description: 认证、隧道或接入能力不满足导致非可信非3GPP接入N3IWF失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_非可信非3GPP接入N3IWF接入失败_场景流程.md
+- id: SCENARIO_003
+  name: 非可信非3GPP接入N3IWF接入切换
+  description: UE在非可信非3GPP接入N3IWF与其他接入之间切换或保持连续性。
+  scenario_type: 迁移场景
+  path: SCENARIO_003_非可信非3GPP接入N3IWF接入切换_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: n3iwf
+    path: architectures/logic_view/elements/n3iwf/spec.md
+  - element_id: tngf
+    path: architectures/logic_view/elements/tngf/spec.md

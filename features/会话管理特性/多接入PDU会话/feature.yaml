@@ -1,0 +1,49 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_session_management
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: sm_ma_pdu
+  name: 多接入PDU会话
+  description: 3GPP 与非 3GPP 接入同时承载同一 PDU 会话
+  releases:
+  - R16
+  ref: TS 23.501 §5.32
+  status: planned
+  level: L2
+  path: features/会话管理特性/多接入PDU会话/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 多接入PDU会话会话建立成功
+  description: UE成功建立满足多接入PDU会话约束的PDU会话。
+  scenario_type: 成功场景
+  path: SCENARIO_001_多接入PDU会话会话建立成功_场景流程.md
+- id: SCENARIO_002
+  name: 多接入PDU会话会话变更成功
+  description: 会话策略、路径或锚点按多接入PDU会话发生变更。
+  scenario_type: 迁移场景
+  path: SCENARIO_002_多接入PDU会话会话变更成功_场景流程.md
+- id: SCENARIO_003
+  name: 多接入PDU会话会话建立失败
+  description: 订阅、策略或网络能力不满足导致多接入PDU会话失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_多接入PDU会话会话建立失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md

@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_network_slicing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: ns_nsacf
+  name: 网络切片准入控制NSACF
+  description: 监控并限制每切片 UE 数与 PDU 会话数
+  releases:
+  - R17
+  ref: TS 23.501 §6.2.18, TS 29.536
+  status: planned
+  level: L2
+  path: features/网络切片/网络切片准入控制NSACF/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 切片配额准入成功
+  description: NSACF确认切片配额可用并允许UE使用切片。
+  scenario_type: 准入场景
+  path: SCENARIO_001_切片配额准入成功_场景流程.md
+- id: SCENARIO_002
+  name: 切片配额不足拒绝
+  description: 切片配额不足导致UE切片准入被拒绝。
+  scenario_type: 失败场景
+  path: SCENARIO_002_切片配额不足拒绝_场景流程.md
+- id: SCENARIO_003
+  name: 配额状态释放
+  description: UE注销或切片不再使用后释放NSACF配额。
+  scenario_type: 释放场景
+  path: SCENARIO_003_配额状态释放_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: nssf
+    path: architectures/logic_view/elements/nssf/spec.md

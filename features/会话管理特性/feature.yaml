@@ -1,0 +1,98 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_session_management
+  name: 会话管理特性
+  description: PDU 会话管理相关特性，含 SSC 模式、上行分类器、IPv6 多归属、本地疏导、多接入会话、5G LAN。
+  status: partial
+  level: L1
+  path: features/会话管理特性/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: sm_ssc_mode_1
+  name: SSC模式1
+  description: 会话业务连续性模式 1：UE IP 不变、UPF 不变
+  status: implemented
+  level: L2
+  path: SSC模式1/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.6.9
+- id: sm_ssc_mode_2_3
+  name: SSC模式2和3
+  description: 模式2 销毁重建、模式3 重建保持 IP，需 PSA UPF 重选
+  status: planned
+  level: L2
+  path: SSC模式2和3/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.6.9
+- id: sm_ulcl
+  name: 上行分类器ULCL
+  description: UPF 按上行流量过滤器分流到不同 PDU 会话
+  status: implemented
+  level: L2
+  path: 上行分类器ULCL/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.6.4, TS 23.502 §4.3.5
+- id: sm_ipv6_multi_home
+  name: IPv6多归属PDU会话
+  description: 单会话多 IPv6 前缀，按前缀分流
+  status: planned
+  level: L2
+  path: IPv6多归属PDU会话/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.6.4
+- id: sm_local_breakout
+  name: 本地疏导与会话分流
+  description: 选择靠近 UE 的 PSA UPF 实现本地业务出口
+  status: implemented
+  level: L2
+  path: 本地疏导与会话分流/feature.yaml
+  releases:
+  - R15
+  ref: TS 23.501 §5.6.4
+- id: sm_atsss
+  name: ATSSS接入流量引导切换与分流
+  description: 多接入 PDU 会话的流量引导/切换/分裂
+  status: planned
+  level: L2
+  path: ATSSS接入流量引导切换与分流/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.32, TS 23.548
+- id: sm_ma_pdu
+  name: 多接入PDU会话
+  description: 3GPP 与非 3GPP 接入同时承载同一 PDU 会话
+  status: planned
+  level: L2
+  path: 多接入PDU会话/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.32
+- id: sm_5g_lan
+  name: 5G LAN类型服务
+  description: 5G LAN 类型会话，支持组成员间直接通信
+  status: planned
+  level: L2
+  path: 5G_LAN类型服务/feature.yaml
+  releases:
+  - R16
+  ref: TS 23.501 §5.27, TS 23.502 §4.4.6
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

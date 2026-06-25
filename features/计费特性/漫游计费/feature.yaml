@@ -1,0 +1,53 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_charging
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: chg_roaming
+  name: 漫游计费
+  description: 漫游场景的计费分离 (hPLMN/vPLMN)
+  releases:
+  - R15
+  ref: TS 32.255, TS 32.256
+  status: planned
+  level: L2
+  path: features/计费特性/漫游计费/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 漫游计费计费建立
+  description: 漫游计费建立计费上下文。
+  scenario_type: 计费场景
+  path: SCENARIO_001_漫游计费计费建立_场景流程.md
+- id: SCENARIO_002
+  name: 漫游计费用量上报
+  description: 漫游计费上报用量或计费事件。
+  scenario_type: 计费场景
+  path: SCENARIO_002_漫游计费用量上报_场景流程.md
+- id: SCENARIO_003
+  name: 漫游计费计费失败
+  description: 漫游计费因计费功能或策略不可用而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_003_漫游计费计费失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: smf
+    path: architectures/logic_view/elements/smf/spec.md
+  - element_id: upf
+    path: architectures/logic_view/elements/upf/spec.md
+  - element_id: chf
+    path: architectures/logic_view/elements/chf/spec.md

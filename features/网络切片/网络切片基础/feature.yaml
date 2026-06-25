@@ -1,0 +1,51 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_network_slicing
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: code+architecture
+  confidence: high
+  intent_source_count: 0
+feature:
+  id: ns_basic
+  name: 网络切片基础
+  description: S-NSSAI(SST+SD) 标识切片，NSSF 选 AMF/SMF
+  releases:
+  - R15
+  ref: TS 23.501 §5.15
+  status: implemented
+  level: L2
+  path: features/网络切片/网络切片基础/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: 网络切片基础准入成功
+  description: UE或业务成功获得网络切片基础能力。
+  scenario_type: 准入场景
+  path: SCENARIO_001_网络切片基础准入成功_场景流程.md
+- id: SCENARIO_002
+  name: 网络切片基础使用受限
+  description: 订阅、区域、配额或策略条件不满足导致网络切片基础受限。
+  scenario_type: 失败场景
+  path: SCENARIO_002_网络切片基础使用受限_场景流程.md
+- id: SCENARIO_003
+  name: 网络切片基础状态更新
+  description: 网络切片基础相关可用性或授权状态发生更新。
+  scenario_type: 迁移场景
+  path: SCENARIO_003_网络切片基础状态更新_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs:
+  - element_id: amf
+    path: architectures/logic_view/elements/amf/spec.md
+  - element_id: nssf
+    path: architectures/logic_view/elements/nssf/spec.md

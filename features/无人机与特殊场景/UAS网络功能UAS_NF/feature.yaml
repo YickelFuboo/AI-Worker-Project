@@ -1,0 +1,42 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L2
+  parent_feature_id: cat_uav_special
+  parent_feature_path: ../feature.yaml
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: uav_uas_nf
+  name: UAS网络功能UAS NF
+  description: 与 C2 (Command & Control) 通信系统交互
+  releases:
+  - R17
+  ref: TS 23.255
+  status: planned
+  level: L2
+  path: features/无人机与特殊场景/UAS网络功能UAS_NF/feature.yaml
+  spec_path: spec.md
+  arch_ref_path: arch_ref.yaml
+  last_modified: "2026-06-25T23:32:24+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features: []
+scenarios:
+- id: SCENARIO_001
+  name: UAS网络功能UAS NF业务成功
+  description: UAS网络功能UAS NF业务场景成功完成。
+  scenario_type: 成功场景
+  path: SCENARIO_001_UAS网络功能UAS_NF业务成功_场景流程.md
+- id: SCENARIO_002
+  name: UAS网络功能UAS NF业务失败
+  description: UAS网络功能UAS NF因配置、订阅、策略、拓扑或对端能力不满足而失败。
+  scenario_type: 失败场景
+  path: SCENARIO_002_UAS网络功能UAS_NF业务失败_场景流程.md
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []

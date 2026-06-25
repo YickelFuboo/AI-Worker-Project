@@ -1,0 +1,80 @@
+meta:
+  schema: directory_feature_node_v1
+  version: '1.0'
+  level: L1
+  parent_feature_id: null
+  parent_feature_path: null
+  feature_path: feature.yaml
+  last_updated: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+  source: feature-catalog
+  confidence: low
+  intent_source_count: 0
+feature:
+  id: cat_authentication_security
+  name: 鉴权与安全特性
+  description: 5GC 鉴权与安全相关特性，含 SUCI/SUPI 隐私保护、SBI 上的 OAuth2 授权、CAPIF RNAA、SNPN 多种鉴权模式、DCS 入网。
+  status: partial
+  level: L1
+  path: features/鉴权与安全特性/feature.yaml
+  last_modified: "2026-06-25T15:58:53+08:00"
+  last_modified_by: rev-code-to-scenario
+child_features:
+- id: sec_suci_protection
+  name: SUCI保护与SUPI隐私
+  description: 用运营商公钥加密 SUPI 防止 IMSI catcher
+  status: implemented
+  level: L2
+  path: SUCI保护与SUPI隐私/feature.yaml
+  releases:
+  - R15
+  ref: TS 33.501 §6.12
+- id: sec_oauth2_sbi
+  name: SBI上的OAuth2授权
+  description: NRF 作为授权服务器，NF 调用前获取 access token
+  status: implemented
+  level: L2
+  path: SBI上的OAuth2授权/feature.yaml
+  releases:
+  - R15
+  ref: TS 29.510 §5.5
+- id: sec_rn_aa_capif
+  name: CAPIF资源拥有者网络API授权RNAA
+  description: 北向 API 资源拥有者授权，OAuth 2.0 机制
+  status: planned
+  level: L2
+  path: CAPIF资源拥有者网络API授权RNAA/feature.yaml
+  releases:
+  - R18
+  ref: TS 23.501 §5.20, TS 29.222
+- id: sec_snpn_ch_aaa
+  name: 基于CH AAA服务器的SNPN鉴权
+  description: SNPN 场景通过 NSSAAF 中继 EAP 到外部 CH AAA
+  status: planned
+  level: L2
+  path: 基于CH_AAA服务器的SNPN鉴权/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.30, TS 33.501 §6.1.4
+- id: sec_snpn_ausf_udm
+  name: 基于AUSF_UDM的SNPN鉴权
+  description: 漫游模型下用 AUSF/UDM 做 CH 鉴权
+  status: planned
+  level: L2
+  path: 基于AUSF_UDM的SNPN鉴权/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.2
+- id: sec_dcs_onboarding
+  name: 通过默认凭据服务器的SNPN UE入网
+  description: UE 用默认凭据从 DCS 获取 SNPN 正式凭据
+  status: planned
+  level: L2
+  path: 通过默认凭据服务器的SNPN_UE入网/feature.yaml
+  releases:
+  - R17
+  ref: TS 23.501 §5.30.3
+traceability:
+  code_anchors: []
+  test_anchors: []
+  architecture_refs: []
