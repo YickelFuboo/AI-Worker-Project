@@ -1,0 +1,40 @@
+case_id: REQ-001
+title: AUSF 支持配置 nfInstanceId
+category: requirement-change
+type: requirement-change
+difficulty: medium
+repo: repos/ausf
+before_commit: 34c42066615363eb03d548759b7279c96ab66a8e
+after_commit: 20dc067ce818b9695f291722f1cc11dbaebc1d8e
+source_commit: 20dc067
+commit_message: 'feat: making the nfInstanceId configurable
+
+
+  Initially the NF created at each boot a new uuid. This makes it difficult to retrieve
+  the information afterwards. This commit propose is to add the nfInstanceId in the
+  configuration as optional so that if needed, it can be tracked more easily.
+
+  If no nfInstanceId specified, it will still be generated at each boot and give more
+  control to users that might need it (for kube deployment, other checks, better identification)
+
+
+  Also using the uuidv4 validator to match spec 3GPP TS 29.510 version 17.6.0 Release
+  17 5.2.2.2.2 mentioning that UUID should be in the version 4 format'
+modified_files:
+- internal/context/ausf_context_init.go
+- pkg/factory/config.go
+- pkg/factory/factory.go
+- go.mod
+- go.sum
+original_requirement: AUSF 当前每次启动都会生成新的 NF Instance ID，导致 Kubernetes 部署、外部检查或运维追踪时难以稳定识别同一个
+  NF。请支持在配置文件中可选配置 nfInstanceId；如果配置了合法 UUID v4 就使用它，否则保持原有每次启动自动生成 UUID 的行为。
+before_behavior: 每次启动都生成新的 UUID，用户无法通过配置固定 NF Instance ID。
+after_behavior: 配置项中可以声明 nfInstanceId；合法 UUID v4 被用于 AUSF context 初始化；未配置时仍自动生成。
+evaluation_focus:
+- 配置模型扩展
+- 向后兼容默认行为
+- UUID v4 校验
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

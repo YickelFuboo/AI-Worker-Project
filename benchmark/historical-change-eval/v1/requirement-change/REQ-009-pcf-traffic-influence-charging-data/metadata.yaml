@@ -1,0 +1,24 @@
+case_id: REQ-009
+title: PCF Traffic Influence 生成 PCC Rule 时加入 charging data
+category: requirement-change
+type: requirement-change
+difficulty: medium
+repo: repos/pcf
+before_commit: 57d566b360513deae13478709fc53caefc0bf06a
+after_commit: 54265c36a704b18e93d75629f2ebcde9a61fc463
+source_commit: 54265c3
+commit_message: 'feat: add charging data for traffic influence'
+modified_files:
+- internal/util/pcc_rule.go
+original_requirement: PCF 根据 Traffic Influence 数据生成 PCC rule 时，需要同时携带 charging data，使后续策略和计费流程能基于
+  Traffic Influence 规则关联计费信息。请调整 PCC rule 构造逻辑，将 Traffic Influence 中的计费相关数据映射到规则中。
+before_behavior: Traffic Influence 转 PCC rule 时没有携带 charging data，后续计费关联信息不足。
+after_behavior: PCC rule 构造会从 Traffic Influence 数据中设置 charging data 相关字段。
+evaluation_focus:
+- 策略到计费的数据映射
+- PCC rule 构造
+- 最小字段级需求变更
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

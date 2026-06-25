@@ -1,0 +1,25 @@
+case_id: BUG-005
+title: NSSF NSSelection registration 嵌套参数校验
+category: bugfix
+type: bugfix
+difficulty: high
+repo: repos/nssf
+before_commit: ca13a9ebc0a44c1977d103646e1d99fc98a38e84
+after_commit: 4c0cbaac6759c774a20152bd4dc6a22f585d0fbf
+source_commit: 4c0cbaa
+commit_message: 'fix: add missing validation in nsselection for registration'
+modified_files:
+- internal/sbi/processor/nsselection_network_slice_information.go
+original_requirement: NSSF 处理 NSSelection registration 请求时，需要校验 subscribedNssai[].subscribedSnssai
+  是否存在，以及 mappingOfNssai 每个元素是否同时包含 servingSnssai 和 homeSnssai。缺失时返回 400 ProblemDetails。
+before_behavior: 嵌套 mandatory 字段缺失时仍可能继续处理。
+after_behavior: 缺失 subscribedSnssai 时返回带 InvalidParams 的 400；mappingOfNssai 元素不完整时返回
+  400。
+evaluation_focus:
+- 复杂嵌套参数校验
+- InvalidParams 构造
+- 不影响其他 NSSelection 流程
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

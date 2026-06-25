@@ -1,0 +1,24 @@
+case_id: REQ-010
+title: SMF 校验 QoS 解析并维护 PCC Rule 状态
+category: requirement-change
+type: requirement-change
+difficulty: high
+repo: repos/smf
+before_commit: 44ea66633f79cbd1993c37904ba116f7080244d4
+after_commit: 8864734878936a3bb715122671ab0ebe9179e931
+source_commit: '8864734'
+commit_message: 'feat: validate QoS parsing and manage PCC rule state'
+modified_files:
+- internal/sbi/processor/gsm_handler.go
+original_requirement: SMF 在处理 UE 发起或策略驱动的 QoS 相关消息时，需要校验 QoS rule 解析结果，并正确维护 PCC rule
+  状态，避免解析失败或状态不同步导致后续策略更新异常。请在 GSM handler 的相关路径中补充解析校验和 PCC rule 状态管理。
+before_behavior: QoS 解析失败或 PCC rule 状态变化时，SMF 对状态维护不充分，可能影响后续策略处理。
+after_behavior: SMF 对 QoS 解析结果做校验，并在相关流程中更新/维护 PCC rule 状态。
+evaluation_focus:
+- QoS 业务状态管理
+- GSM handler 行为增强
+- 策略状态一致性
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

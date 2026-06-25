@@ -1,0 +1,24 @@
+case_id: REQ-011
+title: SMF 支持可选 UE-initiated QoS triggers
+category: requirement-change
+type: requirement-change
+difficulty: high
+repo: repos/smf
+before_commit: 8226acf92040630c78b05aa724d18a7ed4cbf64a
+after_commit: 44ea66633f79cbd1993c37904ba116f7080244d4
+source_commit: 44ea666
+commit_message: 'feat: handle optional UE-initiated QoS triggers'
+modified_files:
+- internal/sbi/consumer/pcf_service.go
+original_requirement: SMF 在和 PCF 交互进行策略控制时，需要支持可选的 UE-initiated QoS triggers。请调整 PCF
+  service 中 QoS rule / policy update 构造逻辑，让 UE 触发的 QoS 更新在有对应条件时被正确表达，同时不影响不携带该触发条件的旧流程。
+before_behavior: UE-initiated QoS trigger 的可选性处理不足，策略更新构造逻辑不够灵活。
+after_behavior: PCF service 能根据输入条件处理可选 UE-initiated QoS triggers，并保持旧路径兼容。
+evaluation_focus:
+- 可选协议触发条件
+- PCF policy update 构造
+- 兼容旧流程
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

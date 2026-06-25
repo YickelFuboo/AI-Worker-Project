@@ -1,0 +1,25 @@
+case_id: REQ-006
+title: N3IWF 增加 NGAP 消息指标采集
+category: requirement-change
+type: requirement-change
+difficulty: medium-high
+repo: repos/n3iwf
+before_commit: d2d8ff6ee424f234c06096d4c191d86af3ada392
+after_commit: 7af28ad1d303afc472944aecc6a7013663683b82
+source_commit: 7af28ad
+commit_message: 'feat: add ngap message metrics'
+modified_files:
+- internal/ngap/handler.go
+- internal/ngap/message/send.go
+original_requirement: N3IWF 需要暴露 NGAP 消息级别的可观测性指标，用于统计接收和发送的 NGAP 消息类型、方向和处理情况。请在
+  NGAP handler 与 send 路径中接入指标采集，保证不改变原有消息处理语义。
+before_behavior: N3IWF 缺少 NGAP message 维度的 inbound/outbound metrics，运维侧难以按消息类型观察控制面交互。
+after_behavior: NGAP 接收处理和发送路径会记录对应消息指标，原有 NGAP 业务逻辑保持不变。
+evaluation_focus:
+- 可观测性需求
+- 协议消息路径插桩
+- 避免改变业务语义
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

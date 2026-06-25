@@ -1,0 +1,26 @@
+case_id: BUG-004
+title: NEF Traffic Influence trafficRoutes 校验
+category: bugfix
+type: bugfix
+difficulty: medium
+repo: repos/nef
+before_commit: d821ac0e91d269291d04da06d2b5be7336a5eef2
+after_commit: 6dbadaa7f22bda26d3fd714c039238cecdf05b6c
+source_commit: 6dbadaa
+commit_message: 'fix: add trafficRoutes validation'
+modified_files:
+- internal/sbi/processor/ti.go
+- internal/sbi/processor/ti_test.go
+original_requirement: NEF Traffic Influence subscription 必须拒绝空 trafficRoutes，以及 trafficRoutes
+  数组中的 null route 元素。请在请求校验阶段返回 malformed request，并补充测试。
+before_behavior: 空 trafficRoutes 或 null route 元素可能被接受，后续流程可能出错。
+after_behavior: 空 trafficRoutes 返回 Missing trafficRoutes；null 元素返回包含索引的 Illegal null
+  route element 错误。
+evaluation_focus:
+- 业务字段完整性校验
+- 错误消息匹配
+- 单元测试
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

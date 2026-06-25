@@ -1,0 +1,69 @@
+commit 4c0cbaac6759c774a20152bd4dc6a22f585d0fbf
+Author:     carlhus <carl.hu.cs14@nycu.edu.tw>
+AuthorDate: Wed Apr 8 16:33:00 2026 +0800
+Commit:     carlhus <carl.hu.cs14@nycu.edu.tw>
+CommitDate: Wed Apr 8 16:33:00 2026 +0800
+
+    fix: add missing validation in nsselection for registration
+
+diff --git a/internal/sbi/processor/nsselection_network_slice_information.go b/internal/sbi/processor/nsselection_network_slice_information.go
+index 740786e..d2b9a68 100644
+--- a/internal/sbi/processor/nsselection_network_slice_information.go
++++ b/internal/sbi/processor/nsselection_network_slice_information.go
+@@ -294,7 +294,6 @@ func nsselectionForRegistration(param NetworkSliceInformationGetQuery) (
+ 	int, *models.AuthorizedNetworkSliceInfo, *models.ProblemDetails,
+ ) {
+ 	authorizedNetworkSliceInfo := &models.AuthorizedNetworkSliceInfo{}
+-
+ 	var status int
+ 	if param.HomePlmnId != nil {
+ 		// Check whether UE's Home PLMN is supported when UE is a roamer
+@@ -320,6 +319,48 @@ func nsselectionForRegistration(param NetworkSliceInformationGetQuery) (
+ 		}
+ 	}
+ 
++	if param.SliceInfoRequestForRegistration.SubscribedNssai != nil {
++		for idx, subscribedSnssai := range param.SliceInfoRequestForRegistration.SubscribedNssai {
++			if subscribedSnssai.SubscribedSnssai != nil {
++				continue
++			}
++
++			paramPath := fmt.Sprintf("slice-info-request-for-registration.subscribedNssai[%d].subscribedSnssai", idx)
++			detail := fmt.Sprintf("[Query Parameter] `%s` is required", paramPath)
++			problemDetails := &models.ProblemDetails{
++				Title:  util.INVALID_REQUEST,
++				Status: http.StatusBadRequest,
++				Detail: detail,
++				InvalidParams: []models.InvalidParam{
++					{
++						Param:  paramPath,
++						Reason: detail,
++					},
++				},
++			}
++
++			status = http.StatusBadRequest
++			return status, nil, problemDetails
++		}
++	}
++
++	if param.SliceInfoRequestForRegistration.MappingOfNssai != nil {
++		// check if servingSnssai  and homeSnssai are provided in each MappingOfSnssai element
++		for _, mappingOfSnssai := range param.SliceInfoRequestForRegistration.MappingOfNssai {
++			if mappingOfSnssai.ServingSnssai == nil || mappingOfSnssai.HomeSnssai == nil {
++				detail := "Each element in `mappingOfNssai` should include both `serving-snssai` and `home-snssai`"
++				problemDetails := &models.ProblemDetails{
++					Title:  util.INVALID_REQUEST,
++					Status: http.StatusBadRequest,
++					Detail: detail,
++				}
++
++				status = http.StatusBadRequest
++				return status, nil, problemDetails
++			}
++		}
++	}
++
+ 	if param.SliceInfoRequestForRegistration.RequestMapping {
+ 		// Based on TS 29.531 v15.2.0, when `requestMapping` is set to true, the NSSF shall return the VPLMN specific
+ 		// mapped S-NSSAI values for the S-NSSAI values in `subscribedNssai`. But also `sNssaiForMapping` shall be

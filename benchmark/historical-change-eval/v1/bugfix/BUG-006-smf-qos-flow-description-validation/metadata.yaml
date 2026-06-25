@@ -1,0 +1,24 @@
+case_id: BUG-006
+title: SMF QoS flow description 校验与触发器设置顺序
+category: bugfix
+type: bugfix
+difficulty: high
+repo: repos/smf
+before_commit: 3e659c12ccea0b0a716a0be3d9de628e243b9857
+after_commit: 2bdbe9b94c1780c245edde1e6ca78cd97cf82def
+source_commit: 2bdbe9b
+commit_message: 'fix: validate QoS flow descriptions and set triggers'
+modified_files:
+- internal/sbi/consumer/pcf_service.go
+original_requirement: SMF 根据 PCF 策略构造 NAS QoS 规则时，CreateNewQoSRule 和 ModifyExistingQoSRuleWithoutModifyingPacketFilters
+  必须有 QoS flow description。请在需要时校验 flowDesc，并确保 RES_MO_RE trigger 只在校验成功后设置。
+before_behavior: 缺少 flowDesc 时可能继续构造状态，且 trigger 可能在失败路径前被设置。
+after_behavior: 需要 flowDesc 的操作缺失时返回错误；trigger 设置移动到校验通过之后。
+evaluation_focus:
+- 协议语义
+- 副作用时机
+- 状态构造顺序
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

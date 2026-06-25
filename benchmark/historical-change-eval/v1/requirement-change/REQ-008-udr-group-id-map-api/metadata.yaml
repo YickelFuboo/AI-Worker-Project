@@ -1,0 +1,26 @@
+case_id: REQ-008
+title: UDR 构建 GroupIdMap API
+category: requirement-change
+type: requirement-change
+difficulty: medium
+repo: repos/udr
+before_commit: a4dc53ae1435fc67f6c4c71fa59b088da1fdccf1
+after_commit: 73aada5eb687437b7fb013fe3cf668408d4f1e7f
+source_commit: 73aada5
+commit_message: 'feat: construct GroupIdMap API'
+modified_files:
+- internal/sbi/api_groupIdMap.go
+- internal/sbi/server.go
+- pkg/factory/config.go
+original_requirement: UDR 需要支持 GroupIdMap 相关 SBI API 路由，使外部 NF 能访问 group id mapping
+  数据。请新增 GroupIdMap API handler 文件，将路由注册到 SBI server，并在配置中补充对应服务能力。
+before_behavior: UDR 没有 GroupIdMap API 路由和服务注册能力。
+after_behavior: 新增 GroupIdMap API 文件；server 注册对应路由；配置服务列表包含该 API 能力。
+evaluation_focus:
+- 新增 API 能力
+- 路由注册
+- 服务配置扩展
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

@@ -1,0 +1,909 @@
+commit dcfeacc6cac69a9a79b410251ae86811c8b3ddfa
+Author:     Your Name <andy151585@gmail.com>
+AuthorDate: Wed Jan 21 12:33:22 2026 +0000
+Commit:     Your Name <andy151585@gmail.com>
+CommitDate: Wed Jan 21 12:33:22 2026 +0000
+
+    feat:error response on upf session handler
+
+diff --git a/internal/pfcp/node.go b/internal/pfcp/node.go
+index 7068194..8cb8466 100644
+--- a/internal/pfcp/node.go
++++ b/internal/pfcp/node.go
+@@ -43,19 +43,26 @@ type Sess struct {
+ 	log      *logrus.Entry
+ }
+ 
++var (
++	ErrMissingMandatoryIE             = errors.New("mandatory IE missing or incorrect")
++	ErrMissingConditionalIE           = errors.New("conditional IE missing or incorrect")
++	ErrRuleNotFound                   = errors.New("rule not found")
++	ErrRuleCreationModificationFailed = errors.New("rule creation/modification failed")
++)
++
+ func (s *Sess) Close() []report.USAReport {
+ 	for id := range s.FARIDs {
+ 		i := ie.NewRemoveFAR(ie.NewFARID(id))
+ 		err := s.RemoveFAR(i)
+ 		if err != nil {
+-			s.log.Errorf("Remove FAR err: %+v", err)
++			s.log.Errorf("Remove FAR err: %v", err)
+ 		}
+ 	}
+ 	for id := range s.QERIDs {
+ 		i := ie.NewRemoveQER(ie.NewQERID(id))
+ 		err := s.RemoveQER(i)
+ 		if err != nil {
+-			s.log.Errorf("Remove QER err: %+v", err)
++			s.log.Errorf("Remove QER err: %v", err)
+ 		}
+ 	}
+ 
+@@ -64,7 +71,7 @@ func (s *Sess) Close() []report.USAReport {
+ 		i := ie.NewRemoveURR(ie.NewURRID(id))
+ 		rs, err := s.RemoveURR(i)
+ 		if err != nil {
+-			s.log.Errorf("Remove URR err: %+v", err)
++			s.log.Errorf("Remove URR err: %v", err)
+ 			continue
+ 		}
+ 		if rs != nil {
+@@ -75,14 +82,14 @@ func (s *Sess) Close() []report.USAReport {
+ 		i := ie.NewRemoveBAR(ie.NewBARID(id))
+ 		err := s.RemoveBAR(i)
+ 		if err != nil {
+-			s.log.Errorf("Remove BAR err: %+v", err)
++			s.log.Errorf("Remove BAR err: %v", err)
+ 		}
+ 	}
+ 	for id := range s.PDRIDs {
+ 		i := ie.NewRemovePDR(ie.NewPDRID(id))
+ 		rs, err := s.RemovePDR(i)
+ 		if err != nil {
+-			s.log.Errorf("remove PDR err: %+v", err)
++			s.log.Errorf("remove PDR err: %v", err)
+ 		}
+ 		if rs != nil {
+ 			usars = append(usars, rs...)
+@@ -97,7 +104,11 @@ func (s *Sess) Close() []report.USAReport {
+ func (s *Sess) CreatePDR(req *ie.IE) error {
+ 	ies, err := req.CreatePDR()
+ 	if err != nil {
+-		return err
++		return ErrRuleCreationModificationFailed
++	}
++
++	if err = s.rnode.driver.CreatePDR(s.LocalID, req); err != nil {
++		return ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	var pdrid uint16
+@@ -107,29 +118,29 @@ func (s *Sess) CreatePDR(req *ie.IE) error {
+ 		case ie.PDRID:
+ 			v, err1 := i.PDRID()
+ 			if err1 != nil {
+-				break
++				return ErrMissingMandatoryIE
+ 			}
+ 			pdrid = v
+ 		case ie.URRID:
+ 			v, err1 := i.URRID()
+ 			if err1 != nil {
+-				break
++				return ErrMissingConditionalIE
+ 			}
+-			urrids[v] = struct{}{}
+-			urrInfo, ok := s.URRIDs[v]
+-			if ok {
+-				urrInfo.refPdrNum++
++			_, ok := s.URRIDs[v]
++			if !ok {
++				return ErrRuleCreationModificationFailed
+ 			}
++			urrids[v] = struct{}{}
+ 		}
+ 	}
+ 
+-	s.PDRIDs[pdrid] = &PDRInfo{
+-		RelatedURRIDs: urrids,
++	for urrid := range urrids {
++		urrInfo := s.URRIDs[urrid]
++		urrInfo.refPdrNum++
+ 	}
+ 
+-	err = s.rnode.driver.CreatePDR(s.LocalID, req)
+-	if err != nil {
+-		return err
++	s.PDRIDs[pdrid] = &PDRInfo{
++		RelatedURRIDs: urrids,
+ 	}
+ 
+ 	return nil
+@@ -155,7 +166,7 @@ func (s *Sess) diassociateURR(urrid uint32) []report.USAReport {
+ 			return usars
+ 		}
+ 	} else {
+-		s.log.Warnf("diassociateURR: wrong refPdrNum(%d)", urrInfo.refPdrNum)
++		s.log.Errorf("diassociateURR: wrong refPdrNum(%d)", urrInfo.refPdrNum)
+ 	}
+ 	return nil
+ }
+@@ -163,7 +174,11 @@ func (s *Sess) diassociateURR(urrid uint32) []report.USAReport {
+ func (s *Sess) UpdatePDR(req *ie.IE) ([]report.USAReport, error) {
+ 	ies, err := req.UpdatePDR()
+ 	if err != nil {
+-		return nil, err
++		return nil, ErrMissingMandatoryIE
++	}
++
++	if err = s.rnode.driver.UpdatePDR(s.LocalID, req); err != nil {
++		return nil, ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	var pdrid uint16
+@@ -173,13 +188,13 @@ func (s *Sess) UpdatePDR(req *ie.IE) ([]report.USAReport, error) {
+ 		case ie.PDRID:
+ 			v, err1 := i.PDRID()
+ 			if err1 != nil {
+-				break
++				return nil, ErrMissingMandatoryIE
+ 			}
+ 			pdrid = v
+ 		case ie.URRID:
+ 			v, err1 := i.URRID()
+ 			if err1 != nil {
+-				break
++				return nil, ErrMissingConditionalIE
+ 			}
+ 			newUrrids[v] = struct{}{}
+ 		}
+@@ -187,12 +202,7 @@ func (s *Sess) UpdatePDR(req *ie.IE) ([]report.USAReport, error) {
+ 
+ 	pdrInfo, ok := s.PDRIDs[pdrid]
+ 	if !ok {
+-		return nil, errors.Errorf("UpdatePDR: PDR(%#x) not found", pdrid)
+-	}
+-
+-	err = s.rnode.driver.UpdatePDR(s.LocalID, req)
+-	if err != nil {
+-		return nil, err
++		return nil, ErrRuleNotFound
+ 	}
+ 
+ 	var usars []report.USAReport
+@@ -213,17 +223,16 @@ func (s *Sess) UpdatePDR(req *ie.IE) ([]report.USAReport, error) {
+ func (s *Sess) RemovePDR(req *ie.IE) ([]report.USAReport, error) {
+ 	pdrid, err := req.PDRID()
+ 	if err != nil {
+-		return nil, err
++		return nil, ErrMissingMandatoryIE
+ 	}
+ 
+ 	pdrInfo, ok := s.PDRIDs[pdrid]
+ 	if !ok {
+-		return nil, errors.Errorf("RemovePDR: PDR(%#x) not found", pdrid)
++		return nil, ErrRuleNotFound
+ 	}
+ 
+-	err = s.rnode.driver.RemovePDR(s.LocalID, req)
+-	if err != nil {
+-		return nil, err
++	if err = s.rnode.driver.RemovePDR(s.LocalID, req); err != nil {
++		return nil, ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	var usars []report.USAReport
+@@ -240,44 +249,46 @@ func (s *Sess) RemovePDR(req *ie.IE) ([]report.USAReport, error) {
+ func (s *Sess) CreateFAR(req *ie.IE) error {
+ 	id, err := req.FARID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+-	s.FARIDs[id] = struct{}{}
+ 
+-	err = s.rnode.driver.CreateFAR(s.LocalID, req)
+-	if err != nil {
+-		return err
++	if err := s.rnode.driver.CreateFAR(s.LocalID, req); err != nil {
++		return ErrRuleCreationModificationFailed
+ 	}
++
++	s.FARIDs[id] = struct{}{}
+ 	return nil
+ }
+ 
+ func (s *Sess) UpdateFAR(req *ie.IE) error {
+ 	id, err := req.FARID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+ 
+-	_, ok := s.FARIDs[id]
+-	if !ok {
+-		return errors.Errorf("UpdateFAR: FAR(%#x) not found", id)
++	if _, ok := s.FARIDs[id]; !ok {
++		return ErrRuleNotFound
+ 	}
+-	return s.rnode.driver.UpdateFAR(s.LocalID, req)
++	if err := s.rnode.driver.UpdateFAR(s.LocalID, req); err != nil {
++		return ErrRuleCreationModificationFailed
++	}
++	return nil
+ }
+ 
+ func (s *Sess) RemoveFAR(req *ie.IE) error {
+ 	id, err := req.FARID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+ 
+ 	_, ok := s.FARIDs[id]
+ 	if !ok {
+-		return errors.Errorf("RemoveFAR: FAR(%#x) not found", id)
++		return ErrRuleNotFound
+ 	}
+ 
+ 	err = s.rnode.driver.RemoveFAR(s.LocalID, req)
+ 	if err != nil {
+-		return err
++		return ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	delete(s.FARIDs, id)
+@@ -287,44 +298,46 @@ func (s *Sess) RemoveFAR(req *ie.IE) error {
+ func (s *Sess) CreateQER(req *ie.IE) error {
+ 	id, err := req.QERID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+-	s.QERIDs[id] = struct{}{}
+ 
+ 	err = s.rnode.driver.CreateQER(s.LocalID, req)
+ 	if err != nil {
+-		return err
++		return ErrRuleCreationModificationFailed
+ 	}
++
++	s.QERIDs[id] = struct{}{}
+ 	return nil
+ }
+ 
+ func (s *Sess) UpdateQER(req *ie.IE) error {
+ 	id, err := req.QERID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+ 
+-	_, ok := s.QERIDs[id]
+-	if !ok {
+-		return errors.Errorf("UpdateQER: QER(%#x) not found", id)
++	if _, ok := s.QERIDs[id]; !ok {
++		return ErrRuleNotFound
+ 	}
+-	return s.rnode.driver.UpdateQER(s.LocalID, req)
++	if err := s.rnode.driver.UpdateQER(s.LocalID, req); err != nil {
++		return ErrRuleCreationModificationFailed
++	}
++	return nil
+ }
+ 
+ func (s *Sess) RemoveQER(req *ie.IE) error {
+ 	id, err := req.QERID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+ 
+ 	_, ok := s.QERIDs[id]
+ 	if !ok {
+-		return errors.Errorf("RemoveQER: QER(%#x) not found", id)
++		return ErrRuleNotFound
+ 	}
+ 
+-	err = s.rnode.driver.RemoveQER(s.LocalID, req)
+-	if err != nil {
+-		return err
++	if err = s.rnode.driver.RemoveQER(s.LocalID, req); err != nil {
++		return ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	delete(s.QERIDs, id)
+@@ -334,7 +347,12 @@ func (s *Sess) RemoveQER(req *ie.IE) error {
+ func (s *Sess) CreateURR(req *ie.IE) error {
+ 	id, err := req.URRID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
++	}
++
++	err = s.rnode.driver.CreateURR(s.LocalID, req)
++	if err != nil {
++		return ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	mInfo := &ie.IE{}
+@@ -358,24 +376,25 @@ func (s *Sess) CreateURR(req *ie.IE) error {
+ 			MNOP: mInfo.HasMNOP(),
+ 		},
+ 	}
+-
+-	err = s.rnode.driver.CreateURR(s.LocalID, req)
+-	if err != nil {
+-		return err
+-	}
+ 	return nil
+ }
+ 
+ func (s *Sess) UpdateURR(req *ie.IE) ([]report.USAReport, error) {
+ 	id, err := req.URRID()
+ 	if err != nil {
+-		return nil, err
++		return nil, ErrMissingMandatoryIE
+ 	}
+ 
+ 	urrInfo, ok := s.URRIDs[id]
+ 	if !ok {
+-		return nil, errors.Errorf("UpdateURR: URR[%#x] not found", id)
++		return nil, ErrRuleNotFound
++	}
++
++	usars, err := s.rnode.driver.UpdateURR(s.LocalID, req)
++	if err != nil {
++		return nil, ErrRuleCreationModificationFailed
+ 	}
++
+ 	for _, x := range req.ChildIEs {
+ 		switch x.Type {
+ 		case ie.MeasurementMethod:
+@@ -391,30 +410,27 @@ func (s *Sess) UpdateURR(req *ie.IE) ([]report.USAReport, error) {
+ 		}
+ 	}
+ 
+-	usars, err := s.rnode.driver.UpdateURR(s.LocalID, req)
+-	if err != nil {
+-		return nil, err
+-	}
+ 	return usars, nil
+ }
+ 
+ func (s *Sess) RemoveURR(req *ie.IE) ([]report.USAReport, error) {
+ 	id, err := req.URRID()
+ 	if err != nil {
+-		return nil, err
++		return nil, ErrMissingMandatoryIE
+ 	}
+ 
+ 	info, ok := s.URRIDs[id]
+ 	if !ok {
+-		return nil, errors.Errorf("RemoveURR: URR[%#x] not found", id)
++		return nil, ErrRuleNotFound
+ 	}
+-	info.removed = true // remove URRInfo later
+ 
+ 	usars, err := s.rnode.driver.RemoveURR(s.LocalID, req)
+ 	if err != nil {
+-		return nil, err
++		return nil, ErrRuleCreationModificationFailed
+ 	}
+ 
++	info.removed = true // remove URRInfo later
++
+ 	// indicates usage report being reported for a URR due to the removal of the URR
+ 	for i := range usars {
+ 		usars[i].USARTrigger.Flags |= report.USAR_TRIG_TERMR
+@@ -425,17 +441,16 @@ func (s *Sess) RemoveURR(req *ie.IE) ([]report.USAReport, error) {
+ func (s *Sess) QueryURR(req *ie.IE) ([]report.USAReport, error) {
+ 	id, err := req.URRID()
+ 	if err != nil {
+-		return nil, err
++		return nil, ErrMissingMandatoryIE
+ 	}
+ 
+-	_, ok := s.URRIDs[id]
+-	if !ok {
+-		return nil, errors.Errorf("QueryURR: URR[%#x] not found", id)
++	if _, ok := s.URRIDs[id]; !ok {
++		return nil, ErrRuleNotFound
+ 	}
+ 
+ 	usars, err := s.rnode.driver.QueryURR(s.LocalID, id)
+ 	if err != nil {
+-		return nil, err
++		return nil, ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	// indicates an immediate report reported on CP function demand
+@@ -448,44 +463,47 @@ func (s *Sess) QueryURR(req *ie.IE) ([]report.USAReport, error) {
+ func (s *Sess) CreateBAR(req *ie.IE) error {
+ 	id, err := req.BARID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+-	s.BARIDs[id] = struct{}{}
+ 
+ 	err = s.rnode.driver.CreateBAR(s.LocalID, req)
+ 	if err != nil {
+-		return err
++		return ErrRuleCreationModificationFailed
+ 	}
++
++	s.BARIDs[id] = struct{}{}
+ 	return nil
+ }
+ 
+ func (s *Sess) UpdateBAR(req *ie.IE) error {
+ 	id, err := req.BARID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+ 
+ 	_, ok := s.BARIDs[id]
+ 	if !ok {
+-		return errors.Errorf("UpdateBAR: BAR(%#x) not found", id)
++		return ErrRuleNotFound
+ 	}
+-	return s.rnode.driver.UpdateBAR(s.LocalID, req)
++	if err = s.rnode.driver.UpdateBAR(s.LocalID, req); err != nil {
++		return ErrRuleCreationModificationFailed
++	}
++	return nil
+ }
+ 
+ func (s *Sess) RemoveBAR(req *ie.IE) error {
+ 	id, err := req.BARID()
+ 	if err != nil {
+-		return err
++		return ErrMissingMandatoryIE
+ 	}
+ 
+ 	_, ok := s.BARIDs[id]
+ 	if !ok {
+-		return errors.Errorf("RemoveBAR: BAR(%#x) not found", id)
++		return ErrRuleNotFound
+ 	}
+ 
+-	err = s.rnode.driver.RemoveBAR(s.LocalID, req)
+-	if err != nil {
+-		return err
++	if err = s.rnode.driver.RemoveBAR(s.LocalID, req); err != nil {
++		return ErrRuleCreationModificationFailed
+ 	}
+ 
+ 	delete(s.BARIDs, id)
+diff --git a/internal/pfcp/session.go b/internal/pfcp/session.go
+index f3c4fd7..b84f537 100644
+--- a/internal/pfcp/session.go
++++ b/internal/pfcp/session.go
+@@ -2,8 +2,8 @@ package pfcp
+ 
+ import (
+ 	"net"
+-	"strings"
+ 
++	"github.com/pkg/errors"
+ 	"github.com/wmnsk/go-pfcp/ie"
+ 	"github.com/wmnsk/go-pfcp/message"
+ 
+@@ -14,16 +14,17 @@ func (s *PfcpServer) handleSessionEstablishmentRequest(
+ 	req *message.SessionEstablishmentRequest,
+ 	addr net.Addr,
+ ) {
+-	// TODO: error response
+ 	s.log.Infoln("handleSessionEstablishmentRequest")
+ 
+ 	if req.NodeID == nil {
+ 		s.log.Errorln("not found NodeID")
++		s.sendSessEstFailRsp(req, addr, ie.CauseMandatoryIEMissing)
+ 		return
+ 	}
+ 	rnodeid, err := req.NodeID.NodeID()
+ 	if err != nil {
+ 		s.log.Errorln(err)
++		s.sendSessEstFailRsp(req, addr, ie.CauseMandatoryIEMissing)
+ 		return
+ 	}
+ 	s.log.Debugf("remote nodeid: %v\n", rnodeid)
+@@ -31,16 +32,19 @@ func (s *PfcpServer) handleSessionEstablishmentRequest(
+ 	rnode, ok := s.rnodes[rnodeid]
+ 	if !ok {
+ 		s.log.Errorf("not found NodeID %v\n", rnodeid)
++		s.sendSessEstFailRsp(req, addr, ie.CauseNoEstablishedPFCPAssociation)
+ 		return
+ 	}
+ 
+ 	if req.CPFSEID == nil {
+ 		s.log.Errorln("not found CP F-SEID")
++		s.sendSessEstFailRsp(req, addr, ie.CauseMandatoryIEMissing)
+ 		return
+ 	}
+ 	fseid, err := req.CPFSEID.FSEID()
+ 	if err != nil {
+ 		s.log.Errorln(err)
++		s.sendSessEstFailRsp(req, addr, ie.CauseMandatoryIEMissing)
+ 		return
+ 	}
+ 	s.log.Debugf("fseid.SEID: %#x\n", fseid.SEID)
+@@ -49,40 +53,56 @@ func (s *PfcpServer) handleSessionEstablishmentRequest(
+ 	sess := rnode.NewSess(fseid.SEID)
+ 
+ 	// TODO: rollback transaction
++	// Solved by deleting sess if one of operation fails (all or nothing)
+ 	for _, i := range req.CreateFAR {
+-		err = sess.CreateFAR(i)
+-		if err != nil {
+-			sess.log.Errorf("Est CreateFAR error: %+v", err)
++		if err = sess.CreateFAR(i); err != nil {
++			sess.log.Errorf("Est CreateFAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessEstFailRsp(req, addr, cause)
++			rnode.DeleteSess(sess.LocalID)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.CreateQER {
+-		err = sess.CreateQER(i)
+-		if err != nil {
+-			sess.log.Errorf("Est CreateQER error: %+v", err)
++		if err = sess.CreateQER(i); err != nil {
++			sess.log.Errorf("Est CreateQER error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessEstFailRsp(req, addr, cause)
++			rnode.DeleteSess(sess.LocalID)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.CreateURR {
+-		err = sess.CreateURR(i)
+-		if err != nil {
+-			sess.log.Errorf("Est CreateURR error: %+v", err)
++		if err = sess.CreateURR(i); err != nil {
++			sess.log.Errorf("Est CreateURR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessEstFailRsp(req, addr, cause)
++			rnode.DeleteSess(sess.LocalID)
++			return
+ 		}
+ 	}
+ 
+ 	if req.CreateBAR != nil {
+-		err = sess.CreateBAR(req.CreateBAR)
+-		if err != nil {
+-			sess.log.Errorf("Est CreateBAR error: %+v", err)
++		if err = sess.CreateBAR(req.CreateBAR); err != nil {
++			sess.log.Errorf("Est CreateBAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessEstFailRsp(req, addr, cause)
++			rnode.DeleteSess(sess.LocalID)
++			return
+ 		}
+ 	}
+ 
+ 	CreatedPDRList := make([]*ie.IE, 0)
+ 
+ 	for _, i := range req.CreatePDR {
+-		err = sess.CreatePDR(i)
+-		if err != nil {
+-			sess.log.Errorf("Est CreatePDR error: %+v", err)
++		if err = sess.CreatePDR(i); err != nil {
++			sess.log.Errorf("Est CreatePDR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessEstFailRsp(req, addr, cause)
++			rnode.DeleteSess(sess.LocalID)
++			return
+ 		}
+ 
+ 		ueIPAddress := getUEAddressFromPDR(i)
+@@ -132,7 +152,6 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 	req *message.SessionModificationRequest,
+ 	addr net.Addr,
+ ) {
+-	// TODO: error response
+ 	s.log.Infoln("handleSessionModificationRequest")
+ 
+ 	sess, err := s.lnode.Sess(req.SEID())
+@@ -147,7 +166,7 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 			ie.NewCause(ie.CauseSessionContextNotFound),
+ 		)
+ 
+-		err = s.sendRspTo(rsp, addr)
++		err := s.sendRspTo(rsp, addr)
+ 		if err != nil {
+ 			s.log.Errorln(err)
+ 			return
+@@ -163,63 +182,75 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 		// When present, it shall contain the unique identifier of the new SMF.
+ 		rnodeid, err1 := req.NodeID.NodeID()
+ 		if err1 != nil {
+-			s.log.Errorln(err)
++			s.log.Errorln(err1)
+ 			return
+ 		}
+ 		s.log.Debugf("new remote nodeid: %v\n", rnodeid)
+ 		s.UpdateNodeID(sess.rnode, rnodeid)
+ 	}
+ 
++	// TODO : rollback transaction
++
+ 	for _, i := range req.CreateFAR {
+-		err = sess.CreateFAR(i)
+-		if err != nil {
+-			sess.log.Errorf("Mod CreateFAR error: %+v", err)
++		if err := sess.CreateFAR(i); err != nil {
++			sess.log.Errorf("Mod CreateFAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.CreateQER {
+-		err = sess.CreateQER(i)
+-		if err != nil {
+-			sess.log.Errorf("Mod CreateQER error: %+v", err)
++		if err := sess.CreateQER(i); err != nil {
++			sess.log.Errorf("Mod CreateQER error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.CreateURR {
+-		err = sess.CreateURR(i)
+-		if err != nil {
+-			if strings.Contains(err.Error(), "file exists") {
+-				sess.log.Warnf("Mod CreateURR error: %+v", err)
+-			} else {
+-				sess.log.Errorf("Mod CreateURR error: %+v", err)
+-			}
++		if err := sess.CreateURR(i); err != nil {
++			sess.log.Errorf("Mod CreateURR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	if req.CreateBAR != nil {
+-		err = sess.CreateBAR(req.CreateBAR)
+-		if err != nil {
+-			sess.log.Errorf("Mod CreateBAR error: %+v", err)
++		if err := sess.CreateBAR(req.CreateBAR); err != nil {
++			sess.log.Errorf("Mod CreateBAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.CreatePDR {
+-		err = sess.CreatePDR(i)
+-		if err != nil {
+-			sess.log.Errorf("Mod CreatePDR error: %+v", err)
++		if err := sess.CreatePDR(i); err != nil {
++			sess.log.Errorf("Mod CreatePDR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.RemoveFAR {
+-		err = sess.RemoveFAR(i)
+-		if err != nil {
+-			sess.log.Errorf("Mod RemoveFAR error: %+v", err)
++		if err := sess.RemoveFAR(i); err != nil {
++			sess.log.Errorf("Mod RemoveFAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.RemoveQER {
+-		err = sess.RemoveQER(i)
+-		if err != nil {
+-			sess.log.Errorf("Mod RemoveQER error: %+v", err)
++		if err := sess.RemoveQER(i); err != nil {
++			sess.log.Errorf("Mod RemoveQER error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+@@ -227,8 +258,10 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 	for _, i := range req.RemoveURR {
+ 		rs, err1 := sess.RemoveURR(i)
+ 		if err1 != nil {
+-			sess.log.Errorf("Mod RemoveURR error: %+v", err1)
+-			continue
++			sess.log.Errorf("Mod RemoveURR error: %v", err1)
++			cause := pfcpCauseFromError(err1)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 		if len(rs) > 0 {
+ 			usars = append(usars, rs...)
+@@ -236,16 +269,21 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 	}
+ 
+ 	if req.RemoveBAR != nil {
+-		err = sess.RemoveBAR(req.RemoveBAR)
+-		if err != nil {
+-			sess.log.Errorf("Mod RemoveBAR error: %+v", err)
++		if err := sess.RemoveBAR(req.RemoveBAR); err != nil {
++			sess.log.Errorf("Mod RemoveBAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.RemovePDR {
+ 		rs, err1 := sess.RemovePDR(i)
+ 		if err1 != nil {
+-			sess.log.Errorf("Mod RemovePDR error: %+v", err1)
++			sess.log.Errorf("Mod RemovePDR error: %v", err1)
++			cause := pfcpCauseFromError(err1)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 		if len(rs) > 0 {
+ 			usars = append(usars, rs...)
+@@ -253,24 +291,30 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 	}
+ 
+ 	for _, i := range req.UpdateFAR {
+-		err = sess.UpdateFAR(i)
+-		if err != nil {
+-			sess.log.Errorf("Mod UpdateFAR error: %+v", err)
++		if err := sess.UpdateFAR(i); err != nil {
++			sess.log.Errorf("Mod UpdateFAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.UpdateQER {
+-		err = sess.UpdateQER(i)
+-		if err != nil {
+-			sess.log.Errorf("Mod UpdateQER error: %+v", err)
++		if err := sess.UpdateQER(i); err != nil {
++			sess.log.Errorf("Mod UpdateQER error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.UpdateURR {
+ 		rs, err1 := sess.UpdateURR(i)
+ 		if err1 != nil {
+-			sess.log.Errorf("Mod UpdateURR error: %+v", err1)
+-			continue
++			sess.log.Errorf("Mod UpdateURR error: %v", err1)
++			cause := pfcpCauseFromError(err1)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 		if len(rs) > 0 {
+ 			usars = append(usars, rs...)
+@@ -278,16 +322,21 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 	}
+ 
+ 	if req.UpdateBAR != nil {
+-		err = sess.UpdateBAR(req.UpdateBAR)
+-		if err != nil {
+-			sess.log.Errorf("Mod UpdateBAR error: %+v", err)
++		if err := sess.UpdateBAR(req.UpdateBAR); err != nil {
++			sess.log.Errorf("Mod UpdateBAR error: %v", err)
++			cause := pfcpCauseFromError(err)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 	}
+ 
+ 	for _, i := range req.UpdatePDR {
+ 		rs, err1 := sess.UpdatePDR(i)
+ 		if err1 != nil {
+-			sess.log.Errorf("Mod UpdatePDR error: %+v", err1)
++			sess.log.Errorf("Mod UpdatePDR error: %v", err1)
++			cause := pfcpCauseFromError(err1)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 		if len(rs) > 0 {
+ 			usars = append(usars, rs...)
+@@ -297,8 +346,10 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 	for _, i := range req.QueryURR {
+ 		rs, err1 := sess.QueryURR(i)
+ 		if err1 != nil {
+-			sess.log.Errorf("Mod QueryURR error: %+v", err1)
+-			continue
++			sess.log.Errorf("Mod QueryURR error: %v", err1)
++			cause := pfcpCauseFromError(err1)
++			s.sendSessModFailRsp(req, sess, addr, cause)
++			return
+ 		}
+ 		if len(rs) > 0 {
+ 			usars = append(usars, rs...)
+@@ -331,8 +382,7 @@ func (s *PfcpServer) handleSessionModificationRequest(
+ 		}
+ 	}
+ 
+-	err = s.sendRspTo(rsp, addr)
+-	if err != nil {
++	if err := s.sendRspTo(rsp, addr); err != nil {
+ 		s.log.Errorln(err)
+ 		return
+ 	}
+@@ -485,3 +535,58 @@ func getPDRIDFromPDR(pdr *ie.IE) uint16 {
+ 	}
+ 	return 0
+ }
++
++func (s *PfcpServer) sendSessEstFailRsp(
++	req *message.SessionEstablishmentRequest,
++	addr net.Addr,
++	cause uint8,
++) {
++	rsp := message.NewSessionEstablishmentResponse(
++		0, // mp
++		0, // fo
++		0, // seid (session 尚未建立)
++		req.Header.SequenceNumber,
++		0, // pri
++		ie.NewCause(cause),
++	)
++	if err := s.sendRspTo(rsp, addr); err != nil {
++		s.log.Errorln(err)
++	}
++}
++
++func (s *PfcpServer) sendSessModFailRsp(
++	req *message.SessionModificationRequest,
++	sess *Sess,
++	addr net.Addr,
++	cause uint8,
++) {
++	rsp := message.NewSessionModificationResponse(
++		0,             // mp
++		0,             // fo
++		sess.RemoteID, // seid
++		req.Header.SequenceNumber,
++		0, // pri
++		ie.NewCause(cause),
++	)
++	err := s.sendRspTo(rsp, addr)
++	if err != nil {
++		s.log.Errorln(err)
++	}
++}
++
++func pfcpCauseFromError(err error) uint8 {
++	switch {
++	case errors.Is(err, ErrMissingMandatoryIE):
++		return ie.CauseMandatoryIEMissing
++
++	case errors.Is(err, ErrMissingConditionalIE):
++		return ie.CauseConditionalIEMissing
++
++	case errors.Is(err, ErrRuleNotFound) ||
++		errors.Is(err, ErrRuleCreationModificationFailed):
++		return ie.CauseRuleCreationModificationFailure
++
++	default:
++		return ie.CauseSystemFailure
++	}
++}

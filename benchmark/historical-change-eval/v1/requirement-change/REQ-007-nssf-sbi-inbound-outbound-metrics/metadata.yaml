@@ -1,0 +1,33 @@
+case_id: REQ-007
+title: NSSF 增加 SBI 入站/出站指标采集
+category: requirement-change
+type: requirement-change
+difficulty: medium
+repo: repos/nssf
+before_commit: 8549305933465d7d708c7f1427faaab6618541e8
+after_commit: 3374380a50e144631d58a43242ec261190dcbab8
+source_commit: '3374380'
+commit_message: 'feat: add sbi inbound/outbound metrics'
+modified_files:
+- go.mod
+- go.sum
+- internal/sbi/api_nssaiavailability.go
+- internal/sbi/api_nsselection.go
+- internal/sbi/consumer/consumer.go
+- internal/sbi/processor/nssaiavailability_store.go
+- internal/sbi/processor/nssaiavailability_subscription.go
+- internal/sbi/processor/nsselection_network_slice_information.go
+- internal/sbi/server.go
+- pkg/service/init.go
+original_requirement: NSSF 需要增加 SBI 入站和出站请求指标，以便观测 NSSelection、NSSAI Availability
+  等服务接口的请求量、响应状态和外部调用情况。请在 server/API/consumer/processor 的关键路径接入指标，不改变接口业务行为。
+before_behavior: NSSF 缺少统一的 SBI inbound/outbound metrics，接口可观测性不足。
+after_behavior: NSSF 服务启动和 SBI 请求路径接入 metrics，入站 API 和出站 consumer 调用能够被统计。
+evaluation_focus:
+- 跨层指标接入
+- server/API/consumer 协同修改
+- 保持业务兼容
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

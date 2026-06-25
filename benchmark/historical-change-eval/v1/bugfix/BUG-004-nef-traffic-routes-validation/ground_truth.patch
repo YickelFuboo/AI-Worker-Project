@@ -1,0 +1,153 @@
+commit 6dbadaa7f22bda26d3fd714c039238cecdf05b6c
+Author:     Kash <andy151585@gmail.com>
+AuthorDate: Tue Apr 7 17:16:14 2026 +0000
+Commit:     Kash <andy151585@gmail.com>
+CommitDate: Tue Apr 7 17:53:25 2026 +0000
+
+    fix: add trafficRoutes validation
+
+diff --git a/internal/sbi/processor/ti.go b/internal/sbi/processor/ti.go
+index 18a0fbd..476377a 100644
+--- a/internal/sbi/processor/ti.go
++++ b/internal/sbi/processor/ti.go
+@@ -1,6 +1,7 @@
+ package processor
+ 
+ import (
++	"fmt"
+ 	"net/http"
+ 
+ 	"github.com/free5gc/nef/internal/logger"
+@@ -440,6 +441,22 @@ func validateTrafficInfluenceData(
+ 				"Missing one of Gpsi, Ipv4Addr, Ipv6Addr, ExternalGroupId, AnyUeInd")
+ 		return pd
+ 	}
++
++	if len(tiSub.TrafficRoutes) == 0 {
++		pd := openapi.
++			ProblemDetailsMalformedReqSyntax(
++				"Missing trafficRoutes")
++		return pd
++	}
++
++	for i, route := range tiSub.TrafficRoutes {
++		if route == nil {
++			pd := openapi.
++				ProblemDetailsMalformedReqSyntax(
++					fmt.Sprintf("Illegal null route element at index %d", i))
++			return pd
++		}
++	}
+ 	return nil
+ }
+ 
+diff --git a/internal/sbi/processor/ti_test.go b/internal/sbi/processor/ti_test.go
+index 29bf4f0..b511aad 100644
+--- a/internal/sbi/processor/ti_test.go
++++ b/internal/sbi/processor/ti_test.go
+@@ -130,6 +130,37 @@ var (
+ 		},
+ 	}
+ 
++	tiSub6ForAf1 = models.NefTrafficInfluSub{
++		AfServiceId: "Service6",
++		AfAppId:     "App6",
++		Ipv4Addr:    "10.60.0.11",
++		TrafficFilters: []models.FlowInfo{
++			{
++				FlowId: 1,
++				FlowDescriptions: []string{
++					"permit out ip from 192.168.0.24 to 10.60.0.11",
++				},
++			},
++		},
++	}
++
++	tiSub7ForAf1 = models.NefTrafficInfluSub{
++		AfServiceId: "Service7",
++		AfAppId:     "App7",
++		Ipv4Addr:    "10.60.0.12",
++		TrafficFilters: []models.FlowInfo{
++			{
++				FlowId: 1,
++				FlowDescriptions: []string{
++					"permit out ip from 192.168.0.26 to 10.60.0.12",
++				},
++			},
++		},
++		TrafficRoutes: []*models.RouteToLocation{
++			nil,
++		},
++	}
++
+ 	tiSubPatch1ForAf1 = models.NefTrafficInfluSubPatch{
+ 		TrafficFilters: []models.FlowInfo{
+ 			{
+@@ -347,6 +378,32 @@ func TestPostTrafficInfluenceSubscription(t *testing.T) {
+ 				},
+ 			},
+ 		},
++		{
++			description: "TC5: Missing trafficRoutes",
++			afID:        "af1",
++			tiSub:       &tiSub6ForAf1,
++			expectedResponse: &HandlerResponse{
++				Status: http.StatusBadRequest,
++				Body: &models.ProblemDetails{
++					Status: http.StatusBadRequest,
++					Title:  "Malformed request syntax",
++					Detail: "Missing trafficRoutes",
++				},
++			},
++		},
++		{
++			description: "TC6: Illegal null route element",
++			afID:        "af1",
++			tiSub:       &tiSub7ForAf1,
++			expectedResponse: &HandlerResponse{
++				Status: http.StatusBadRequest,
++				Body: &models.ProblemDetails{
++					Status: http.StatusBadRequest,
++					Title:  "Malformed request syntax",
++					Detail: "Illegal null route element at index 0",
++				},
++			},
++		},
+ 	}
+ 
+ 	nefCtx := nefApp.Context()
+@@ -615,6 +672,34 @@ func TestPutIndividualTrafficInfluenceSubscription(t *testing.T) {
+ 				},
+ 			},
+ 		},
++		{
++			description: "TC6: Missing trafficRoutes",
++			afID:        "af1",
++			subID:       "6",
++			tiSub:       &tiSub6ForAf1,
++			expectedResponse: &HandlerResponse{
++				Status: http.StatusBadRequest,
++				Body: &models.ProblemDetails{
++					Status: http.StatusBadRequest,
++					Title:  "Malformed request syntax",
++					Detail: "Missing trafficRoutes",
++				},
++			},
++		},
++		{
++			description: "TC7: Illegal null route element",
++			afID:        "af1",
++			subID:       "7",
++			tiSub:       &tiSub7ForAf1,
++			expectedResponse: &HandlerResponse{
++				Status: http.StatusBadRequest,
++				Body: &models.ProblemDetails{
++					Status: http.StatusBadRequest,
++					Title:  "Malformed request syntax",
++					Detail: "Illegal null route element at index 0",
++				},
++			},
++		},
+ 	}
+ 
+ 	nefCtx := nefApp.Context()

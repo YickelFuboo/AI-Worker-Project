@@ -1,0 +1,24 @@
+case_id: BUG-001
+title: AMF N1 Message Notify 必填 anN2ApId 校验修正
+category: bugfix
+type: bugfix
+difficulty: low
+repo: repos/amf
+before_commit: dcc3045ef859d79d94095e40254616baddb1fb56
+after_commit: 3fe96a9912920377e616794b0450e4669d99e213
+source_commit: 3fe96a9
+commit_message: 'fix: validate missing anN2ApId in N1 message notify'
+modified_files:
+- internal/sbi/processor/callback.go
+original_requirement: AMF 在处理 N1 Message Notify 回调时，需要拒绝缺失或非法的 registrationCtxtContainer.anN2ApId。当前实现的判断条件写反，导致
+  anN2ApId 缺失或非正值时没有被正确拒绝。请修复校验逻辑，保持改动最小。
+before_behavior: 缺失或非正值 anN2ApId 没有按 mandatory IE 错误路径被拒绝，后续流程可能继续处理不完整上下文。
+after_behavior: 当 anN2ApId 缺失、为 0 或非法时返回错误；合法正值可以继续处理。
+evaluation_focus:
+- 单点条件方向修正
+- N1 Message Notify 入口定位
+- 最小改动
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

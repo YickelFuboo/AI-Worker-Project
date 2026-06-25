@@ -1,0 +1,30 @@
+commit 1f192eb472ef15081a2c5eb6545c9afd3f720aff
+Author:     solar224 <cyc.cs14@nycu.edu.tw>
+AuthorDate: Thu Mar 12 16:03:09 2026 +0000
+Commit:     solar224 <cyc.cs14@nycu.edu.tw>
+CommitDate: Thu Mar 12 16:03:09 2026 +0000
+
+    fix(uecm): use ADD instead of REPLACE for purgeFlag JSON Patch
+
+diff --git a/internal/sbi/processor/ue_context_management.go b/internal/sbi/processor/ue_context_management.go
+index c9e5e01..ff0e6fe 100644
+--- a/internal/sbi/processor/ue_context_management.go
++++ b/internal/sbi/processor/ue_context_management.go
+@@ -286,7 +286,7 @@ func (p *Processor) UpdateAmf3gppAccessProcedure(c *gin.Context,
+ 	if request.PurgeFlag {
+ 		var patchItemTmp models.PatchItem
+ 		patchItemTmp.Path = "/" + "purgeFlag"
+-		patchItemTmp.Op = models.PatchOperation_REPLACE
++		patchItemTmp.Op = models.PatchOperation_ADD
+ 		patchItemTmp.Value = request.PurgeFlag
+ 		patchItemReqArray = append(patchItemReqArray, patchItemTmp)
+ 	}
+@@ -400,7 +400,7 @@ func (p *Processor) UpdateAmfNon3gppAccessProcedure(c *gin.Context,
+ 	if request.PurgeFlag {
+ 		var patchItemTmp models.PatchItem
+ 		patchItemTmp.Path = "/" + "purgeFlag"
+-		patchItemTmp.Op = models.PatchOperation_REPLACE
++		patchItemTmp.Op = models.PatchOperation_ADD
+ 		patchItemTmp.Value = request.PurgeFlag
+ 		patchItemReqArray = append(patchItemReqArray, patchItemTmp)
+ 	}

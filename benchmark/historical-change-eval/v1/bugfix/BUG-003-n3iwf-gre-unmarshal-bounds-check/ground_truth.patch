@@ -1,0 +1,97 @@
+commit 0bb9e1d22d8dd5baa7795dcf3f8fd7815419ea87
+Author:     SAY-5 <saiasish.cnp@gmail.com>
+AuthorDate: Sun May 10 14:43:54 2026 -0700
+Commit:     SAY-5 <saiasish.cnp@gmail.com>
+CommitDate: Sun May 10 14:43:54 2026 -0700
+
+    fix(gre): bounds-check GRE header fields during Unmarshal
+
+diff --git a/internal/gre/message.go b/internal/gre/message.go
+index e396b99..99887ad 100644
+--- a/internal/gre/message.go
++++ b/internal/gre/message.go
+@@ -39,6 +39,9 @@ func (p *GREPacket) Marshal() []byte {
+ }
+ 
+ func (p *GREPacket) Unmarshal(b []byte) error {
++	if len(b) < 4 {
++		return errors.Errorf("GRE packet too short: got %d bytes, need at least 4", len(b))
++	}
+ 	p.flags = b[0]
+ 	p.version = b[1]
+ 
+@@ -47,6 +50,10 @@ func (p *GREPacket) Unmarshal(b []byte) error {
+ 	offset := 4
+ 
+ 	if p.GetKeyFlag() {
++		if len(b) < offset+GREHeaderKeyFieldLength {
++			return errors.Errorf("GRE packet too short for Key field: got %d bytes, need %d",
++				len(b), offset+GREHeaderKeyFieldLength)
++		}
+ 		p.key = binary.BigEndian.Uint32(b[offset : offset+GREHeaderKeyFieldLength])
+ 		offset += GREHeaderKeyFieldLength
+ 	}
+diff --git a/internal/gre/message_test.go b/internal/gre/message_test.go
+new file mode 100644
+index 0000000..8675e47
+--- /dev/null
++++ b/internal/gre/message_test.go
+@@ -0,0 +1,58 @@
++package gre
++
++import (
++	"testing"
++)
++
++func TestGREPacketUnmarshalShortBuffer(t *testing.T) {
++	cases := []struct {
++		name string
++		buf  []byte
++	}{
++		{name: "empty", buf: []byte{}},
++		{name: "one byte", buf: []byte{0x00}},
++		{name: "two bytes", buf: []byte{0x20, 0x00}},
++		{name: "three bytes", buf: []byte{0x20, 0x00, 0x08}},
++	}
++	for _, tc := range cases {
++		t.Run(tc.name, func(t *testing.T) {
++			defer func() {
++				if r := recover(); r != nil {
++					t.Fatalf("Unmarshal panicked on short buffer: %v", r)
++				}
++			}()
++			var p GREPacket
++			if err := p.Unmarshal(tc.buf); err == nil {
++				t.Fatalf("expected error for %d-byte buffer, got nil", len(tc.buf))
++			}
++		})
++	}
++}
++
++func TestGREPacketUnmarshalKeyFlagTruncated(t *testing.T) {
++	// flags byte 0x20 sets the Key flag.
++	buf := []byte{0x20, 0x00, 0x08, 0x00}
++	defer func() {
++		if r := recover(); r != nil {
++			t.Fatalf("Unmarshal panicked with Key flag + no Key field: %v", r)
++		}
++	}()
++	var p GREPacket
++	if err := p.Unmarshal(buf); err == nil {
++		t.Fatal("expected error for Key-flag buffer with no Key field, got nil")
++	}
++}
++
++func TestGREPacketUnmarshalValid(t *testing.T) {
++	buf := []byte{0x00, 0x00, 0x08, 0x00, 0x01, 0x02, 0x03}
++	var p GREPacket
++	if err := p.Unmarshal(buf); err != nil {
++		t.Fatalf("unexpected error: %v", err)
++	}
++	if p.protocolType != IPv4 {
++		t.Fatalf("protocolType = %d, want %d", p.protocolType, IPv4)
++	}
++	if string(p.payload) != string([]byte{0x01, 0x02, 0x03}) {
++		t.Fatalf("payload mismatch: got %v", p.payload)
++	}
++}

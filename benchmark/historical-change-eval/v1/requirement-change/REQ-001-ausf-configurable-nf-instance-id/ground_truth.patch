@@ -1,0 +1,147 @@
+commit 20dc067ce818b9695f291722f1cc11dbaebc1d8e
+Author:     Niahh <samy.ouastani@gmail.com>
+AuthorDate: Mon Dec 15 11:16:11 2025 +0100
+Commit:     Niahh <samy.ouastani@gmail.com>
+CommitDate: Wed Dec 24 14:46:46 2025 +0100
+
+    feat: making the nfInstanceId configurable
+    
+    Initially the NF created at each boot a new uuid. This makes it difficult to retrieve the information afterwards. This commit propose is to add the nfInstanceId in the configuration as optional so that if needed, it can be tracked more easily.
+    If no nfInstanceId specified, it will still be generated at each boot and give more control to users that might need it (for kube deployment, other checks, better identification)
+    
+    Also using the uuidv4 validator to match spec 3GPP TS 29.510 version 17.6.0 Release 17 5.2.2.2.2 mentioning that UUID should be in the version 4 format
+
+diff --git a/go.mod b/go.mod
+index 0406bb2..8154ca0 100644
+--- a/go.mod
++++ b/go.mod
+@@ -9,7 +9,7 @@ require (
+ 	github.com/free5gc/util v1.2.0
+ 	github.com/gin-gonic/gin v1.10.0
+ 	github.com/google/gopacket v1.1.19
+-	github.com/google/uuid v1.3.0
++	github.com/google/uuid v1.6.0
+ 	github.com/pkg/errors v0.9.1
+ 	github.com/prometheus/client_golang v1.21.0
+ 	github.com/sirupsen/logrus v1.9.3
+diff --git a/go.sum b/go.sum
+index 0b9dfa7..bca37b0 100644
+--- a/go.sum
++++ b/go.sum
+@@ -59,8 +59,8 @@ github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeN
+ github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
+ github.com/google/gopacket v1.1.19 h1:ves8RnFZPGiFnTS0uPQStjwru6uO6h+nlr9j6fL7kF8=
+ github.com/google/gopacket v1.1.19/go.mod h1:iJ8V8n6KS+z2U1A8pUwu8bW5SyEMkXJB8Yo/Vo+TKTo=
+-github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+-github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
++github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
++github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+ github.com/h2non/gock v1.2.0 h1:K6ol8rfrRkUOefooBC8elXoaNGYkpp7y2qcxGG6BzUE=
+ github.com/h2non/gock v1.2.0/go.mod h1:tNhoxHYW2W42cYkYb1WqzdbYIieALC99kpYr7rH/BQk=
+ github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 h1:2VTzZjLZBgl62/EtslCrtky5vbi9dd7HrQPQIx6wqiw=
+diff --git a/internal/context/ausf_context_init.go b/internal/context/ausf_context_init.go
+index 80d7591..f58065e 100644
+--- a/internal/context/ausf_context_init.go
++++ b/internal/context/ausf_context_init.go
+@@ -5,8 +5,6 @@ import (
+ 	"os"
+ 	"strconv"
+ 
+-	"github.com/google/uuid"
+-
+ 	"github.com/free5gc/ausf/internal/logger"
+ 	"github.com/free5gc/ausf/pkg/factory"
+ 	"github.com/free5gc/openapi/models"
+@@ -19,7 +17,7 @@ func InitAusfContext(context *AUSFContext) {
+ 	configuration := config.Configuration
+ 	sbi := configuration.Sbi
+ 
+-	context.NfId = uuid.New().String()
++	context.NfId = config.GetNfInstanceId()
+ 	context.GroupID = configuration.GroupId
+ 	context.NrfUri = configuration.NrfUri
+ 	context.NrfCertPem = configuration.NrfCertPem
+diff --git a/pkg/factory/config.go b/pkg/factory/config.go
+index 6552c09..f04f184 100644
+--- a/pkg/factory/config.go
++++ b/pkg/factory/config.go
+@@ -12,6 +12,7 @@ import (
+ 	"sync"
+ 
+ 	"github.com/asaskevich/govalidator"
++	"github.com/google/uuid"
+ 
+ 	"github.com/free5gc/ausf/internal/logger"
+ 	"github.com/free5gc/openapi/models"
+@@ -22,6 +23,7 @@ const (
+ 	AusfDefaultCertPemPath        = "./cert/ausf.pem"
+ 	AusfDefaultPrivateKeyPath     = "./cert/ausf.key"
+ 	AusfDefaultConfigPath         = "./config/ausfcfg.yaml"
++	AusfDefaultNfInstanceIdEnvVar = "AUSF_NF_INSTANCE_ID"
+ 	AusfSbiDefaultIPv4            = "127.0.0.9"
+ 	AusfSbiDefaultPort            = 8000
+ 	AusfSbiDefaultScheme          = "https"
+@@ -63,6 +65,7 @@ type Info struct {
+ }
+ 
+ type Configuration struct {
++	NfInstanceId         string          `yaml:"nfInstanceId,omitempty" valid:"optional,uuidv4"`
+ 	Sbi                  *Sbi            `yaml:"sbi,omitempty" valid:"required"`
+ 	Metrics              *Metrics        `yaml:"metrics,omitempty" valid:"optional"`
+ 	ServiceNameList      []string        `yaml:"serviceNameList,omitempty" valid:"required"`
+@@ -80,6 +83,10 @@ type Logger struct {
+ }
+ 
+ func (c *Configuration) validate() (bool, error) {
++	if c.NfInstanceId == "" {
++		c.NfInstanceId = uuid.New().String()
++	}
++
+ 	if sbi := c.Sbi; sbi != nil {
+ 		if result, err := sbi.validate(); err != nil {
+ 			return result, err
+@@ -128,6 +135,31 @@ func (c *Configuration) validate() (bool, error) {
+ 	return result, appendInvalid(err)
+ }
+ 
++func (c *Config) GetNfInstanceId() string {
++	c.RLock()
++	defer c.RUnlock()
++
++	var nfInstanceId string
++
++	logger.CfgLog.Debugf("Fetching nfInstanceId from env var \"%s\"", AusfDefaultNfInstanceIdEnvVar)
++
++	if nfInstanceId = os.Getenv(AusfDefaultNfInstanceIdEnvVar); nfInstanceId == "" {
++		logger.CfgLog.Debugf("No value found for \"%s\" env, fallback on config nfInstanceId : %s",
++			AusfDefaultNfInstanceIdEnvVar, c.Configuration.NfInstanceId)
++		return c.Configuration.NfInstanceId
++	}
++
++	if err := uuid.Validate(nfInstanceId); err != nil {
++		logger.CfgLog.Errorf("Env var \"%s\" is not a valid uuid, "+
++			"fallback on configuration nfInstanceId : %s", AusfDefaultNfInstanceIdEnvVar, c.Configuration.NfInstanceId)
++		return c.Configuration.NfInstanceId
++	}
++
++	logger.CfgLog.Debugf("nfInstanceId from %s : %s", AusfDefaultNfInstanceIdEnvVar, nfInstanceId)
++
++	return nfInstanceId
++}
++
+ type Sbi struct {
+ 	Scheme       string `yaml:"scheme" valid:"scheme"`
+ 	RegisterIPv4 string `yaml:"registerIPv4,omitempty" valid:"host,required"` // IP that is registered at NRF.
+diff --git a/pkg/factory/factory.go b/pkg/factory/factory.go
+index fcbd12d..b4e20b2 100644
+--- a/pkg/factory/factory.go
++++ b/pkg/factory/factory.go
+@@ -46,7 +46,7 @@ func ReadConfig(cfgPath string) (*Config, error) {
+ 			logger.CfgLog.Errorf("%+v", validErr)
+ 		}
+ 		logger.CfgLog.Errorf("[-- PLEASE REFER TO SAMPLE CONFIG FILE COMMENTS --]")
+-		return nil, fmt.Errorf("Config validate Error")
++		return nil, fmt.Errorf("config validate Error")
+ 	}
+ 
+ 	return cfg, nil

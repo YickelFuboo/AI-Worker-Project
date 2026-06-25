@@ -1,0 +1,31 @@
+commit 5c2c9e36d2017c71a791c69724cf16b2d4dd39c3
+Author:     wiwi878 <a31625802@gmail.com>
+AuthorDate: Wed May 20 06:05:16 2026 +0000
+Commit:     wiwi878 <a31625802@gmail.com>
+CommitDate: Wed May 20 06:05:16 2026 +0000
+
+    fix: validate supi or suci
+
+diff --git a/internal/sbi/processor/ue_authentication.go b/internal/sbi/processor/ue_authentication.go
+index 6df0409..96e1d08 100644
+--- a/internal/sbi/processor/ue_authentication.go
++++ b/internal/sbi/processor/ue_authentication.go
+@@ -244,6 +244,18 @@ func (p *Processor) UeAuthPostRequestProcedure(c *gin.Context, updateAuthenticat
+ 	var authInfoReq models.AuthenticationInfoRequest
+ 
+ 	supiOrSuci := updateAuthenticationInfo.SupiOrSuci
++	if !validator.IsValidSupi(supiOrSuci) && !validator.IsValidSuci(supiOrSuci) {
++		logger.UeAuthLog.Warnf("invalid supiOrSuci in UE authentication request: %q", supiOrSuci)
++		problemDetails := models.ProblemDetails{
++			Title:  "Malformed request syntax",
++			Status: http.StatusBadRequest,
++			Detail: "supiOrSuci must be a valid SUPI or SUCI",
++			Cause:  "MALFORMED_SUPI_OR_SUCI",
++		}
++		c.Set(sbi.IN_PB_DETAILS_CTX_STR, problemDetails.Cause)
++		c.JSON(http.StatusBadRequest, problemDetails)
++		return
++	}
+ 
+ 	snName := updateAuthenticationInfo.ServingNetworkName
+ 	servingNetworkAuthorized := ausf_context.IsServingNetworkAuthorized(snName)

@@ -1,0 +1,76 @@
+case_id: BUG-008
+title: UDR 错误响应后缺少 return
+category: bugfix
+type: bugfix
+difficulty: medium
+repo: repos/udr
+before_commit: 0e7b568284f85338cbe9b36e4177c8f876411c2b
+after_commit: a78f419f213af5b11a38f22101b77a83157e996e
+source_commit: a78f419
+commit_message: 'fix: add missing return statements after error responses
+
+
+  Problem:
+
+  When data was not found or an error occurred, UDR returned error response
+
+  but continued executing and wrote additional data to the response body.
+
+  This created invalid JSON responses, causing downstream services (like NEF)
+
+  to fail parsing with ''invalid character n after top-level value'' and return 500.
+
+
+  Solution:
+
+  Add return statements after error responses in the following files/functions:
+
+
+  internal/sbi/processor/default.go:
+
+  - GetApplicationDataIndividualPfdFromDBProcedure
+
+  - PutApplicationDataIndividualPfdToDBProcedure
+
+  - PolicyDataBdtDataGetProcedure
+
+  - PolicyDataSubsToNotifySubsIdDeleteProcedure
+
+  - PolicyDataSubsToNotifySubsIdPutProcedure
+
+  - PolicyDataUesUeIdAmDataGetProcedure
+
+  - PolicyDataUesUeIdOperatorSpecificDataGetProcedure
+
+  - PolicyDataUesUeIdOperatorSpecificDataPatchProcedure (2 locations)
+
+
+  internal/sbi/processor/amf3_gpp_access_registration_document.go:
+
+  - AmfContext3gppProcedure
+
+  - QueryAmfContext3gppProcedure
+
+
+  internal/sbi/processor/amf_non3_gpp_access_registration_document.go:
+
+  - AmfContextNon3gppProcedure
+
+
+  Fixes: free5gc/free5gc#753'
+modified_files:
+- internal/sbi/processor/amf3_gpp_access_registration_document.go
+- internal/sbi/processor/amf_non3_gpp_access_registration_document.go
+- internal/sbi/processor/default.go
+original_requirement: UDR 在数据不存在或数据库 patch 出错时已经写出错误响应，但函数继续执行并写入额外响应体，导致非法 JSON。请在所有相关错误响应后立即
+  return，避免重复响应。
+before_behavior: 错误响应后继续执行，响应体可能被污染，下游解析出现 invalid character after top-level value。
+after_behavior: 相关错误响应路径写出 c.JSON 后立即 return。
+evaluation_focus:
+- 错误控制流
+- 跨文件同类问题搜索
+- 避免改变响应内容
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

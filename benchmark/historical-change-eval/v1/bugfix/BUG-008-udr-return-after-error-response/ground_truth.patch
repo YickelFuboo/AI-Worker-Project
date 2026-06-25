@@ -1,0 +1,144 @@
+commit a78f419f213af5b11a38f22101b77a83157e996e
+Author:     solar224 <cyc.cs14@nycu.edu.tw>
+AuthorDate: Fri Dec 26 06:38:32 2025 +0000
+Commit:     solar224 <cyc.cs14@nycu.edu.tw>
+CommitDate: Wed Jan 7 07:13:28 2026 +0000
+
+    fix: add missing return statements after error responses
+    
+    Problem:
+    When data was not found or an error occurred, UDR returned error response
+    but continued executing and wrote additional data to the response body.
+    This created invalid JSON responses, causing downstream services (like NEF)
+    to fail parsing with 'invalid character n after top-level value' and return 500.
+    
+    Solution:
+    Add return statements after error responses in the following files/functions:
+    
+    internal/sbi/processor/default.go:
+    - GetApplicationDataIndividualPfdFromDBProcedure
+    - PutApplicationDataIndividualPfdToDBProcedure
+    - PolicyDataBdtDataGetProcedure
+    - PolicyDataSubsToNotifySubsIdDeleteProcedure
+    - PolicyDataSubsToNotifySubsIdPutProcedure
+    - PolicyDataUesUeIdAmDataGetProcedure
+    - PolicyDataUesUeIdOperatorSpecificDataGetProcedure
+    - PolicyDataUesUeIdOperatorSpecificDataPatchProcedure (2 locations)
+    
+    internal/sbi/processor/amf3_gpp_access_registration_document.go:
+    - AmfContext3gppProcedure
+    - QueryAmfContext3gppProcedure
+    
+    internal/sbi/processor/amf_non3_gpp_access_registration_document.go:
+    - AmfContextNon3gppProcedure
+    
+    Fixes: free5gc/free5gc#753
+
+diff --git a/internal/sbi/processor/amf3_gpp_access_registration_document.go b/internal/sbi/processor/amf3_gpp_access_registration_document.go
+index eb3e053..65ff95f 100644
+--- a/internal/sbi/processor/amf3_gpp_access_registration_document.go
++++ b/internal/sbi/processor/amf3_gpp_access_registration_document.go
+@@ -33,6 +33,7 @@ func (p *Processor) AmfContext3gppProcedure(
+ 		problemDetails := util.ProblemDetailsModifyNotAllowed("")
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, problemDetails.Cause)
+ 		c.JSON(int(problemDetails.Status), problemDetails)
++		return
+ 	}
+ 
+ 	PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
+@@ -59,6 +60,7 @@ func (p *Processor) QueryAmfContext3gppProcedure(c *gin.Context, collName string
+ 		logger.DataRepoLog.Errorf("QueryAmfContext3gppProcedure err: %s", pd.Detail)
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 	c.JSON(http.StatusOK, data)
+ }
+diff --git a/internal/sbi/processor/amf_non3_gpp_access_registration_document.go b/internal/sbi/processor/amf_non3_gpp_access_registration_document.go
+index dda4026..609b77c 100644
+--- a/internal/sbi/processor/amf_non3_gpp_access_registration_document.go
++++ b/internal/sbi/processor/amf_non3_gpp_access_registration_document.go
+@@ -33,6 +33,7 @@ func (p *Processor) AmfContextNon3gppProcedure(
+ 		pd := util.ProblemDetailsSystemFailure(err.Error())
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 	PreHandleOnDataChangeNotify(ueId, CurrentResourceUri, patchItem, origValue, newValue)
+ 	c.Status(http.StatusNoContent)
+diff --git a/internal/sbi/processor/default.go b/internal/sbi/processor/default.go
+index 775cf62..1f93e0e 100644
+--- a/internal/sbi/processor/default.go
++++ b/internal/sbi/processor/default.go
+@@ -43,6 +43,7 @@ func (p *Processor) GetApplicationDataIndividualPfdFromDBProcedure(c *gin.Contex
+ 		logger.DataRepoLog.Errorf("getApplicationDataIndividualPfdFromDB err: %s", pd.Detail)
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 	c.JSON(http.StatusOK, data)
+ }
+@@ -64,6 +65,7 @@ func (p *Processor) PutApplicationDataIndividualPfdToDBProcedure(
+ 
+ 	if existed {
+ 		c.JSON(http.StatusOK, data)
++		return
+ 	}
+ 	c.JSON(http.StatusCreated, data)
+ }
+@@ -142,6 +144,7 @@ func (p *Processor) PolicyDataBdtDataGetProcedure(c *gin.Context, collName strin
+ 	if err != nil {
+ 		logger.DataRepoLog.Errorf("PolicyDataBdtDataGetProcedure err: %+v", err)
+ 		c.JSON(http.StatusOK, nil)
++		return
+ 	}
+ 	c.JSON(http.StatusOK, bdtDataArray)
+ }
+@@ -197,6 +200,7 @@ func (p *Processor) PolicyDataSubsToNotifySubsIdDeleteProcedure(c *gin.Context,
+ 		pd := util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 	delete(udrSelf.PolicyDataSubscriptions, subsId)
+ 	c.Status(http.StatusNoContent)
+@@ -211,6 +215,7 @@ func (p *Processor) PolicyDataSubsToNotifySubsIdPutProcedure(c *gin.Context, sub
+ 		pd := util.ProblemDetailsNotFound("SUBSCRIPTION_NOT_FOUND")
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 
+ 	udrSelf.PolicyDataSubscriptions[subsId] = &policyDataSubscription
+@@ -226,6 +231,7 @@ func (p *Processor) PolicyDataUesUeIdAmDataGetProcedure(c *gin.Context, collName
+ 		logger.DataRepoLog.Errorf("PolicyDataUesUeIdAmDataGetProcedure err: %s", pd.Detail)
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 	c.JSON(http.StatusOK, data)
+ }
+@@ -239,6 +245,7 @@ func (p *Processor) PolicyDataUesUeIdOperatorSpecificDataGetProcedure(c *gin.Con
+ 		logger.DataRepoLog.Errorf("PolicyDataUesUeIdOperatorSpecificDataGetProcedure err: %s", pd.Detail)
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 	operatorSpecificDataContainerMap := data["operatorSpecificDataContainerMap"]
+ 	c.JSON(http.StatusOK, operatorSpecificDataContainerMap)
+@@ -255,6 +262,7 @@ func (p *Processor) PolicyDataUesUeIdOperatorSpecificDataPatchProcedure(c *gin.C
+ 		pd := util.ProblemDetailsModifyNotAllowed("")
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 
+ 	if err := mongoapi.RestfulAPIJSONPatchExtend(collName, filter, patchJSON,
+@@ -263,6 +271,7 @@ func (p *Processor) PolicyDataUesUeIdOperatorSpecificDataPatchProcedure(c *gin.C
+ 		pd := util.ProblemDetailsModifyNotAllowed("")
+ 		c.Set(sbi.IN_PB_DETAILS_CTX_STR, pd.Cause)
+ 		c.JSON(int(pd.Status), pd)
++		return
+ 	}
+ 	c.Status(http.StatusNoContent)
+ }

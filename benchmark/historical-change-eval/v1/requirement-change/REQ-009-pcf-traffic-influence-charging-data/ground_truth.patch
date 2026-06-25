@@ -1,0 +1,28 @@
+commit 54265c36a704b18e93d75629f2ebcde9a61fc463
+Author:     yzlin <linyangzhe0508@gmail.com>
+AuthorDate: Tue Jan 21 18:09:55 2025 +0000
+Commit:     Ian Chen <ychen.desl@gmail.com>
+CommitDate: Mon Mar 3 09:53:01 2025 +0000
+
+    feat: add charging data for traffic influence
+
+diff --git a/internal/util/pcc_rule.go b/internal/util/pcc_rule.go
+index 67fe0b1..638ee36 100644
+--- a/internal/util/pcc_rule.go
++++ b/internal/util/pcc_rule.go
+@@ -229,13 +229,13 @@ func SetSmPolicyDecisionByDefault(decision *models.SmPolicyDecision, id int32) {
+ 
+ // Set SMpilicy decision with the PCC rule generated from the trafficInfluData
+ func SetSmPolicyDecisionByTrafficInfluData(decision *models.SmPolicyDecision,
+-	pccRule *models.PccRule, trafficInfluData models.TrafficInfluData,
++	pccRule *models.PccRule, trafficInfluData models.TrafficInfluData, chgData *models.ChargingData,
+ ) {
+ 	tcData := convertToTrafficControlData(&trafficInfluData)
+ 	tcData.TcId = strings.ReplaceAll(pccRule.PccRuleId, "PccRuleId", "TcId")
+ 	flowInfos := convertToFlowinfos(&trafficInfluData)
+ 	pccRule.FlowInfos = flowInfos
+-	SetPccRuleRelatedData(decision, pccRule, tcData, nil, nil, nil)
++	SetPccRuleRelatedData(decision, pccRule, tcData, nil, chgData, nil)
+ }
+ 
+ func convertToFlowinfos(trafficInfluData *models.TrafficInfluData) []models.FlowInformation {

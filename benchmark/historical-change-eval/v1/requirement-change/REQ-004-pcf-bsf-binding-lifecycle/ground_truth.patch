@@ -1,0 +1,432 @@
+commit 977e17ae83015926dc98c98dda149c962525ec57
+Author:     usmanTheCoder <kh.usman444@gmail.com>
+AuthorDate: Sat Sep 6 21:35:32 2025 +0000
+Commit:     usmanTheCoder <kh.usman444@gmail.com>
+CommitDate: Sat Sep 6 21:35:32 2025 +0000
+
+    feat(PCF): Integrate BSF client for binding management
+    
+    • Add BSF service client for PCF binding lifecycle:
+      - Create bsf_service.go with CreatePCFBinding, DeletePCFBinding functions
+      - Integrate BSF client into consumer.go for binding operations
+      - Add BSF service configuration and discovery support
+    
+    • Enhance UE context management:
+      - Update ue.go with BSF binding ID tracking
+      - Integrate binding creation/deletion in SM policy lifecycle
+      - Add proper cleanup of BSF bindings on session termination
+    
+    • Update SM policy processor:
+      - Modify smpolicy.go to use BSF for binding management
+      - Add BSF binding creation during policy establishment
+      - Ensure proper binding cleanup on policy deletion
+    
+    This integration enables PCF to properly manage bindings with BSF
+    according to 3GPP TS 29.521 specifications for enhanced policy control.
+
+diff --git a/internal/context/ue.go b/internal/context/ue.go
+index db16682..d8e72a8 100644
+--- a/internal/context/ue.go
++++ b/internal/context/ue.go
+@@ -100,6 +100,8 @@ type UeSmPolicyData struct {
+ 	PcfUe                  *UeContext
+ 	InfluenceDataToPccRule map[string]string
+ 	SubscriptionID         string
++	// BSF Integration
++	BsfBindingId string
+ }
+ 
+ // NewUeAMPolicyData returns created UeAMPolicyData data and insert this data to Ue.AMPolicyData with assolId as key
+diff --git a/internal/sbi/consumer/bsf_service.go b/internal/sbi/consumer/bsf_service.go
+new file mode 100644
+index 0000000..ff93142
+--- /dev/null
++++ b/internal/sbi/consumer/bsf_service.go
+@@ -0,0 +1,256 @@
++package consumer
++
++import (
++	"bytes"
++	"encoding/json"
++	"fmt"
++	"net/http"
++	"strings"
++	"sync"
++
++	"github.com/free5gc/openapi/models"
++	"github.com/free5gc/openapi/nrf/NFDiscovery"
++	pcf_context "github.com/free5gc/pcf/internal/context"
++	"github.com/free5gc/pcf/internal/logger"
++)
++
++type nbsfService struct {
++	consumer *Consumer
++
++	httpClientMu sync.RWMutex
++	httpClient   *http.Client
++}
++
++func (s *nbsfService) getHTTPClient() *http.Client {
++	s.httpClientMu.RLock()
++	defer s.httpClientMu.RUnlock()
++	if s.httpClient == nil {
++		s.httpClient = &http.Client{}
++	}
++	return s.httpClient
++}
++
++// BSFSelection discovers and selects BSF for PCF binding registration
++func (s *nbsfService) BSFSelection() (string, error) {
++	// Discover BSF via NRF
++	targetNfType := models.NrfNfManagementNfType_BSF
++	requesterNfType := models.NrfNfManagementNfType_PCF
++	request := NFDiscovery.SearchNFInstancesRequest{
++		TargetNfType:    &targetNfType,
++		RequesterNfType: &requesterNfType,
++	}
++
++	// Use existing NRF discovery service
++	result, err := s.consumer.nnrfService.SendSearchNFInstances(s.consumer.Context().NrfUri, targetNfType, requesterNfType, request)
++	if err != nil {
++		return "", fmt.Errorf("BSF discovery failed: %w", err)
++	}
++
++	if result == nil || len(result.NfInstances) == 0 {
++		return "", fmt.Errorf("no BSF instances found")
++	}
++
++	// Select first BSF instance and find management service URI
++	bsfProfile := result.NfInstances[0]
++	for _, service := range bsfProfile.NfServices {
++		if service.ServiceName == models.ServiceName_NBSF_MANAGEMENT &&
++			service.NfServiceStatus == models.NfServiceStatus_REGISTERED {
++			return service.ApiPrefix, nil
++		}
++	}
++
++	return "", fmt.Errorf("BSF management service not found")
++}
++
++// RegisterPCFBinding registers PCF binding for a PDU session context
++func (s *nbsfService) RegisterPCFBinding(smPolicyData *pcf_context.UeSmPolicyData) (string, error) {
++	bsfUri, err := s.BSFSelection()
++	if err != nil {
++		logger.ConsumerLog.Warnf("BSF selection failed: %v", err)
++		return "", err
++	}
++
++	// Extract data from policy context
++	ctx := smPolicyData.PolicyContext
++	if ctx == nil {
++		return "", fmt.Errorf("policy context is nil")
++	}
++
++	// Get PCF service information
++	pcfContext := s.consumer.Context()
++	var pcfFqdn string
++	var pcfIpEndPoints []models.IpEndPoint
++
++	if policyAuthService, exists := pcfContext.NfService[models.ServiceName_NPCF_POLICYAUTHORIZATION]; exists {
++		pcfFqdn = policyAuthService.ApiPrefix
++		pcfIpEndPoints = policyAuthService.IpEndPoints
++	} else {
++		// Fallback to basic PCF info
++		pcfFqdn = fmt.Sprintf("%s://%s:%d", pcfContext.UriScheme, pcfContext.RegisterIPv4, pcfContext.SBIPort)
++		pcfIpEndPoints = []models.IpEndPoint{
++			{
++				Ipv4Address: pcfContext.RegisterIPv4,
++				Port:        int32(pcfContext.SBIPort),
++			},
++		}
++	}
++
++	// Create binding request
++	binding := models.PcfBinding{
++		Supi:           ctx.Supi,
++		Gpsi:           ctx.Gpsi,
++		Ipv4Addr:       ctx.Ipv4Address,
++		Ipv6Prefix:     ctx.Ipv6AddressPrefix,
++		IpDomain:       ctx.IpDomain,
++		Dnn:            ctx.Dnn,
++		Snssai:         ctx.SliceInfo,
++		PcfFqdn:        pcfFqdn,
++		PcfIpEndPoints: pcfIpEndPoints,
++		PcfId:          pcfContext.NfId,
++	}
++
++	// Marshal binding request
++	jsonData, err := json.Marshal(binding)
++	if err != nil {
++		return "", fmt.Errorf("failed to marshal binding: %w", err)
++	}
++
++	// Create HTTP request
++	createURL := fmt.Sprintf("%s/nbsf-management/v1/pcfBindings", bsfUri)
++	req, err := http.NewRequest("POST", createURL, bytes.NewBuffer(jsonData))
++	if err != nil {
++		return "", fmt.Errorf("failed to create request: %w", err)
++	}
++
++	// Add headers
++	req.Header.Set("Content-Type", "application/json")
++	req.Header.Set("Accept", "application/json")
++
++	// Send request
++	client := s.getHTTPClient()
++	resp, err := client.Do(req)
++	if err != nil {
++		logger.ConsumerLog.Errorf("Failed to register PCF binding in BSF: %v", err)
++		return "", err
++	}
++	defer resp.Body.Close()
++
++	if resp.StatusCode == http.StatusCreated {
++		// Extract binding ID from Location header
++		location := resp.Header.Get("Location")
++		if location != "" {
++			// Extract binding ID from location path like: /nbsf-management/v1/pcfBindings/{bindingId}
++			parts := strings.Split(location, "/")
++			if len(parts) > 0 {
++				bindingId := parts[len(parts)-1]
++				logger.ConsumerLog.Infof("Successfully registered PCF binding in BSF: %s", bindingId)
++				return bindingId, nil
++			}
++		}
++		logger.ConsumerLog.Infof("Successfully registered PCF binding in BSF for SUPI: %s, DNN: %s", ctx.Supi, ctx.Dnn)
++		return "", nil // Binding created but ID not extracted
++	}
++
++	return "", fmt.Errorf("unexpected response status: %d", resp.StatusCode)
++}
++
++// UpdatePCFBinding updates existing PCF binding in BSF
++func (s *nbsfService) UpdatePCFBinding(bindingId string, smPolicyData *pcf_context.UeSmPolicyData) error {
++	bsfUri, err := s.BSFSelection()
++	if err != nil {
++		logger.ConsumerLog.Warnf("BSF selection failed: %v", err)
++		return err
++	}
++
++	// Extract data from policy context for updates
++	ctx := smPolicyData.PolicyContext
++	if ctx == nil {
++		return fmt.Errorf("policy context is nil")
++	}
++
++	// Create patch updates with current context data
++	updates := map[string]interface{}{}
++
++	// Only include non-empty fields for updates
++	if ctx.Ipv4Address != "" {
++		updates["ipv4Addr"] = ctx.Ipv4Address
++	}
++	if ctx.Ipv6AddressPrefix != "" {
++		updates["ipv6Prefix"] = ctx.Ipv6AddressPrefix
++	}
++	if ctx.IpDomain != "" {
++		updates["ipDomain"] = ctx.IpDomain
++	}
++
++	// Add PCF info updates
++	pcfContext := s.consumer.Context()
++	if policyAuthService, exists := pcfContext.NfService[models.ServiceName_NPCF_POLICYAUTHORIZATION]; exists {
++		updates["pcfFqdn"] = policyAuthService.ApiPrefix
++		updates["pcfIpEndPoints"] = policyAuthService.IpEndPoints
++	}
++
++	// Marshal updates
++	jsonData, err := json.Marshal(updates)
++	if err != nil {
++		return fmt.Errorf("failed to marshal updates: %w", err)
++	}
++
++	// Create HTTP request
++	updateURL := fmt.Sprintf("%s/nbsf-management/v1/pcfBindings/%s", bsfUri, bindingId)
++	req, err := http.NewRequest("PATCH", updateURL, bytes.NewBuffer(jsonData))
++	if err != nil {
++		return fmt.Errorf("failed to create request: %w", err)
++	}
++
++	// Add headers
++	req.Header.Set("Content-Type", "application/json-patch+json")
++	req.Header.Set("Accept", "application/json")
++
++	// Send request
++	client := s.getHTTPClient()
++	resp, err := client.Do(req)
++	if err != nil {
++		logger.ConsumerLog.Errorf("Failed to update PCF binding in BSF: %v", err)
++		return err
++	}
++	defer resp.Body.Close()
++
++	if resp.StatusCode == http.StatusOK {
++		logger.ConsumerLog.Infof("Successfully updated PCF binding %s in BSF", bindingId)
++		return nil
++	}
++
++	return fmt.Errorf("unexpected response status: %d", resp.StatusCode)
++}
++
++// DeletePCFBinding removes PCF binding from BSF
++func (s *nbsfService) DeletePCFBinding(bindingId string) error {
++	bsfUri, err := s.BSFSelection()
++	if err != nil {
++		logger.ConsumerLog.Warnf("BSF selection failed: %v", err)
++		return err
++	}
++
++	// Create HTTP request
++	deleteURL := fmt.Sprintf("%s/nbsf-management/v1/pcfBindings/%s", bsfUri, bindingId)
++	req, err := http.NewRequest("DELETE", deleteURL, nil)
++	if err != nil {
++		return fmt.Errorf("failed to create request: %w", err)
++	}
++
++	// Send request
++	client := s.getHTTPClient()
++	resp, err := client.Do(req)
++	if err != nil {
++		logger.ConsumerLog.Errorf("Failed to delete PCF binding from BSF: %v", err)
++		return err
++	}
++	defer resp.Body.Close()
++
++	if resp.StatusCode == http.StatusNoContent || resp.StatusCode == http.StatusNotFound {
++		logger.ConsumerLog.Infof("Successfully deleted PCF binding %s from BSF", bindingId)
++		return nil
++	}
++
++	return fmt.Errorf("unexpected response status: %d", resp.StatusCode)
++}
+diff --git a/internal/sbi/consumer/consumer.go b/internal/sbi/consumer/consumer.go
+index 04293b2..52113f1 100644
+--- a/internal/sbi/consumer/consumer.go
++++ b/internal/sbi/consumer/consumer.go
+@@ -26,6 +26,7 @@ type Consumer struct {
+ 	*namfService
+ 	*nudrService
+ 	*npcfService
++	*nbsfService
+ }
+ 
+ func NewConsumer(pcf pcf) (*Consumer, error) {
+@@ -54,5 +55,22 @@ func NewConsumer(pcf pcf) (*Consumer, error) {
+ 		nfAMPolicyControlClient: make(map[string]*AMPolicyControl.APIClient),
+ 	}
+ 
++	c.nbsfService = &nbsfService{
++		consumer: c,
++	}
++
+ 	return c, nil
+ }
++
++// BSF Service Methods
++func (c *Consumer) RegisterPCFBinding(smPolicyData *pcf_context.UeSmPolicyData) (string, error) {
++	return c.nbsfService.RegisterPCFBinding(smPolicyData)
++}
++
++func (c *Consumer) UpdatePCFBinding(bindingId string, smPolicyData *pcf_context.UeSmPolicyData) error {
++	return c.nbsfService.UpdatePCFBinding(bindingId, smPolicyData)
++}
++
++func (c *Consumer) DeletePCFBinding(bindingId string) error {
++	return c.nbsfService.DeletePCFBinding(bindingId)
++}
+diff --git a/internal/sbi/processor/smpolicy.go b/internal/sbi/processor/smpolicy.go
+index 8bcb5a9..fd58d8d 100644
+--- a/internal/sbi/processor/smpolicy.go
++++ b/internal/sbi/processor/smpolicy.go
+@@ -10,7 +10,6 @@ import (
+ 	"go.mongodb.org/mongo-driver/bson"
+ 
+ 	"github.com/free5gc/openapi"
+-	"github.com/free5gc/openapi/bsf/Management"
+ 	"github.com/free5gc/openapi/models"
+ 	"github.com/free5gc/openapi/pcf/SMPolicyControl"
+ 	"github.com/free5gc/openapi/udr/DataRepository"
+@@ -464,40 +463,14 @@ func (p *Processor) HandleCreateSmPolicyRequest(
+ 	}
+ 	smPolicyData.SubscriptionID = subscriptionID
+ 
+-	// Create PCF binding data to BSF
+-	policyAuthorizationService := p.Context().NfService[models.ServiceName_NPCF_POLICYAUTHORIZATION]
+-	pcfBinding := models.PcfBinding{
+-		Supi:           request.Supi,
+-		Gpsi:           request.Gpsi,
+-		Ipv4Addr:       request.Ipv4Address,
+-		Ipv6Prefix:     request.Ipv6AddressPrefix,
+-		IpDomain:       request.IpDomain,
+-		Dnn:            request.Dnn,
+-		Snssai:         request.SliceInfo,
+-		PcfFqdn:        policyAuthorizationService.ApiPrefix,
+-		PcfIpEndPoints: policyAuthorizationService.IpEndPoints,
+-	}
+-
+-	// TODO: Record BSF URI instead of discovering from NRF every time
+-	bsfUri := p.Consumer().SendNFInstancesBSF(p.Context().NrfUri)
+-	if bsfUri != "" {
+-		bsfClient := util.GetNbsfClient(bsfUri)
+-
+-		ctx, pd, err = p.Context().GetTokenCtx(models.ServiceName_NBSF_MANAGEMENT, models.NrfNfManagementNfType_BSF)
+-		if err != nil {
+-			c.JSON(int(pd.Status), pd)
+-			return
+-		}
+-		req := Management.CreatePCFBindingRequest{
+-			PcfBinding: &pcfBinding,
+-		}
+-		resp, err := bsfClient.PCFBindingsCollectionApi.CreatePCFBinding(ctx, &req)
+-		if err != nil || resp == nil {
+-			logger.SmPolicyLog.Warnf("Create PCF binding data in BSF error[%+v]", err)
+-			// Uncomment the following to return error response --> PDU SessEstReq will fail
+-			// problemDetail := util.GetProblemDetail("Cannot create PCF binding data in BSF", "")
+-			// return nil, nil, &problemDetail
+-		}
++	// Register PCF binding in BSF using the new consumer service
++	if bindingId, err := p.Consumer().RegisterPCFBinding(smPolicyData); err != nil {
++		logger.SmPolicyLog.Warnf("Failed to register PCF binding in BSF: %v", err)
++		// Continue without failing the session - BSF registration is not critical for basic operation
++	} else if bindingId != "" {
++		// Store binding ID in policy data for future updates/deletion
++		smPolicyData.BsfBindingId = bindingId
++		logger.SmPolicyLog.Infof("Successfully registered PCF binding in BSF with ID: %s", bindingId)
+ 	}
+ 	locationHeader := util.GetResourceUri(models.ServiceName_NPCF_SMPOLICYCONTROL, smPolicyID)
+ 	c.Header("Location", locationHeader)
+@@ -555,6 +528,16 @@ func (p *Processor) HandleDeleteSmPolicyContextRequest(
+ 		logger.SmPolicyLog.Errorf("Remove UDR Influence Data Subscription Error[%v]", err.Error())
+ 	}
+ 
++	// Delete PCF binding from BSF if binding ID exists
++	if smPolicy.BsfBindingId != "" {
++		if err := p.Consumer().DeletePCFBinding(smPolicy.BsfBindingId); err != nil {
++			logger.SmPolicyLog.Warnf("Failed to delete PCF binding from BSF: %v", err)
++			// Continue with deletion even if BSF cleanup fails
++		} else {
++			logger.SmPolicyLog.Infof("Successfully deleted PCF binding from BSF: %s", smPolicy.BsfBindingId)
++		}
++	}
++
+ 	// Unsubscrice UDR
+ 	delete(ue.SmPolicyData, smPolicyId)
+ 	logger.SmPolicyLog.Tracef("SMPolicy smPolicyID[%s] DELETE", smPolicyId)
+@@ -993,6 +976,17 @@ func (p *Processor) HandleUpdateSmPolicyContextRequest(
+ 		c.JSON(int(problemDetail.Status), problemDetail)
+ 		return
+ 	}
++
++	// Update PCF binding in BSF if binding ID exists and context has relevant changes
++	if smPolicy.BsfBindingId != "" {
++		if err := p.Consumer().UpdatePCFBinding(smPolicy.BsfBindingId, smPolicy); err != nil {
++			logger.SmPolicyLog.Warnf("Failed to update PCF binding in BSF: %v", err)
++			// Continue with policy update even if BSF update fails
++		} else {
++			logger.SmPolicyLog.Infof("Successfully updated PCF binding in BSF: %s", smPolicy.BsfBindingId)
++		}
++	}
++
+ 	logger.SmPolicyLog.Tracef("SMPolicy smPolicyID[%s] Update", smPolicyId)
+ 	c.JSON(http.StatusOK, smPolicyDecision)
+ }

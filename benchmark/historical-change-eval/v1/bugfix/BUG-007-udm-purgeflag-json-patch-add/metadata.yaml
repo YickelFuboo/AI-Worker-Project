@@ -1,0 +1,24 @@
+case_id: BUG-007
+title: UDM purgeFlag JSON Patch 操作类型修正
+category: bugfix
+type: bugfix
+difficulty: medium
+repo: repos/udm
+before_commit: 65d7070f4bfd016864cbbaefbd506bbc85d2fa92
+after_commit: 1f192eb472ef15081a2c5eb6545c9afd3f720aff
+source_commit: 1f192eb
+commit_message: 'fix(uecm): use ADD instead of REPLACE for purgeFlag JSON Patch'
+modified_files:
+- internal/sbi/processor/ue_context_management.go
+original_requirement: UDM 更新 UE context purgeFlag 时，目标字段可能不存在。JSON Patch 应使用 ADD 而不是
+  REPLACE，以便字段不存在时也能创建。请修正 3GPP 和 non-3GPP 两条路径。
+before_behavior: 使用 REPLACE 时要求目标路径已存在，purgeFlag 不存在时 patch 可能失败。
+after_behavior: 两条路径都使用 ADD 操作，保持 path 和 value 不变。
+evaluation_focus:
+- JSON Patch 语义
+- 同类位置成对修复
+- 最小改动
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

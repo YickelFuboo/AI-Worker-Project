@@ -1,0 +1,76 @@
+commit 73aada5eb687437b7fb013fe3cf668408d4f1e7f
+Author:     ian60509 <ian.60509@gmail.com>
+AuthorDate: Wed Sep 11 06:37:39 2024 +0000
+Commit:     ian60509 <ian.60509@gmail.com>
+CommitDate: Wed Sep 11 06:37:39 2024 +0000
+
+    feat: construct GroupIdMap API
+
+diff --git a/internal/sbi/api_groupIdMap.go b/internal/sbi/api_groupIdMap.go
+new file mode 100644
+index 0000000..fdd93eb
+--- /dev/null
++++ b/internal/sbi/api_groupIdMap.go
+@@ -0,0 +1,28 @@
++package sbi
++
++import (
++	"net/http"
++	"github.com/gin-gonic/gin"
++)
++
++func (s *Server) getGroupIdMap() []Route {
++	return []Route{
++		{
++			Name: "Index",
++			Method: "GET",
++			Pattern: "/",
++			HandlerFunc: Index,
++		},
++		{
++			Name:        "GetNfGroupIDs",
++			Method:      "GET",
++			Pattern:     "/nf-group-ids",
++			HandlerFunc: s.HTTPGetNfGroupIDs,
++		},
++	}
++}
++
++// GetNfGroupIDs - Retrieves NF-Group IDs for provided Subscriber and NF types
++func (s *Server)HTTPGetNfGroupIDs(c *gin.Context) {
++	c.JSON(http.StatusNotImplemented, gin.H{})
++}
+\ No newline at end of file
+diff --git a/internal/sbi/server.go b/internal/sbi/server.go
+index d277a9a..ed709d5 100644
+--- a/internal/sbi/server.go
++++ b/internal/sbi/server.go
+@@ -100,6 +100,14 @@ func newRouter(s *Server) *gin.Engine {
+ 	})
+ 	dataRepositoryRoutes := s.getDataRepositoryRoutes()
+ 	AddService(dataRepositoryGroup, dataRepositoryRoutes)
++
++	groupIdGroup := router.Group(factory.UdrGroupIdResUriPrefix)
++	groupIdGroup.Use(func(c *gin.Context) {
++		util.NewRouterAuthorizationCheck(models.ServiceName_NUDR_GROUP_ID_MAP).Check(c, s.Context())
++	})
++	groupIdRoutes := s.getGroupIdMap()
++	AddService(groupIdGroup, groupIdRoutes)
++
+ 	return router
+ }
+ 
+diff --git a/pkg/factory/config.go b/pkg/factory/config.go
+index 5abea89..6330624 100644
+--- a/pkg/factory/config.go
++++ b/pkg/factory/config.go
+@@ -22,7 +22,8 @@ const (
+ 	UdrSbiDefaultPort        = 8000
+ 	UdrSbiDefaultScheme      = "https"
+ 	UdrDefaultNrfUri         = "https://127.0.0.10:8000"
+-	UdrDrResUriPrefix        = "/nudr-dr/v1"
++	UdrDrResUriPrefix        = "/nudr-dr/v2"
++	UdrGroupIdResUriPrefix   = "/nudr-group-id-map/v1"
+ )
+ 
+ type DbType string

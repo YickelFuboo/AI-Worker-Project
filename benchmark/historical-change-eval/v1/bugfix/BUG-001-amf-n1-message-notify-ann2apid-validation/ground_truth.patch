@@ -1,0 +1,21 @@
+commit 3fe96a9912920377e616794b0450e4669d99e213
+Author:     wiwi878 <a31625802@gmail.com>
+AuthorDate: Wed May 20 05:25:32 2026 +0000
+Commit:     wiwi878 <a31625802@gmail.com>
+CommitDate: Wed May 20 05:25:32 2026 +0000
+
+    fix: validate missing anN2ApId in N1 message notify
+
+diff --git a/internal/sbi/processor/callback.go b/internal/sbi/processor/callback.go
+index 661f836..ab7737f 100644
+--- a/internal/sbi/processor/callback.go
++++ b/internal/sbi/processor/callback.go
+@@ -283,7 +283,7 @@ func (p *Processor) N1MessageNotifyProcedure(n1MessageNotify models.N1MessageNot
+ 	if registrationCtxtContainer == nil || registrationCtxtContainer.UeContext == nil ||
+ 		registrationCtxtContainer.RanNodeId == nil || registrationCtxtContainer.UserLocation == nil ||
+ 		registrationCtxtContainer.AnType == "" || registrationCtxtContainer.InitialAmfName == "" ||
+-		registrationCtxtContainer.AnN2ApId > 0 {
++		registrationCtxtContainer.AnN2ApId <= 0 {
+ 		problemDetails := &models.ProblemDetails{
+ 			Status: http.StatusBadRequest,
+ 			Cause:  "MANDATORY_IE_MISSING",

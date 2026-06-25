@@ -1,0 +1,40 @@
+commit 2bdbe9b94c1780c245edde1e6ca78cd97cf82def
+Author:     DBGR18 <dbgr1218@gmail.com>
+AuthorDate: Tue May 12 23:10:20 2026 +0800
+Commit:     DBGR18 <dbgr1218@gmail.com>
+CommitDate: Tue May 12 23:10:20 2026 +0800
+
+    fix: validate QoS flow descriptions and set triggers
+
+diff --git a/internal/sbi/consumer/pcf_service.go b/internal/sbi/consumer/pcf_service.go
+index dfbbe1f..d7f1a84 100644
+--- a/internal/sbi/consumer/pcf_service.go
++++ b/internal/sbi/consumer/pcf_service.go
+@@ -141,10 +141,6 @@ func (s *npcfService) SendSMPolicyAssociationUpdateByUERequestModification(
+ 	} else if !hasQoSRules {
+ 		return nil, errors.New("QoS rules missing for UE-initiated request")
+ 	} else {
+-		updateSMPolicy.RepPolicyCtrlReqTriggers = []models.PolicyControlRequestTrigger{
+-			models.PolicyControlRequestTrigger_RES_MO_RE,
+-		}
+-
+ 		// UE SHOULD only create ONE QoS Flow in a request (TS 24.501 6.4.2.2)
+ 		rule := qosRules[0]
+ 		var flowDesc *nasType.QoSFlowDesc
+@@ -170,6 +166,16 @@ func (s *npcfService) SendSMPolicyAssociationUpdateByUERequestModification(
+ 			return nil, errors.New("QoS Rule Operation Unknown")
+ 		}
+ 
++		requiresFlowDesc := rule.Operation == nasType.OperationCodeCreateNewQoSRule ||
++			rule.Operation == nasType.OperationCodeModifyExistingQoSRuleWithoutModifyingPacketFilters
++		if requiresFlowDesc && flowDesc == nil {
++			return nil, errors.New("QoS flow description required for QoS rule operation")
++		}
++
++		updateSMPolicy.RepPolicyCtrlReqTriggers = []models.PolicyControlRequestTrigger{
++			models.PolicyControlRequestTrigger_RES_MO_RE,
++		}
++
+ 		ueInitResReq := &models.UeInitiatedResourceRequest{}
+ 		ueInitResReq.RuleOp = ruleOp
+ 		ueInitResReq.Precedence = int32(rule.Precedence)

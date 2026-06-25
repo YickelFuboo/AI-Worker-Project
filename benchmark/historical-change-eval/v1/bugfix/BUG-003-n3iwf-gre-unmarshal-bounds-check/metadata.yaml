@@ -1,0 +1,25 @@
+case_id: BUG-003
+title: N3IWF GRE Unmarshal 短包边界检查
+category: bugfix
+type: bugfix
+difficulty: medium-high
+repo: repos/n3iwf
+before_commit: 7aaf5e71da15e77c8a002283495a07015d9c513b
+after_commit: 0bb9e1d22d8dd5baa7795dcf3f8fd7815419ea87
+source_commit: 0bb9e1d
+commit_message: 'fix(gre): bounds-check GRE header fields during Unmarshal'
+modified_files:
+- internal/gre/message.go
+- internal/gre/message_test.go
+original_requirement: N3IWF 的 GRE 报文 Unmarshal 在处理短 buffer 或截断的可选 Key 字段时不应发生越界 panic。请在读取
+  GRE 基础头和可选字段前做长度检查，并添加短包、截断 Key 字段和合法报文测试。
+before_behavior: 短包或 Key Flag 存在但 Key 字段不完整时可能切片越界。
+after_behavior: 短包返回明确错误；合法报文仍能正常解析；新增单元测试覆盖异常和正常路径。
+evaluation_focus:
+- 二进制协议解析边界检查
+- 测试覆盖
+- 保持正常报文行为
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

@@ -1,0 +1,38 @@
+case_id: REQ-004
+title: PCF 集成 BSF Binding 生命周期管理
+category: requirement-change
+type: requirement-change
+difficulty: high
+repo: repos/pcf
+before_commit: 6ba2d87c4518a8c4fd3ebc9fc6858040119a350a
+after_commit: 977e17ae83015926dc98c98dda149c962525ec57
+source_commit: 977e17a
+commit_message: "feat(PCF): Integrate BSF client for binding management\n\n• Add BSF\
+  \ service client for PCF binding lifecycle:\n  - Create bsf_service.go with CreatePCFBinding,\
+  \ DeletePCFBinding functions\n  - Integrate BSF client into consumer.go for binding\
+  \ operations\n  - Add BSF service configuration and discovery support\n\n• Enhance\
+  \ UE context management:\n  - Update ue.go with BSF binding ID tracking\n  - Integrate\
+  \ binding creation/deletion in SM policy lifecycle\n  - Add proper cleanup of BSF\
+  \ bindings on session termination\n\n• Update SM policy processor:\n  - Modify smpolicy.go\
+  \ to use BSF for binding management\n  - Add BSF binding creation during policy\
+  \ establishment\n  - Ensure proper binding cleanup on policy deletion\n\nThis integration\
+  \ enables PCF to properly manage bindings with BSF\naccording to 3GPP TS 29.521\
+  \ specifications for enhanced policy control."
+modified_files:
+- internal/context/ue.go
+- internal/sbi/consumer/bsf_service.go
+- internal/sbi/consumer/consumer.go
+- internal/sbi/processor/smpolicy.go
+original_requirement: PCF 需要按照 3GPP TS 29.521 集成 BSF 客户端，在 SM Policy 生命周期中创建和删除 PCF
+  binding。请增加 BSF service consumer，保存 binding ID，并在策略建立/删除流程中完成绑定创建和清理。
+before_behavior: PCF 没有 BSF binding lifecycle 管理能力，UE context 中没有保存 BSF binding ID。
+after_behavior: 新增 BSF consumer；UE context 记录 binding ID；SM policy 建立时创建 binding，策略删除时清理
+  binding。
+evaluation_focus:
+- 跨模块功能集成
+- 策略生命周期
+- BSF client 发现与调用
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

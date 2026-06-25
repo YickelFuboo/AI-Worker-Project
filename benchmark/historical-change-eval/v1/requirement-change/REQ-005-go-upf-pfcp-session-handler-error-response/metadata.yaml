@@ -1,0 +1,25 @@
+case_id: REQ-005
+title: UPF Session Handler 返回 PFCP 错误响应能力
+category: requirement-change
+type: requirement-change
+difficulty: high
+repo: repos/go-upf
+before_commit: b798fe5ee6a984be492fa53958dd5f1305469f85
+after_commit: dcfeacc6cac69a9a79b410251ae86811c8b3ddfa
+source_commit: dcfeacc
+commit_message: feat:error response on upf session handler
+modified_files:
+- internal/pfcp/node.go
+- internal/pfcp/session.go
+original_requirement: UPF 的 PFCP Session Handler 在会话建立、修改或删除处理失败时，应向对端返回符合 PFCP 语义的错误响应，而不是仅记录错误或静默失败。请为
+  session handler 增加错误响应构造和返回路径。
+before_behavior: PFCP session 处理失败时错误反馈不完整，对端可能无法获得明确 cause。
+after_behavior: session handler 在失败路径构造并发送错误响应，node/session 处理逻辑能表达失败 cause。
+evaluation_focus:
+- 协议错误响应能力
+- PFCP session 生命周期
+- 跨 node/session 的行为改造
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

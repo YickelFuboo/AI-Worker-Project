@@ -1,0 +1,25 @@
+case_id: BUG-002
+title: AUSF UE Authentication SUPI/SUCI 格式校验
+category: bugfix
+type: bugfix
+difficulty: medium
+repo: repos/ausf
+before_commit: b2399f4d4fd5abe5e18d6dfab3b2a3259fe40403
+after_commit: 5c2c9e36d2017c71a791c69724cf16b2d4dd39c3
+source_commit: 5c2c9e3
+commit_message: 'fix: validate supi or suci'
+modified_files:
+- internal/sbi/processor/ue_authentication.go
+original_requirement: AUSF 处理 UE Authentication 请求时，应先校验 supiOrSuci 是否为合法 SUPI 或 SUCI。非法标识应返回
+  400 ProblemDetails，并停止后续认证流程。
+before_behavior: 非法 supiOrSuci 会继续进入认证逻辑，可能造成后续错误或异常响应。
+after_behavior: 入口处复用 SUPI/SUCI validator；非法值返回 MALFORMED_SUPI_OR_SUCI 的 400 响应并立即
+  return。
+evaluation_focus:
+- 入口参数校验
+- 复用现有 validator
+- ProblemDetails 风格一致性
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

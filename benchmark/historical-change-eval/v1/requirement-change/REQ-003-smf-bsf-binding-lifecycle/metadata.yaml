@@ -1,0 +1,38 @@
+case_id: REQ-003
+title: SMF 集成 BSF Binding 生命周期管理
+category: requirement-change
+type: requirement-change
+difficulty: high
+repo: repos/smf
+before_commit: f7eab07200b0fca483a80f01130b9cc13548fe9e
+after_commit: f0e953d5236ffa248f7c34ec8d3b5c0302ff5770
+source_commit: f0e953d
+commit_message: "feat(SMF): Integrate BSF client for binding management\n\n• Add BSF\
+  \ service client for SM context binding lifecycle:\n  - Create bsf_service.go with\
+  \ CreatePCFBinding, DeletePCFBinding functions\n  - Integrate BSF client into consumer.go\
+  \ for binding operations\n  - Add BSF service configuration and discovery support\n\
+  \n• Enhance SM context management:\n  - Update sm_context.go with BSF binding ID\
+  \ tracking\n  - Integrate binding creation/deletion in PDU session lifecycle\n \
+  \ - Add proper cleanup of BSF bindings on session termination\n\n• Update PDU session\
+  \ processor:\n  - Modify pdu_session.go to use BSF for binding management\n  - Add\
+  \ BSF binding creation during session establishment\n  - Ensure proper binding cleanup\
+  \ on session release\n\nThis integration enables SMF to properly manage bindings\
+  \ with BSF\naccording to 3GPP TS 29.521 specifications for enhanced session management."
+modified_files:
+- internal/context/sm_context.go
+- internal/sbi/consumer/bsf_service.go
+- internal/sbi/consumer/consumer.go
+- internal/sbi/processor/pdu_session.go
+original_requirement: SMF 需要按照 3GPP TS 29.521 集成 BSF 客户端，在 PDU Session 生命周期中创建和删除
+  PCF binding。请增加 BSF service consumer，保存 binding ID，并在会话建立/释放流程中完成绑定创建和清理。
+before_behavior: SMF 没有 BSF binding lifecycle 管理能力，SM context 中也没有保存 BSF binding ID。
+after_behavior: 新增 BSF consumer；SM context 记录 binding ID；PDU session 建立时创建 binding，释放时删除
+  binding。
+evaluation_focus:
+- 跨模块功能集成
+- 生命周期清理
+- 3GPP BSF/PCF binding 语义
+artifacts:
+  prompt: prompt.md
+  ground_truth_patch: ground_truth.patch
+  scoring: scoring.md

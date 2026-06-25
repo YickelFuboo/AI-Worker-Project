@@ -1,0 +1,33 @@
+commit 4dc9c9042766032b35af90169423c0343b4ef979
+Author:     timyl <geng.z.zhi@outlook.com>
+AuthorDate: Wed Mar 25 05:10:56 2026 +0000
+Commit:     timyl <geng.z.zhi@outlook.com>
+CommitDate: Wed Mar 25 05:10:56 2026 +0000
+
+    feat: include UE location info in SM Policy Association Create request
+    
+    Include UserLocationInfo in the SmPolicyContextData sent to PCF during
+    SM Policy Association Create (N7 interface, Npcf_SMPolicyControl).
+    This allows the PCF to apply location-based policies at session
+    establishment.
+
+diff --git a/internal/sbi/consumer/pcf_service.go b/internal/sbi/consumer/pcf_service.go
+index f22ffa0..a17b50e 100644
+--- a/internal/sbi/consumer/pcf_service.go
++++ b/internal/sbi/consumer/pcf_service.go
+@@ -90,6 +90,15 @@ func (s *npcfService) SendSMPolicyAssociationCreate(smContext *smf_context.SMCon
+ 		Mnc: smContext.ServingNetwork.Mnc,
+ 	}
+ 	smPolicyData.SuppFeat = "F"
++	if smContext.UeLocation != nil {
++		ueLocation := *smContext.UeLocation
++		if ueLocation.NrLocation != nil && ueLocation.NrLocation.AgeOfLocationInformation < 0 {
++			nrLoc := *ueLocation.NrLocation
++			nrLoc.AgeOfLocationInformation = 0
++			ueLocation.NrLocation = &nrLoc
++		}
++		smPolicyData.UserLocationInfo = &ueLocation
++	}
+ 
+ 	ctx, _, err := smf_context.GetSelf().
+ 		GetTokenCtx(models.ServiceName_NPCF_SMPOLICYCONTROL, models.NrfNfManagementNfType_PCF)
