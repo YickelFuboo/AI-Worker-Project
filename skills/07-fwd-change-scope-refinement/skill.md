@@ -2,7 +2,9 @@
 
 ## 功能描述
 
-基于已通过 `06-Q-fwd-architecture-design-check` 的架构分析综合检查结果，以及 `06-fwd-logic-flow-design` 生成的逻辑流设计文件，将模块级设计细化为代码仓、模块、文件、函数和数据结构级的变更范围清单。该步骤生成 `repo_changes/overview.md` 和必要的仓级细化内容，并直接返回结构化 JSON，供后续编码实现、测试设计或工作量评估阶段消费。
+基于 `06-fwd-logic-flow-design` 生成的逻辑流设计文件和其返回的结构化 JSON（已通过 `06-Q-fwd-architecture-design-check` 门禁），将模块级设计细化为代码仓、模块、文件、函数和数据结构级的变更范围清单。该步骤生成 `repo_changes/overview.md` 和必要的仓级细化内容，并直接返回结构化 JSON，供后续编码实现、测试设计或工作量评估阶段消费。
+
+`06-Q-fwd-architecture-design-check` 是架构分析综合质量门禁节点，由 workflow 依据其 `verdict` 决定是否调度本 skill。07 不消费 06-Q 的检查 JSON，也不依据 06-Q 的 `verdict` 自行决定是否执行；07 的输入是 04、05、06 已通过门禁的分析交付件本身。
 
 该 skill 是正向流程中首次允许进入代码文件和函数级范围的阶段。它只定义“需要改哪里、改什么类型、为什么改”，不直接写业务代码，不生成测试用例实现，不提交代码。
 
@@ -12,8 +14,7 @@
 
 ## 适用场景
 
-- `06-fwd-logic-flow-design` 已生成或更新 `repo_changes/{仓名}/implementation_design.md` 并返回结构化 JSON
-- `06-Q-fwd-architecture-design-check` 已直接返回结构化 JSON，且 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS`
+- `06-fwd-logic-flow-design` 已生成或更新 `repo_changes/{仓名}/implementation_design.md` 并返回结构化 JSON，且该交付件已通过 `06-Q-fwd-architecture-design-check` 门禁（由 workflow 判定）
 - 需要把架构与逻辑设计映射为代码仓、模块、文件、函数、数据结构级变更范围
 - 需要为编码实现或测试设计提供可追溯的修改目标清单
 
@@ -23,32 +24,24 @@
 
 1. `06-fwd-logic-flow-design` 返回的 JSON 对象
 2. 06 JSON 中声明的 `repo_changes/**/implementation_design.md` 文件
-3. `06-Q-fwd-architecture-design-check` 返回的 JSON 对象
+3. `04-fwd-arch-impact-analysis` 和 `05-fwd-interface-contract-analysis` 的交付件，用于追溯架构影响和接口契约变化
 4. 相关代码仓的仓级规格、设计文档、模块设计文档和约束文件
 5. 必要的代码阅读结果，用于定位文件、函数和数据结构
 
-### 06-Q JSON 要求
+### 输入门禁前提
 
-07 只能消费 06-Q 的结构化 JSON 返回结果，不读取 06-Q 的检查报告文件，因为 06-Q 不应生成检查文件。
+04、05、06 的分析交付件必须是已通过 `06-Q-fwd-architecture-design-check` 门禁的内容。门禁判定由 workflow 依据 `06-Q` 的 `verdict` 完成：只有 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS` 时，workflow 才调度本 skill。
 
-允许执行 07 的 06-Q 结论：
+07 不读取 `06-Q` 的检查 JSON，也不依据 `06-Q` 的 `verdict` 自行决定是否执行。07 的输入只有 04、05、06 的分析交付件（JSON 和文件）以及代码仓资料。
 
-- `PASS`
-- `PASS_WITH_WARNINGS`
-
-不得执行 07 的 06-Q 结论：
-
-- `REWORK`
-- `INCONCLUSIVE`
-
-当 06-Q 的 `verdict` 为 `REWORK` 或 `INCONCLUSIVE` 时，本 skill 不生成代码变更范围文件，只返回 `status = BLOCKED` 或 `status = INCONCLUSIVE` 的 JSON 结果，并在 `warnings` 或 `pending_questions` 中说明原因。
+如果 06 的逻辑流设计交付件缺失、不可解析或内容不足以支撑代码范围细化，本 skill 返回 `status = INCONCLUSIVE` 或 `status = BLOCKED`，并在 `notes`、`warnings` 或 `pending_questions` 中说明原因。
 
 ## 工作方式
 
 ### 执行步骤
 
 1. **读取 06 JSON 和逻辑设计文件**：理解逻辑流、数据流、状态机、参与模块和追溯关系
-2. **读取 06-Q JSON**：确认架构分析综合检查结论允许继续，并继承非阻断告警和待确认项
+2. **读取 04/05 交付件**：理解架构影响和接口契约变化，继承其非阻断告警和待确认项
 3. **读取仓级约束和设计资料**：加载相关代码仓 `spec.md`、`design.md`、模块设计文档和 `.agent/rules/` 约束
 4. **读取代码定位范围**：使用代码阅读工具定位涉及的文件、函数、数据结构和调用点
 5. **映射变更范围**：将 `LF-XXX`、`DF-XXX`、`SM-XXX` 映射到代码仓、模块、文件、函数和数据结构级变更项
@@ -84,7 +77,7 @@
 ### 注意事项
 
 - 每个代码范围项必须可追溯到 `LF-XXX`、`DF-XXX` 或 `SM-XXX`
-- 如果 06-Q 存在非阻断告警，07 必须在 `warnings` 或 `pending_questions` 中保留相关上下文，不得隐式消除
+- 如果 04、05、06 交付件存在非阻断告警，07 必须在 `warnings` 或 `pending_questions` 中保留相关上下文，不得隐式消除
 - 对 `unknown` 接口影响或设计不确定项，不得强行映射为确定代码改动
 - 读取代码时应遵守仓级 `.agent/rules/` 约束；如约束缺失或冲突，记录为告警或待确认项
 
@@ -108,7 +101,7 @@
 | `requirement_id` | string | 是 | 来自 06 JSON 或输入目录名 |
 | `status` | string | 是 | 只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `summary` | string | 是 | 一句话概括本次变更范围细化结果，不能为空 |
-| `input_architecture_check_verdict` | string | 是 | 只能是 `PASS`、`PASS_WITH_WARNINGS`、`REWORK`、`INCONCLUSIVE` |
+| `input_logic_design_status` | string | 是 | 上游 `06-fwd-logic-flow-design` 报告的状态，只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `output_files` | array | 是 | 本次新生成文件列表；没有新文件时必须是空数组 `[]` |
 | `updated_files` | array | 是 | 本次更新文件列表；没有更新文件时必须是空数组 `[]` |
 | `repo_scopes` | array | 是 | 仓级变更范围清单；没有范围时必须是空数组 `[]` |
@@ -346,7 +339,7 @@
   "requirement_id": "REQ-001-ausf-configurable-nf-instance-id",
   "status": "COMPLETED_WITH_WARNINGS",
   "summary": "已将 AUSF NF Instance ID 配置逻辑细化为 1 个代码仓、3 个文件和 4 个函数级变更范围，并保留配置层级待确认项。",
-  "input_architecture_check_verdict": "PASS_WITH_WARNINGS",
+  "input_logic_design_status": "COMPLETED_WITH_WARNINGS",
   "output_files": [
     {
       "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/repo_changes/overview.md",

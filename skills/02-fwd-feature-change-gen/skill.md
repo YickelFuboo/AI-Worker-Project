@@ -2,7 +2,9 @@
 
 ## 功能描述
 
-基于 `01-fwd-req-analysis` 生成的结构化需求文档，以及 `01-Q-fwd-req-quality-check` 直接返回的结构化 JSON 检查结果，生成业务视角的变更说明文档。该步骤明确受影响的一级特性、子特性和需求场景，描述每个场景的业务变更内容（新增/修改/删除），并生成 `feature_changes/` 目录下的变更文件。
+基于 `01-fwd-req-analysis` 生成、并已通过 `01-Q-fwd-req-quality-check` 门禁的结构化需求文档 `requirement.md`，生成业务视角的变更说明文档。该步骤明确受影响的一级特性、子特性和需求场景，描述每个场景的业务变更内容（新增/修改/删除），并生成 `feature_changes/` 目录下的变更文件。
+
+`01-Q-fwd-req-quality-check` 是需求质量门禁节点，由 workflow 依据其 `verdict` 决定是否调度本 skill。02 不消费 01-Q 的检查 JSON，也不依据 01-Q 的 `verdict` 自行决定是否执行；02 的输入是 01 已通过门禁的需求交付件本身。
 
 该 skill 只做业务特性和场景级变更分析，不进入架构设计、代码模块定位或实现方案设计。完成后必须直接返回结构化 JSON，供上层 workflow 或调度程序解析本次产物路径、变更清单、告警和待确认项。
 
@@ -12,9 +14,8 @@
 
 ## 适用场景
 
-- `01-fwd-req-analysis` 已生成或更新 `requirements/{需求ID}/requirement.md`
-- `01-Q-fwd-req-quality-check` 已直接返回结构化 JSON，且 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS`
-- 需求质量门禁通过后，需要明确业务视角的特性和场景变更范围
+- `01-fwd-req-analysis` 已生成或更新 `requirements/{需求ID}/requirement.md`，且该需求交付件已通过 `01-Q-fwd-req-quality-check` 门禁（由 workflow 判定）
+- 需要明确业务视角的特性和场景变更范围
 - 需要确定新增、修改或删除的业务场景及其交互流程差异
 - 为后续规格说明、架构影响域分析和设计文档提供业务侧输入
 
@@ -23,37 +24,27 @@
 ### 必需输入
 
 1. `requirements/{需求ID}/requirement.md`
-2. `01-Q-fwd-req-quality-check` 返回的 JSON 对象
-3. `features/**/feature.yaml` 和相关子特性资料
+2. `features/**/feature.yaml` 和相关子特性资料
 
-### 质量检查 JSON 要求
+### 输入门禁前提
 
-02 只能消费 01-Q 的结构化 JSON 返回结果，不读取 `requirement_quality.md` 或 `requirement_quality.json`。
+`requirement.md` 必须是已通过 `01-Q-fwd-req-quality-check` 门禁的需求交付件。门禁判定由 workflow 依据 `01-Q` 的 `verdict` 完成：只有 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS` 时，workflow 才调度本 skill。
 
-允许执行 02 的质量结论：
+02 不读取 `01-Q` 的检查 JSON、`requirement_quality.md` 或 `requirement_quality.json`，也不依据 `01-Q` 的 `verdict` 自行决定是否执行。02 的输入只有需求交付件本身和特性资料。
 
-- `PASS`
-- `PASS_WITH_WARNINGS`
-
-不得执行 02 的质量结论：
-
-- `REWORK`
-- `INCONCLUSIVE`
-
-当 01-Q 的 `verdict` 为 `REWORK` 或 `INCONCLUSIVE` 时，本 skill 不生成变更文件，只返回 `status = BLOCKED` 或 `status = INCONCLUSIVE` 的 JSON 结果，并在 `warnings` 或 `pending_questions` 中说明原因。
+如果 `requirement.md` 缺失、不可解析或内容不足以支撑场景级变更分析，本 skill 返回 `status = INCONCLUSIVE` 或 `status = BLOCKED`，并在 `notes`、`warnings` 或 `pending_questions` 中说明原因。
 
 ## 工作方式
 
 ### 执行步骤
 
 1. **读取需求文档**：解析 `requirement.md` 中的需求目标、功能范围、业务规则、场景列表和验收标准
-2. **读取质量检查 JSON**：读取调用方提供的 01-Q JSON，确认 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS`；如带 `warnings`，在本阶段 JSON 返回中保留相关上下文
-3. **读取特性资料**：加载 `features/**/feature.yaml` 和相关子特性资料，定位候选一级特性和子特性
-4. **生成稳定场景 ID**：为需求文档中的场景生成稳定 ID，格式为 `SCENARIO_001`、`SCENARIO_002`，顺序按 `requirement.md` 中出现顺序
-5. **分析特性映射**：逐场景判断其最匹配的一级特性和子特性；无法唯一确定时必须记录为告警或待确认项，不得强行确定
-6. **判定变更类型**：逐场景判断是 `new`、`modify` 还是 `delete`，并记录判定依据
-7. **生成变更文件**：按模板输出到 `requirements/{需求ID}/feature_changes/{子特性目录}/` 下，命名格式 `SR-{序号}-{场景描述}_变更说明.md`
-8. **返回 JSON 结果**：直接返回符合“输出 JSON 契约”的 JSON 对象，列出生成/更新文件、场景级变更、告警和待确认项
+2. **读取特性资料**：加载 `features/**/feature.yaml` 和相关子特性资料，定位候选一级特性和子特性
+3. **生成稳定场景 ID**：为需求文档中的场景生成稳定 ID，格式为 `SCENARIO_001`、`SCENARIO_002`，顺序按 `requirement.md` 中出现顺序
+4. **分析特性映射**：逐场景判断其最匹配的一级特性和子特性；无法唯一确定时必须记录为告警或待确认项，不得强行确定
+5. **判定变更类型**：逐场景判断是 `new`、`modify` 还是 `delete`，并记录判定依据
+6. **生成变更文件**：按模板输出到 `requirements/{需求ID}/feature_changes/{子特性目录}/` 下，命名格式 `SR-{序号}-{场景描述}_变更说明.md`
+7. **返回 JSON 结果**：直接返回符合“输出 JSON 契约”的 JSON 对象，列出生成/更新文件、场景级变更、告警和待确认项
 
 ### 变更类型判定规则
 
@@ -75,7 +66,6 @@
 - 变更说明必须精确引用场景 ID（如 `SCENARIO_001`），确保可追溯
 - 场景间如有业务依赖关系，需在变更说明中明确顺序和依赖原因
 - 参考 `templates/feature_change_template.md` 的格式
-- 可以引用 01-Q 的非阻断 `warnings`，但不得把它们改写成 workflow 调度决策
 - 不生成或更新继承性报告，除非后续有独立 skill 或模板明确定义该产物
 - 不进入架构设计、接口设计、代码实现、测试设计或迁移方案设计
 
@@ -99,7 +89,7 @@
 | `requirement_id` | string | 是 | 来自 `requirement.md` 或输入目录名 |
 | `status` | string | 是 | 只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `summary` | string | 是 | 一句话概括本次业务变更分析结果，不能为空 |
-| `input_quality_verdict` | string | 是 | 只能是 `PASS`、`PASS_WITH_WARNINGS`、`REWORK`、`INCONCLUSIVE` |
+| `input_requirement_status` | string | 是 | 上游 `01-fwd-req-analysis` 报告的状态，只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `output_files` | array | 是 | 本次新生成文件列表；没有新文件时必须是空数组 `[]` |
 | `updated_files` | array | 是 | 本次更新文件列表；没有更新文件时必须是空数组 `[]` |
 | `feature_changes` | array | 是 | 场景级业务变更清单；没有变更时必须是空数组 `[]` |
@@ -111,7 +101,7 @@
 
 - `COMPLETED`：已成功生成或更新业务变更说明文件，且没有显式告警或待确认项
 - `COMPLETED_WITH_WARNINGS`：已成功生成或更新业务变更说明文件，但存在非阻断告警、映射置信度不足或继承自 01-Q 的告警
-- `BLOCKED`：输入质量结论不允许执行、关键特性映射缺失或关键信息不足，无法生成可靠变更文件
+- `BLOCKED`：关键特性映射缺失或关键信息不足，无法生成可靠变更文件
 - `INCONCLUSIVE`：输入缺失、格式异常、特性资料不可解析或无法形成可靠业务变更结论
 
 ### status 与字段一致性
@@ -223,7 +213,7 @@
   "requirement_id": "REQ-001-ausf-configurable-nf-instance-id",
   "status": "COMPLETED_WITH_WARNINGS",
   "summary": "已为 3 个需求场景生成业务变更说明，识别为 AUSF NF 实例标识配置相关变更，并保留 1 项特性映射告警。",
-  "input_quality_verdict": "PASS_WITH_WARNINGS",
+  "input_requirement_status": "COMPLETED_WITH_WARNINGS",
   "output_files": [
     {
       "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/feature_changes/NF实例标识配置/SR-001-配置稳定nfInstanceId_变更说明.md",

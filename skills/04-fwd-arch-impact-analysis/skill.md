@@ -2,7 +2,9 @@
 
 ## 功能描述
 
-基于已通过 `03-Q-fwd-scenario-impact-check` 的场景分析结果，分析业务变更和存量影响在架构层面的影响范围，确定受影响的架构元素、元素职责、依赖关系和候选接口影响，并生成 `architecture_changes/` 目录下的架构元素变更说明文件。
+基于 `02-fwd-feature-change-gen` 生成的业务变更说明和 `03-fwd-inheritance-analysis` 生成的继承性报告（两者均已通过 `03-Q-fwd-scenario-impact-check` 门禁），分析业务变更和存量影响在架构层面的影响范围，确定受影响的架构元素、元素职责、依赖关系和候选接口影响，并生成 `architecture_changes/` 目录下的架构元素变更说明文件。
+
+`03-Q-fwd-scenario-impact-check` 是场景分析质量门禁节点，由 workflow 依据其 `verdict` 决定是否调度本 skill。04 不消费 03-Q 的检查 JSON，也不依据 03-Q 的 `verdict` 自行决定是否执行；04 的输入是 02 和 03 已通过门禁的交付件本身。
 
 该 skill 只做架构元素级影响域分析，不细化接口字段契约，不设计模块内部逻辑流，不定位代码文件或函数。完成后必须直接返回结构化 JSON，供后续接口契约变更分析和调度程序解析。
 
@@ -12,9 +14,8 @@
 
 ## 适用场景
 
-- `02-fwd-feature-change-gen` 已生成业务变更说明并返回结构化 JSON
-- `03-fwd-inheritance-analysis` 已生成继承性报告并返回结构化 JSON
-- `03-Q-fwd-scenario-impact-check` 已直接返回结构化 JSON，且 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS`
+- `02-fwd-feature-change-gen` 已生成业务变更说明并返回结构化 JSON，且该交付件已通过 `03-Q-fwd-scenario-impact-check` 门禁（由 workflow 判定）
+- `03-fwd-inheritance-analysis` 已生成继承性报告并返回结构化 JSON，且该交付件已通过 `03-Q-fwd-scenario-impact-check` 门禁（由 workflow 判定）
 - 需要把场景级业务变更和存量影响映射到架构元素、职责和依赖关系
 - 需要为后续 `05-fwd-interface-contract-analysis` 和 `06-fwd-logic-flow-design` 提供架构侧输入
 
@@ -25,31 +26,22 @@
 1. `requirements/{需求ID}/requirement.md`
 2. `02-fwd-feature-change-gen` 返回的 JSON 对象和其声明的 `feature_changes/**` 文件
 3. `03-fwd-inheritance-analysis` 返回的 JSON 对象和其声明的 `inheritance_report.md`
-4. `03-Q-fwd-scenario-impact-check` 返回的 JSON 对象
-5. `architectures/**` 架构元素资料，例如 `architectures/logic_view/elements_tree.yaml`、元素 `spec.md`、`interfaces.yaml`
-6. 相关子特性的 `arch_ref.yaml` 或等价架构关联资料
+4. `architectures/**` 架构元素资料，例如 `architectures/logic_view/elements_tree.yaml`、元素 `spec.md`、`interfaces.yaml`
+5. 相关子特性的 `arch_ref.yaml` 或等价架构关联资料
 
-### 03-Q JSON 要求
+### 输入门禁前提
 
-04 只能消费 03-Q 的结构化 JSON 返回结果，不读取 03-Q 的检查报告文件，因为 03-Q 不应生成检查文件。
+02 的业务变更说明和 03 的继承性报告必须是已通过 `03-Q-fwd-scenario-impact-check` 门禁的交付件。门禁判定由 workflow 依据 `03-Q` 的 `verdict` 完成：只有 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS` 时，workflow 才调度本 skill。
 
-允许执行 04 的 03-Q 结论：
+04 不读取 `03-Q` 的检查 JSON，也不依据 `03-Q` 的 `verdict` 自行决定是否执行。04 的输入只有 02、03 的交付件（JSON 和文件）和架构资料。
 
-- `PASS`
-- `PASS_WITH_WARNINGS`
-
-不得执行 04 的 03-Q 结论：
-
-- `REWORK`
-- `INCONCLUSIVE`
-
-当 03-Q 的 `verdict` 为 `REWORK` 或 `INCONCLUSIVE` 时，本 skill 不生成架构变更文件，只返回 `status = BLOCKED` 或 `status = INCONCLUSIVE` 的 JSON 结果，并在 `warnings` 或 `pending_questions` 中说明原因。
+如果 02 或 03 的交付件缺失、不可解析或内容不足以支撑架构影响分析，本 skill 返回 `status = INCONCLUSIVE` 或 `status = BLOCKED`，并在 `notes`、`warnings` 或 `pending_questions` 中说明原因。
 
 ## 工作方式
 
 ### 执行步骤
 
-1. **读取上游 JSON**：读取 02、03、03-Q JSON，确认场景变更、继承性影响、风险和质量门禁结论
+1. **读取上游 JSON**：读取 02、03 JSON，确认场景变更、继承性影响和风险
 2. **读取上游产物**：读取 02/03 JSON 声明的业务变更说明和继承性报告，确保架构影响能追溯到业务场景
 3. **读取架构资料**：加载 `architectures/**`、元素规格和相关 `arch_ref.yaml`，识别候选架构元素
 4. **建立场景到架构元素映射**：逐 `SCENARIO_XXX` 判断涉及的架构元素、元素职责和依赖关系变化
@@ -85,7 +77,7 @@
 ### 注意事项
 
 - 架构影响必须可追溯到 `SCENARIO_XXX`、`FC-XXX` 或 `SI-XXX`
-- 可以继承 03-Q 的非阻断告警，但不得把它们改写成 workflow 调度决策
+- 可以继承 02、03 交付件中的非阻断告警上下文，但不得把它们改写成 workflow 调度决策
 - 不进入接口契约详细设计、逻辑流设计、代码实现或测试设计
 - 若发现接口契约需要细化，只记录为 `candidate_interface_impacts`，交给 05 处理
 
@@ -109,7 +101,8 @@
 | `requirement_id` | string | 是 | 来自 `requirement.md` 或输入目录名 |
 | `status` | string | 是 | 只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `summary` | string | 是 | 一句话概括本次架构影响域分析结果，不能为空 |
-| `input_scenario_check_verdict` | string | 是 | 只能是 `PASS`、`PASS_WITH_WARNINGS`、`REWORK`、`INCONCLUSIVE` |
+| `input_feature_change_status` | string | 是 | 上游 `02-fwd-feature-change-gen` 报告的状态，只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
+| `input_inheritance_status` | string | 是 | 上游 `03-fwd-inheritance-analysis` 报告的状态，只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `output_files` | array | 是 | 本次新生成文件列表；没有新文件时必须是空数组 `[]` |
 | `updated_files` | array | 是 | 本次更新文件列表；没有更新文件时必须是空数组 `[]` |
 | `architecture_impacts` | array | 是 | 架构元素级影响清单；没有影响时必须是空数组 `[]` |
@@ -255,7 +248,8 @@
   "requirement_id": "REQ-001-ausf-configurable-nf-instance-id",
   "status": "COMPLETED_WITH_WARNINGS",
   "summary": "已识别 1 个受影响架构元素和 1 项候选接口影响，外部观察入口仍待 05 阶段确认。",
-  "input_scenario_check_verdict": "PASS_WITH_WARNINGS",
+  "input_feature_change_status": "COMPLETED_WITH_WARNINGS",
+  "input_inheritance_status": "COMPLETED_WITH_WARNINGS",
   "output_files": [
     {
       "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/architecture_changes/AUSF/AR-001-AUSF_变更说明.md",

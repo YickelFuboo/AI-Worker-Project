@@ -23,10 +23,12 @@
 
 ### 必需输入
 
-1. `03-Q-fwd-scenario-impact-check` 返回的 JSON 对象
+1. `02-fwd-feature-change-gen` 和 `03-fwd-inheritance-analysis` 的已通过门禁交付件（`feature_changes/**`、`inheritance_report.md` 及其 JSON），用于建立场景和兼容性风险基线
 2. `04-fwd-arch-impact-analysis` 返回的 JSON 对象和其声明的 `architecture_changes/**` 文件
 3. `05-fwd-interface-contract-analysis` 返回的 JSON 对象和其声明的更新文件或接口契约文件
 4. `06-fwd-logic-flow-design` 返回的 JSON 对象和其声明的 `repo_changes/**/implementation_design.md` 文件
+
+本 skill 不消费 `03-Q` 的检查 JSON。场景和兼容性风险基线来自 02、03 的 WORK 交付件本身，而不是上一个门禁节点的 `verdict`。
 
 ### 输入状态要求
 
@@ -43,7 +45,7 @@
 
 ### 执行步骤
 
-1. **读取 03-Q JSON**：理解场景分析段质量结论、非阻断告警和待确认项
+1. **读取场景基线**：读取 02、03 的已通过门禁交付件，建立 `SCENARIO_XXX` 和兼容性风险基线，用于判断 04/05/06 的覆盖完整性
 2. **检查 04 JSON 和文件**：确认每个需要架构处理的场景或兼容性风险都有架构影响结论和产物路径
 3. **检查 05 JSON 和文件**：确认 04 的每个候选接口影响都有接口契约结论，或有可追溯的不适用/未知说明
 4. **检查 06 JSON 和文件**：确认每个关键架构影响和接口契约变化都有逻辑流、数据流或状态机覆盖
@@ -61,7 +63,7 @@
 
 ### 阻断与告警判断
 
-- 03-Q 通过的场景或兼容性风险没有对应架构影响，必须判为 `REWORK`
+- 02/03 基线中的场景或兼容性风险没有对应架构影响，必须判为 `REWORK`
 - 04 的 `candidate_interface_impacts` 没有被 05 覆盖，必须判为 `REWORK`
 - 05 的 `impact_type = new|modify|delete` 没有被 06 的逻辑流覆盖，必须判为 `REWORK`
 - 04、05、06 的文件路径与 JSON `output_files` / `updated_files` 不一致，必须判为 `REWORK` 或 `INCONCLUSIVE`
