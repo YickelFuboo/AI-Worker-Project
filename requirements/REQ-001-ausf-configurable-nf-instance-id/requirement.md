@@ -17,7 +17,7 @@ status: draft
 | What（做什么） | 支持在配置文件中可选声明 `nfInstanceId`；当声明值是合法 UUID v4 时，AUSF 使用该值作为自身 NF Instance ID；当未声明时，保持原有每次启动自动生成 UUID 的行为。 | 已确认 |
 | Why（为什么） | 当前 AUSF 每次启动都会生成新的 NF Instance ID，导致 Kubernetes 部署、外部检查和运维追踪难以稳定识别同一个 AUSF 实例。 | 已确认 |
 | How（如何表现） | 运维人员可以通过配置文件为 AUSF 指定稳定的 `nfInstanceId`；AUSF 启动后对外表现为使用该配置值标识自身。未配置时，启动行为与原先一致。 | 已确认 |
-| How much（多少） | 配置值必须是合法 UUID v4；该配置项为可选项；未配置场景必须保持向后兼容。非法配置值的处理方式待确认。 | 待确认 |
+| How much（多少） | 配置值必须是合法 UUID v4；该配置项为可选项；未配置场景必须保持向后兼容；配置非法格式或非 UUID v4 时，AUSF 应启动失败并提示配置错误。 | 已确认 |
 
 ## 2. 需求背景
 
@@ -31,7 +31,7 @@ status: draft
 - 量化指标（如性能、覆盖率、可用性、容量、时延、成功率）：
   - 配置合法 UUID v4 时，AUSF 启动后使用该配置值作为 NF Instance ID。
   - 未配置 `nfInstanceId` 时，AUSF 仍自动生成 UUID，不要求部署方修改现有配置。
-  - 非法 `nfInstanceId` 的期望行为待确认。
+  - 配置非法格式或非 UUID v4 的 `nfInstanceId` 时，AUSF 启动失败并提示配置错误。
 
 ## 4. 功能范围
 
@@ -48,7 +48,7 @@ status: draft
 - 不要求修改除 AUSF 以外的其它 NF 的 `nfInstanceId` 配置能力。
 - 不要求改变 AUSF 的鉴权业务流程、Nausf 服务能力或与 AMF/UDM 的业务交互语义。
 - 不要求在本阶段判断现有代码、配置文件、特性树或具体实现模块的变更落点。
-- 不要求定义非法 UUID v4 配置值的最终处理策略，该项仍待确认。
+- 不要求定义配置错误提示的具体文案、错误码或实现方式，这些内容由后续阶段确定。
 
 ## 5. 用户/业务场景
 
@@ -86,10 +86,10 @@ status: draft
 - **业务过程**：
   1. 运维人员在 AUSF 配置文件中填写非法格式或非 UUID v4 的 `nfInstanceId`。
   2. AUSF 启动时读取该配置项。
-  3. AUSF 对非法值的处理策略需要被明确。
-- **业务结果**：待确认。可能的业务期望包括启动失败并提示配置错误，或忽略非法配置并回退到自动生成 UUID。
+  3. AUSF 启动失败并提示 `nfInstanceId` 配置错误。
+- **业务结果**：AUSF 启动失败，并向运维人员提示 `nfInstanceId` 配置错误，避免系统使用不符合 UUID v4 要求的 NF Instance ID。
 - **验收标准（Given-When-Then）**：
-  - Given AUSF 配置文件中声明了非法 `nfInstanceId`，When AUSF 启动并读取配置，Then AUSF 应如何处理该配置值仍待确认。
+  - Given AUSF 配置文件中声明了非法格式或非 UUID v4 的 `nfInstanceId`，When AUSF 启动并读取配置，Then AUSF 启动失败并提示 `nfInstanceId` 配置错误。
 
 ## 6. 业务规则
 
@@ -99,7 +99,7 @@ status: draft
 | BR-002 | 当 `nfInstanceId` 已配置且为合法 UUID v4 时，AUSF 必须使用该配置值作为自身 NF Instance ID。 | 必须 |
 | BR-003 | 当 `nfInstanceId` 未配置时，AUSF 必须保持原有每次启动自动生成 UUID 的行为。 | 必须 |
 | BR-004 | `nfInstanceId` 的合法配置值必须满足 UUID v4 格式。 | 必须 |
-| BR-005 | 非法 `nfInstanceId` 的处理策略尚未确认，不应在后续阶段隐式假设。 | 必须 |
+| BR-005 | 当 `nfInstanceId` 已配置但格式非法或不是 UUID v4 时，AUSF 必须启动失败并提示配置错误。 | 必须 |
 
 ## 7. 非功能要求
 
@@ -117,7 +117,6 @@ status: draft
 
 ## 9. 待确认项
 
-- [ ] 当配置了非法格式或非 UUID v4 的 `nfInstanceId` 时，AUSF 应启动失败并提示配置错误，还是忽略该值并保持自动生成 UUID？
 - [ ] `nfInstanceId` 的配置项名称是否必须精确为 `nfInstanceId`，以及它在配置文件中的层级位置是否已有约束？
 - [ ] 外部检查或运维追踪读取 AUSF NF Instance ID 的观察入口是什么，例如日志、NRF 注册信息、健康检查输出或其它接口？
 - [ ] 对 AUSF 启动性能是否有明确阈值要求？
