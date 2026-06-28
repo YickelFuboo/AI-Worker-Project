@@ -26,7 +26,7 @@ created: 2026-06-26
 
 ## 2. 场景来源
 
-- 需求文档：`requirements/REQ-001-ausf-configurable-nf-instance-id/requirement.md`
+- 需求文档：`requirements/REQ-001-ausf-configurable-nf-instance-id/需求分析.md`
 - 来源场景：SCENARIO_001 运维人员为 AUSF 配置稳定 nfInstanceId 后启动
 - 来源验收标准：
   - Given AUSF 配置文件中声明了合法 UUID v4 的 `nfInstanceId`，When AUSF 启动并完成自身上下文初始化，Then AUSF 的 NF Instance ID 等于配置文件中的 `nfInstanceId`。

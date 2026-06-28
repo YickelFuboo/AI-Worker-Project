@@ -26,7 +26,7 @@ created: 2026-06-26
 
 ## 2. 场景来源
 
-- 需求文档：`requirements/REQ-001-ausf-configurable-nf-instance-id/requirement.md`
+- 需求文档：`requirements/REQ-001-ausf-configurable-nf-instance-id/需求分析.md`
 - 来源场景：SCENARIO_002 未配置 nfInstanceId 时 AUSF 保持自动生成行为
 - 来源验收标准：
   - Given AUSF 配置文件中未声明 `nfInstanceId`，When AUSF 启动并完成自身上下文初始化，Then AUSF 自动生成 NF Instance ID。

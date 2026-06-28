@@ -20,7 +20,7 @@
 ### 执行步骤
 
 1. **汇总各视角产物**：
-   - 业务：`requirements/{需求ID}/requirement.md`、`feature_changes/`
+   - 业务：`requirements/{需求ID}/需求分析.md`、`feature_changes/`
    - 架构：`architecture_changes/`
    - 实现：`repo_changes/overview.md` 及各仓 `implementation_design.md`
    - 验收：`test_changes/`、测试执行报告、质量度量报告

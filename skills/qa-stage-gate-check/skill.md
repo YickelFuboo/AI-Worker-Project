@@ -18,7 +18,7 @@
 
 ### 执行步骤
 
-1. **读取阶段产物**：加载当前阶段产出的所有文件（如 `requirement.md`、`architecture_changes/` 等）
+1. **读取阶段产物**：加载当前阶段产出的所有文件（如 `需求分析.md`、`architecture_changes/` 等）
 2. **读取门禁规则**：加载 `knowledge/质量门禁/` 下对应阶段的 YAML 门禁规则：
    - 需求阶段门禁.yaml
    - 架构阶段门禁.yaml

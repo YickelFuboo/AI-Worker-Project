@@ -4,7 +4,7 @@
 
 将用户的自然语言业务诉求转化为结构化需求文档。该步骤只负责把需求本身说清楚：补齐 5W2H 要素，明确需求背景、目标、范围、业务场景、业务规则、验收标准和待确认问题，为后续质量门禁、特性变更分析、规格说明和设计文档提供输入。
 
-该 skill 必须生成或更新 `requirements/{需求ID}/requirement.md`，并在完成后直接返回结构化 JSON，供上层 workflow 或调度程序解析本次产物路径、摘要和待确认项。
+该 skill 必须生成或更新 `requirements/{需求ID}/需求分析.md`，并在完成后直接返回结构化 JSON，供上层 workflow 或调度程序解析本次产物路径、摘要和待确认项。
 
 ## 所属 Agent
 
@@ -25,9 +25,9 @@
 2. **补齐 5W2H**：确认 Who（谁）、When（何时）、Where（何处）、What（做什么）、Why（为什么）、How（业务上如何表现）、How much（多少/量化约束）是否完整
 3. **理解诉求**：与用户确认需求背景、目标用户、业务价值、触发条件、期望结果和验收口径
 4. **业务场景拆解**：识别具体用户/业务场景，每个场景说明触发条件、参与角色、业务过程、业务结果和 Given-When-Then 验收标准；不得机械套用“正常流程/异常流程/边界条件”作为固定场景集合
-5. **需求结构化**：按模板输出需求分析文档到 `requirements/{需求ID}/requirement.md`，包含 5W2H、功能范围、业务场景、业务规则、非功能要求、验收标准和待确认项
+5. **需求结构化**：按模板输出需求分析文档到 `requirements/{需求ID}/需求分析.md`，包含 5W2H、功能范围、业务场景、业务规则、非功能要求、验收标准和待确认项
 6. **边界确认**：明确在范围内、范围外和待确认的事项，避免后续范围蔓延
-7. **返回 JSON 结果**：生成或更新 `requirement.md` 后，直接返回符合“输出 JSON 契约”的 JSON 对象，供 workflow 获取产物路径和摘要
+7. **返回 JSON 结果**：生成或更新 `需求分析.md` 后，直接返回符合“输出 JSON 契约”的 JSON 对象，供 workflow 获取产物路径和摘要
 
 ### 注意事项
 
@@ -41,11 +41,11 @@
 
 ### 文件输出要求
 
-- 文档路径：`requirements/{需求ID}/requirement.md`
+- 文档路径：`requirements/{需求ID}/需求分析.md`
 - 严格按模板格式输出：`templates/requirement_template.md`
 - 包含完整的 5W2H、功能概述、业务场景、用例列表、业务规则、非功能要求、验收标准和待确认项
 - 如有不明确项，在文档中标注“待确认”
-- 输出 `requirements/{需求ID}/requirement.md` 后，下一步应由 workflow 调用 `01-Q-fwd-req-quality-check`；本 skill 只在 JSON 中报告产物，不决定 workflow 下一步动作
+- 输出 `requirements/{需求ID}/需求分析.md` 后，下一步应由 workflow 调用 `01-Q-fwd-req-quality-check`；本 skill 只在 JSON 中报告产物，不决定 workflow 下一步动作
 
 ## 输出 JSON 契约
 
@@ -67,8 +67,8 @@
 
 ### status 枚举语义
 
-- `COMPLETED`：已生成或更新可供质量检查的 `requirement.md`，且没有显式待确认项
-- `COMPLETED_WITH_PENDING_QUESTIONS`：已生成或更新可供质量检查的 `requirement.md`，但存在非阻断待确认项
+- `COMPLETED`：已生成或更新可供质量检查的 `需求分析.md`，且没有显式待确认项
+- `COMPLETED_WITH_PENDING_QUESTIONS`：已生成或更新可供质量检查的 `需求分析.md`，但存在非阻断待确认项
 - `BLOCKED`：缺少关键输入，无法生成可用的结构化需求文档
 - `INCONCLUSIVE`：输入缺失、格式异常或需求意图无法判断，未能形成可靠分析结果
 
@@ -85,7 +85,7 @@
 
 ```json
 {
-  "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/requirement.md",
+  "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/需求分析.md",
   "type": "requirement",
   "operation": "created"
 }
@@ -95,7 +95,7 @@
 - `path` 必须是仓库相对路径
 - `type` 只能是 `requirement`、`supporting_material`
 - `operation` 在 `output_files` 中只能是 `created`，在 `updated_files` 中只能是 `updated`
-- `requirement.md` 必须出现在 `output_files` 或 `updated_files` 中，除非 `status` 是 `BLOCKED` 或 `INCONCLUSIVE`
+- `需求分析.md` 必须出现在 `output_files` 或 `updated_files` 中，除非 `status` 是 `BLOCKED` 或 `INCONCLUSIVE`
 
 ### pending_questions 对象
 
@@ -141,7 +141,7 @@
   "summary": "已将 AUSF 支持配置 nfInstanceId 的原始诉求结构化为需求文档，覆盖合法配置、未配置和非法配置三类核心场景。",
   "output_files": [
     {
-      "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/requirement.md",
+      "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/需求分析.md",
       "type": "requirement",
       "operation": "created"
     }

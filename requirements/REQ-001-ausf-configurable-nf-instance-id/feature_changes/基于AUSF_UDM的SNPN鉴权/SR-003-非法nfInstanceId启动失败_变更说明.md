@@ -26,7 +26,7 @@ created: 2026-06-26
 
 ## 2. 场景来源
 
-- 需求文档：`requirements/REQ-001-ausf-configurable-nf-instance-id/requirement.md`
+- 需求文档：`requirements/REQ-001-ausf-configurable-nf-instance-id/需求分析.md`
 - 来源场景：SCENARIO_003 配置的 nfInstanceId 不是合法 UUID v4
 - 来源验收标准：
   - Given AUSF 配置文件中声明了非法格式或非 UUID v4 的 `nfInstanceId`，When AUSF 启动并读取配置，Then AUSF 启动失败并提示 `nfInstanceId` 配置错误。

@@ -23,7 +23,7 @@
 
 ### 必需输入
 
-1. `02-fwd-feature-change-gen` 和 `03-fwd-inheritance-analysis` 的已通过门禁交付件（`feature_changes/**`、`inheritance_report.md` 及其 JSON），用于建立场景和兼容性风险基线
+1. `02-fwd-feature-change-gen` 和 `03-fwd-inheritance-analysis` 的已通过门禁交付件（`feature_changes/**`、`feature_changes/继承性分析报告.md` 及其 JSON），用于建立场景和兼容性风险基线
 2. `04-fwd-arch-impact-analysis` 返回的 JSON 对象和其声明的 `architecture_changes/**` 文件
 3. `05-fwd-interface-contract-analysis` 返回的 JSON 对象和其声明的更新文件或接口契约文件
 4. `06-fwd-logic-flow-design` 返回的 JSON 对象和其声明的 `repo_changes/**/implementation_design.md` 文件

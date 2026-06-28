@@ -2,7 +2,7 @@
 
 ## 功能描述
 
-基于 `02-fwd-feature-change-gen` 生成的场景级业务变更说明，以及 02 直接返回的结构化 JSON，分析新需求对存量业务场景、业务规则和兼容性约束的影响。该步骤聚焦“新变更是否会影响已有业务场景”，生成 `inheritance_report.md`，并直接返回结构化 JSON，供后续 `03-Q-fwd-scenario-impact-check` 和架构影响域分析阶段消费。
+基于 `02-fwd-feature-change-gen` 生成的场景级业务变更说明，以及 02 直接返回的结构化 JSON，分析新需求对存量业务场景、业务规则和兼容性约束的影响。该步骤聚焦“新变更是否会影响已有业务场景”，生成 `feature_changes/继承性分析报告.md`，并直接返回结构化 JSON，供后续 `03-Q-fwd-scenario-impact-check` 和架构影响域分析阶段消费。
 
 该 skill 只做业务场景继承性、存量影响和回归范围分析，不进入架构元素、接口契约、代码模块、函数或测试文件设计。
 
@@ -22,7 +22,7 @@
 
 ### 必需输入
 
-1. `requirements/{需求ID}/requirement.md`
+1. `requirements/{需求ID}/需求分析.md`
 2. `02-fwd-feature-change-gen` 返回的 JSON 对象
 3. 02 JSON 中列出的 `feature_changes/**` 文件
 4. `features/**/feature.yaml` 和相关子特性场景、规则资料
@@ -53,7 +53,7 @@
 4. **读取存量特性资料**：读取相关 `features/**/feature.yaml`、子特性场景和规则资料，定位可能受影响的存量业务场景
 5. **分析继承性影响**：逐 `SCENARIO_XXX` 判断是否影响存量场景、存量规则、存量验收口径或兼容性约束
 6. **识别风险与回归范围**：按 `high`、`medium`、`low` 标记兼容性风险，并列出建议回归验证的存量场景或业务能力
-7. **生成继承性报告**：按模板输出 `requirements/{需求ID}/inheritance_report.md`
+7. **生成继承性报告**：按模板输出 `requirements/{需求ID}/feature_changes/继承性分析报告.md`
 8. **返回 JSON 结果**：直接返回符合“输出 JSON 契约”的 JSON 对象，列出生成/更新文件、场景影响清单、风险、告警和待确认项
 
 ### 继承性影响判定规则
@@ -80,7 +80,7 @@
 
 ### 文件输出要求
 
-- 输出路径：`requirements/{需求ID}/inheritance_report.md`
+- 输出路径：`requirements/{需求ID}/feature_changes/继承性分析报告.md`
 - 严格按模板格式输出：`templates/inheritance_report_template.md`
 - 报告必须覆盖 02 JSON 中每个 `feature_changes[].scenario_id`
 - 报告必须包含风险矩阵、受影响存量场景、兼容性结论和建议回归范围
@@ -95,7 +95,7 @@
 | 字段 | 类型 | 必填 | 约束 |
 |------|------|------|------|
 | `schema_version` | string | 是 | 固定为 `"1.0"` |
-| `requirement_id` | string | 是 | 来自 `requirement.md` 或输入目录名 |
+| `requirement_id` | string | 是 | 来自 `需求分析.md` 或输入目录名 |
 | `status` | string | 是 | 只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `summary` | string | 是 | 一句话概括本次继承性分析结果，不能为空 |
 | `input_feature_change_status` | string | 是 | 只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
@@ -121,7 +121,7 @@
 
 ```json
 {
-  "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/inheritance_report.md",
+  "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/feature_changes/继承性分析报告.md",
   "type": "inheritance_report",
   "operation": "created"
 }
@@ -262,7 +262,7 @@
   "input_feature_change_status": "COMPLETED_WITH_WARNINGS",
   "output_files": [
     {
-      "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/inheritance_report.md",
+      "path": "requirements/REQ-001-ausf-configurable-nf-instance-id/feature_changes/继承性分析报告.md",
       "type": "inheritance_report",
       "operation": "created"
     }

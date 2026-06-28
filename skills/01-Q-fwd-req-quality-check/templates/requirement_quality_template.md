@@ -1,7 +1,7 @@
 ---
 quality_check_id: RQ-{IR-XXX}-{YYYY-MM-DD}-{序号}
 requirement_id: {IR-XXX}
-source_requirement: requirements/{需求ID}/requirement.md
+source_requirement: requirements/{需求ID}/需求分析.md
 verdict: PASS | REWORK | PASS_WITH_WARNINGS
 readiness_for_02: yes | no | conditional
 created: {YYYY-MM-DD}
@@ -15,7 +15,7 @@ created: {YYYY-MM-DD}
 |------|------|
 | 质量检查ID | RQ-{IR-XXX}-{YYYY-MM-DD}-{序号} |
 | 需求ID | {IR-XXX} |
-| 源需求文档 | `requirements/{需求ID}/requirement.md` |
+| 源需求文档 | `requirements/{需求ID}/需求分析.md` |
 | 检查结论 | PASS / REWORK / PASS_WITH_WARNINGS |
 | 是否可进入 02-fwd-feature-change-gen | 是 / 否 / 有条件 |
 | 主要原因 | {一句话说明放行、返工或告警放行原因} |
@@ -103,4 +103,4 @@ created: {YYYY-MM-DD}
 
 - PASS：进入 `02-fwd-feature-change-gen`。
 - PASS_WITH_WARNINGS：在记录告警和处理建议后进入 `02-fwd-feature-change-gen`，并在后续阶段跟踪告警项。
-- REWORK：回到 `01-fwd-req-analysis` 重新澄清或补充 `requirement.md`，然后再次执行本质量检查。
+- REWORK：回到 `01-fwd-req-analysis` 重新澄清或补充 `需求分析.md`，然后再次执行本质量检查。

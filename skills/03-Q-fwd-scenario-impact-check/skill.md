@@ -22,11 +22,11 @@
 
 ### 必需输入
 
-1. `requirements/{需求ID}/requirement.md`
+1. `requirements/{需求ID}/需求分析.md`
 2. `02-fwd-feature-change-gen` 返回的 JSON 对象
 3. 02 JSON 中声明的 `feature_changes/**` 文件
 4. `03-fwd-inheritance-analysis` 返回的 JSON 对象
-5. 03 JSON 中声明的 `inheritance_report.md`
+5. 03 JSON 中声明的 `feature_changes/继承性分析报告.md`
 
 ### 输入状态要求
 
@@ -50,11 +50,11 @@
 
 ### 执行步骤
 
-1. **读取需求文档**：读取 `requirements/{需求ID}/requirement.md`，识别需求场景和验收标准
+1. **读取需求文档**：读取 `requirements/{需求ID}/需求分析.md`，识别需求场景和验收标准
 2. **检查 02 JSON**：确认业务变更清单、场景 ID、特性映射、变更类型、置信度和产物路径一致
 3. **检查 02 文件**：读取 02 JSON 声明的 `feature_changes/**` 文件，确认每个变更文件只描述一个需求场景，且与 JSON 对齐
 4. **检查 03 JSON**：确认 `scenario_impacts` 覆盖 02 中每个 `feature_changes[].scenario_id`，风险、回归范围和待确认项可追溯
-5. **检查 03 文件**：读取 03 JSON 声明的 `inheritance_report.md`，确认报告内容与 JSON 对齐
+5. **检查 03 文件**：读取 03 JSON 声明的 `feature_changes/继承性分析报告.md`，确认报告内容与 JSON 对齐
 6. **检查场景覆盖**：判断需求文档中的每个业务场景是否在 02 和 03 中都有稳定追踪
 7. **检查边界越界**：判断 02/03 是否输出架构元素、接口字段、代码模块、函数名、测试文件或实现方案；如存在，作为阻断问题
 8. **返回 JSON 结果**：直接返回符合“输出 JSON 契约”的 JSON 对象，不写入任何检查结果文件

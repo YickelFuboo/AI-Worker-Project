@@ -2,7 +2,7 @@
 
 ## 功能描述
 
-基于 `01-fwd-req-analysis` 生成、并已通过 `01-Q-fwd-req-quality-check` 门禁的结构化需求文档 `requirement.md`，生成业务视角的变更说明文档。该步骤明确受影响的一级特性、子特性和需求场景，描述每个场景的业务变更内容（新增/修改/删除），并生成 `feature_changes/` 目录下的变更文件。
+基于 `01-fwd-req-analysis` 生成、并已通过 `01-Q-fwd-req-quality-check` 门禁的结构化需求文档 `需求分析.md`，生成业务视角的变更说明文档。该步骤明确受影响的一级特性、子特性和需求场景，描述每个场景的业务变更内容（新增/修改/删除），并生成 `feature_changes/` 目录下的变更文件。
 
 `01-Q-fwd-req-quality-check` 是需求质量门禁节点，由 workflow 依据其 `verdict` 决定是否调度本 skill。02 不消费 01-Q 的检查 JSON，也不依据 01-Q 的 `verdict` 自行决定是否执行；02 的输入是 01 已通过门禁的需求交付件本身。
 
@@ -14,7 +14,7 @@
 
 ## 适用场景
 
-- `01-fwd-req-analysis` 已生成或更新 `requirements/{需求ID}/requirement.md`，且该需求交付件已通过 `01-Q-fwd-req-quality-check` 门禁（由 workflow 判定）
+- `01-fwd-req-analysis` 已生成或更新 `requirements/{需求ID}/需求分析.md`，且该需求交付件已通过 `01-Q-fwd-req-quality-check` 门禁（由 workflow 判定）
 - 需要明确业务视角的特性和场景变更范围
 - 需要确定新增、修改或删除的业务场景及其交互流程差异
 - 为后续规格说明、架构影响域分析和设计文档提供业务侧输入
@@ -23,24 +23,24 @@
 
 ### 必需输入
 
-1. `requirements/{需求ID}/requirement.md`
+1. `requirements/{需求ID}/需求分析.md`
 2. `features/**/feature.yaml` 和相关子特性资料
 
 ### 输入门禁前提
 
-`requirement.md` 必须是已通过 `01-Q-fwd-req-quality-check` 门禁的需求交付件。门禁判定由 workflow 依据 `01-Q` 的 `verdict` 完成：只有 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS` 时，workflow 才调度本 skill。
+`需求分析.md` 必须是已通过 `01-Q-fwd-req-quality-check` 门禁的需求交付件。门禁判定由 workflow 依据 `01-Q` 的 `verdict` 完成：只有 `verdict` 为 `PASS` 或 `PASS_WITH_WARNINGS` 时，workflow 才调度本 skill。
 
-02 不读取 `01-Q` 的检查 JSON、`requirement_quality.md` 或 `requirement_quality.json`，也不依据 `01-Q` 的 `verdict` 自行决定是否执行。02 的输入只有需求交付件本身和特性资料。
+02 不读取 `01-Q` 的检查 JSON、`需求质量检查.md` 或 `需求质量检查.json`，也不依据 `01-Q` 的 `verdict` 自行决定是否执行。02 的输入只有需求交付件本身和特性资料。
 
-如果 `requirement.md` 缺失、不可解析或内容不足以支撑场景级变更分析，本 skill 返回 `status = INCONCLUSIVE` 或 `status = BLOCKED`，并在 `notes`、`warnings` 或 `pending_questions` 中说明原因。
+如果 `需求分析.md` 缺失、不可解析或内容不足以支撑场景级变更分析，本 skill 返回 `status = INCONCLUSIVE` 或 `status = BLOCKED`，并在 `notes`、`warnings` 或 `pending_questions` 中说明原因。
 
 ## 工作方式
 
 ### 执行步骤
 
-1. **读取需求文档**：解析 `requirement.md` 中的需求目标、功能范围、业务规则、场景列表和验收标准
+1. **读取需求文档**：解析 `需求分析.md` 中的需求目标、功能范围、业务规则、场景列表和验收标准
 2. **读取特性资料**：加载 `features/**/feature.yaml` 和相关子特性资料，定位候选一级特性和子特性
-3. **生成稳定场景 ID**：为需求文档中的场景生成稳定 ID，格式为 `SCENARIO_001`、`SCENARIO_002`，顺序按 `requirement.md` 中出现顺序
+3. **生成稳定场景 ID**：为需求文档中的场景生成稳定 ID，格式为 `SCENARIO_001`、`SCENARIO_002`，顺序按 `需求分析.md` 中出现顺序
 4. **分析特性映射**：逐场景判断其最匹配的一级特性和子特性；无法唯一确定时必须记录为告警或待确认项，不得强行确定
 5. **判定变更类型**：逐场景判断是 `new`、`modify` 还是 `delete`，并记录判定依据
 6. **生成变更文件**：按模板输出到 `requirements/{需求ID}/feature_changes/{子特性目录}/` 下，命名格式 `SR-{序号}-{场景描述}_变更说明.md`
@@ -72,6 +72,7 @@
 ### 文件输出要求
 
 - 输出路径：`requirements/{需求ID}/feature_changes/{子特性目录}/SR-{序号}-{描述}_变更说明.md`
+- 如后续模板或流程需要生成特性影响分析汇总产物，统一输出到 `requirements/{需求ID}/feature_changes/特性影响分析报告.md`，不得在需求根目录生成英文缩写命名的报告文件
 - 严格按模板格式输出：`templates/feature_change_template.md`
 - 每个变更文件只描述一个需求场景对应的业务变更
 - YAML 元数据头部必须包含 `requirement_id`、`feature_id`、`subfeature_id`、`scenario_id`、`change_type`、`mapping_confidence`、`created`
@@ -86,7 +87,7 @@
 | 字段 | 类型 | 必填 | 约束 |
 |------|------|------|------|
 | `schema_version` | string | 是 | 固定为 `"1.0"` |
-| `requirement_id` | string | 是 | 来自 `requirement.md` 或输入目录名 |
+| `requirement_id` | string | 是 | 来自 `需求分析.md` 或输入目录名 |
 | `status` | string | 是 | 只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `summary` | string | 是 | 一句话概括本次业务变更分析结果，不能为空 |
 | `input_requirement_status` | string | 是 | 上游 `01-fwd-req-analysis` 报告的状态，只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |

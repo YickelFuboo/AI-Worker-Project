@@ -22,11 +22,11 @@ created: {YYYY-MM-DD}
 | 需求场景 | {SCENARIO_XXX} {场景名} |
 | 变更类型 | 新增 / 修改 / 删除 |
 | 映射置信度 | high / medium / low |
-| 变更原因 | {基于 requirement.md 的业务原因，不写技术实现原因} |
+| 变更原因 | {基于 需求分析.md 的业务原因，不写技术实现原因} |
 
 ## 2. 场景来源
 
-- 需求文档：`requirements/{需求ID}/requirement.md`
+- 需求文档：`requirements/{需求ID}/需求分析.md`
 - 来源场景：{SCENARIO_XXX} {场景名}
 - 来源验收标准：
   - Given ... When ... Then ...

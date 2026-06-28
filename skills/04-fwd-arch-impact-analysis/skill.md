@@ -23,9 +23,9 @@
 
 ### 必需输入
 
-1. `requirements/{需求ID}/requirement.md`
+1. `requirements/{需求ID}/需求分析.md`
 2. `02-fwd-feature-change-gen` 返回的 JSON 对象和其声明的 `feature_changes/**` 文件
-3. `03-fwd-inheritance-analysis` 返回的 JSON 对象和其声明的 `inheritance_report.md`
+3. `03-fwd-inheritance-analysis` 返回的 JSON 对象和其声明的 `feature_changes/继承性分析报告.md`
 4. `architectures/**` 架构元素资料，例如 `architectures/logic_view/elements_tree.yaml`、元素 `spec.md`、`interfaces.yaml`
 5. 相关子特性的 `arch_ref.yaml` 或等价架构关联资料
 
@@ -98,7 +98,7 @@
 | 字段 | 类型 | 必填 | 约束 |
 |------|------|------|------|
 | `schema_version` | string | 是 | 固定为 `"1.0"` |
-| `requirement_id` | string | 是 | 来自 `requirement.md` 或输入目录名 |
+| `requirement_id` | string | 是 | 来自 `需求分析.md` 或输入目录名 |
 | `status` | string | 是 | 只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
 | `summary` | string | 是 | 一句话概括本次架构影响域分析结果，不能为空 |
 | `input_feature_change_status` | string | 是 | 上游 `02-fwd-feature-change-gen` 报告的状态，只能是 `COMPLETED`、`COMPLETED_WITH_WARNINGS`、`BLOCKED`、`INCONCLUSIVE` |
